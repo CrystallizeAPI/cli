@@ -60,6 +60,7 @@ try {
     } else {
         logger.fatal(`Unknown error.`);
     }
+    console.error(exception);
     logMemory();
     process.exit(1);
 }

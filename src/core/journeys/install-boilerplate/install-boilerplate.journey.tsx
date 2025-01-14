@@ -13,17 +13,22 @@ import { Success } from '../../../ui/components/success';
 import type { InstallBoilerplateStore } from './create-store';
 import { useAtom } from 'jotai';
 import type { CredentialRetriever } from '../../../domain/contracts/credential-retriever';
-import type { QueryBus } from '../../../domain/contracts/bus';
+import type { CommandBus, QueryBus } from '../../../domain/contracts/bus';
+import type { Logger } from '../../../domain/contracts/logger';
 
 type InstallBoilerplateJourneyProps = {
     store: InstallBoilerplateStore['atoms'];
     credentialsRetriever: CredentialRetriever;
     queryBus: QueryBus;
+    logger: Logger;
+    commandBus: CommandBus;
 };
 export const InstallBoilerplateJourney = ({
     store,
     credentialsRetriever,
     queryBus,
+    commandBus,
+    logger,
 }: InstallBoilerplateJourneyProps) => {
     const [state] = useAtom(store.stateAtom);
     const [, changeTenant] = useAtom(store.changeTenantAtom);
@@ -57,8 +62,8 @@ export const InstallBoilerplateJourney = ({
                     }}
                 />
             )}
-            {isWizardFullfilled && <DownloadProject store={store} />}
-            {state.isDownloaded && <ExecuteRecipes store={store} />}
+            {isWizardFullfilled && <DownloadProject store={store} queryBus={queryBus} />}
+            {state.isDownloaded && <ExecuteRecipes store={store} commandBus={commandBus} logger={logger} />}
             <Messages messages={state.messages} />
 
             {!isWizardFullfilled && <Tips fetchTips={fetchTips} />}

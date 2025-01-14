@@ -1,9 +1,12 @@
 #!/usr/bin/env bun
 
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import packageJson from '../package.json';
 import pc from 'picocolors';
-import { commands, logger } from './core/di';
+import { buildServices } from './core/di';
+
+const services = buildServices();
+const { logger, commands } = services;
 
 const program = new Command();
 program.version(packageJson.version);
@@ -37,7 +40,9 @@ program.addHelpText('beforeAll', pc.cyanBright(logo));
 program.description(
     "Crystallize CLI helps you manage your Crystallize tenant(s) and improve your DX.\nWe've got your back(end)!\n        🤜✨🤛.",
 );
+program.addOption(new Option('-e, --env <env>', 'Environment to use').choices(['staging', 'production']));
 commands.forEach((command) => {
+    // command.addOption(new Option('-e, --env <env>', 'Environment to use').choices(['staging', 'production']));
     command.configureHelp(helpStyling);
     program.addCommand(command);
 });
@@ -60,7 +65,7 @@ try {
     } else {
         logger.fatal(`Unknown error.`);
     }
-    console.error(exception);
+    logger.debug(exception);
     logMemory();
     process.exit(1);
 }

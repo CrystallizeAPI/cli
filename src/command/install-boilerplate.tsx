@@ -8,7 +8,7 @@ import type { InstallBoilerplateStore } from '../core/journeys/install-boilerpla
 import { Provider } from 'jotai';
 import type { CredentialRetriever } from '../domain/contracts/credential-retriever';
 import type { Logger } from '../domain/contracts/logger';
-import type { QueryBus } from '../domain/contracts/bus';
+import type { QueryBus, CommandBus } from '../domain/contracts/bus';
 
 type Deps = {
     logLevels: ('info' | 'debug')[];
@@ -17,6 +17,7 @@ type Deps = {
     credentialsRetriever: CredentialRetriever;
     logger: Logger;
     queryBus: QueryBus;
+    commandBus: CommandBus;
 };
 
 export const createInstallBoilerplateCommand = ({
@@ -25,6 +26,7 @@ export const createInstallBoilerplateCommand = ({
     installBoilerplateCommandStore,
     credentialsRetriever,
     queryBus,
+    commandBus,
     logLevels,
 }: Deps): Command => {
     const command = new Command('install-boilerplate');
@@ -34,8 +36,7 @@ export const createInstallBoilerplateCommand = ({
     command.addArgument(new Argument('[boilerplate-identifier]', 'The boilerplate identifier to use.'));
     command.addOption(new Option('-b, --bootstrap-tenant', 'Bootstrap the tenant with initial data.'));
 
-    command.action(async (...args) => {
-        const [folder, tenantIdentifier, boilerplateIdentifier, flags] = args;
+    command.action(async (folder: string, tenantIdentifier: string, boilerplateIdentifier: string, flags) => {
         logger.setBuffered(true);
         await flySystem.createDirectoryOrFail(
             folder,
@@ -67,6 +68,8 @@ export const createInstallBoilerplateCommand = ({
                     <Provider store={storage}>
                         <InstallBoilerplateJourney
                             queryBus={queryBus}
+                            commandBus={commandBus}
+                            logger={logger}
                             store={atoms}
                             credentialsRetriever={credentialsRetriever}
                         />

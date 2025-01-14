@@ -16,6 +16,7 @@ export type FetchTipsHandlerDefinition = QueryHandlerDefinition<
 
 const handler = async (_: Envelope<Query>, deps: Deps) => {
     const { logger } = deps;
+    // we call production all the time here on purpose.
     const apiClient = createClient({
         tenantIdentifier: 'crystallize_marketing',
     });

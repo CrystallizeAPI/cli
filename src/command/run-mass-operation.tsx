@@ -3,17 +3,23 @@ import type { Logger } from '../domain/contracts/logger';
 import type { CommandBus } from '../domain/contracts/bus';
 import type { Operation, Operations } from '@crystallize/schema/mass-operation';
 import type { CredentialRetriever } from '../domain/contracts/credential-retriever';
-import { createClient } from '@crystallize/js-api-client';
 import pc from 'picocolors';
 import { ZodError } from 'zod';
+import type { createClient } from '@crystallize/js-api-client';
 
 type Deps = {
     logger: Logger;
     commandBus: CommandBus;
     credentialsRetriever: CredentialRetriever;
+    createCrystallizeClient: typeof createClient;
 };
 
-export const createRunMassOperationCommand = ({ logger, commandBus, credentialsRetriever }: Deps): Command => {
+export const createRunMassOperationCommand = ({
+    logger,
+    commandBus,
+    credentialsRetriever,
+    createCrystallizeClient,
+}: Deps): Command => {
     const command = new Command('run-mass-operation');
     command.description('Upload and start an Mass Operation Task in your tenant.');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier to use.'));
@@ -22,8 +28,7 @@ export const createRunMassOperationCommand = ({ logger, commandBus, credentialsR
     command.option('--token_secret <token_secret>', 'Your access token secret.');
     command.option('--legacy-spec', 'Use legacy spec format.');
 
-    command.action(async (...args) => {
-        const [tenantIdentifier, file, flags] = args;
+    command.action(async (tenantIdentifier: string, file: string, flags) => {
         let operationsContent: Operations;
         if (flags.legacySpec) {
             logger.warn(`Using legacy spec... Converting to operations file...`);
@@ -76,17 +81,17 @@ export const createRunMassOperationCommand = ({ logger, commandBus, credentialsR
                 throw new Error('Task not started. Please check the logs for more information.');
             }
 
-            const crystallizeClient = createClient({
+            const crystallizeClient = createCrystallizeClient({
                 tenantIdentifier,
                 accessTokenId: credentials.ACCESS_TOKEN_ID,
                 accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
             });
 
-            logger.info(`Now, Waiting for task to complete...`);
-            while (startedTask.status !== 'complete') {
-                logger.info(`Task status: ${pc.yellow(startedTask.status)}`);
+            logger.info(`Now, Waiting for task ${pc.yellow(startedTask.id)} to complete...`);
+            while (startedTask?.status !== 'complete') {
+                logger.info(`Task status: ${pc.yellow(startedTask?.status)}`);
                 await new Promise((resolve) => setTimeout(resolve, 1000));
-                const get = await crystallizeClient.nextPimApi(getMassOperationBulkTask, { id: startedTask.id });
+                const get = await crystallizeClient.nextPimApi(getMassOperationBulkTask, { id: startedTask?.id });
                 if (get.bulkTask.error) {
                     throw new Error(get.data.bulkTask.error);
                 }

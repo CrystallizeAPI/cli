@@ -21,19 +21,24 @@ import { createS3Uploader } from './create-s3-uploader';
 import os from 'os';
 import { createRunMassOperationHandler } from '../domain/use-cases/run-mass-operation';
 import { createRunMassOperationCommand } from '../command/run-mass-operation';
+import type { createClient } from '@crystallize/js-api-client';
+import { createCrystallizeClientBuilder } from './create-crystallize-client-builder';
 
-const buildServices = () => {
+export const buildServices = () => {
     const logLevels = (
         `${Bun.env.LOG_LEVELS}` === 'no-output' ? [] : ['info', ...`${Bun.env.LOG_LEVELS}`.split(',')]
     ) as ('info' | 'debug')[];
+    const crystallizeEnvironment = `${Bun.env.CRYSTALLIZE_ENVIRONMENT}` === 'staging' ? 'staging' : 'production';
     const logger = createLogger('cli', logLevels);
     const container = createContainer<{
         logLevels: ('info' | 'debug')[];
+        crystallizeEnvironment: 'staging' | 'production';
         logger: Logger;
         queryBus: QueryBus;
         commandBus: CommandBus;
         flySystem: FlySystem;
         credentialsRetriever: CredentialRetriever;
+        createCrystallizeClient: typeof createClient;
         runner: ReturnType<typeof createRunner>;
         s3Uploader: ReturnType<typeof createS3Uploader>;
         // use cases
@@ -55,17 +60,18 @@ const buildServices = () => {
     });
     container.register({
         logLevels: asValue(logLevels),
+        crystallizeEnvironment: asValue(crystallizeEnvironment),
         logger: asValue(logger),
         queryBus: asFunction(() => createQueryBus<QueryDefinitions>()).singleton(),
         commandBus: asFunction(() => createCommandBus<CommandDefinitions>()).singleton(),
         flySystem: asFunction(createFlySystem).singleton(),
         credentialsRetriever: asFunction(createCredentialsRetriever)
             .inject(() => ({
-                fallbackFile: `${os.homedir()}/.crystallize/credentials.json`,
+                fallbackFile: `${os.homedir()}/.crystallize/credentials${crystallizeEnvironment !== 'production' ? '-' + crystallizeEnvironment : ''}.json`,
                 options: undefined,
             }))
             .singleton(),
-
+        createCrystallizeClient: asFunction(createCrystallizeClientBuilder).singleton(),
         runner: asFunction(createRunner).singleton(),
         s3Uploader: asFunction(createS3Uploader).singleton(),
 
@@ -111,5 +117,3 @@ const buildServices = () => {
         ],
     };
 };
-const services = buildServices();
-export const { logger, createCommand, createQuery, dispatchCommand, dispatchQuery, commands } = services;

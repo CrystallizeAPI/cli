@@ -8,8 +8,14 @@ type Deps = {
     options?: CredentialRetrieverOptions;
     fallbackFile: string;
     flySystem: FlySystem;
+    createCrystallizeClient: typeof createClient;
 };
-export const createCredentialsRetriever = ({ options, fallbackFile, flySystem }: Deps): CredentialRetriever => {
+export const createCredentialsRetriever = ({
+    options,
+    fallbackFile,
+    flySystem,
+    createCrystallizeClient,
+}: Deps): CredentialRetriever => {
     const getCredentials = async (rOptions?: CredentialRetrieverOptions) => {
         if (rOptions?.token_id && rOptions?.token_secret) {
             return {
@@ -52,7 +58,7 @@ export const createCredentialsRetriever = ({ options, fallbackFile, flySystem }:
     };
 
     const checkCredentials = async (credentials: PimCredentials) => {
-        const apiClient = createClient({
+        const apiClient = createCrystallizeClient({
             tenantIdentifier: '',
             accessTokenId: credentials.ACCESS_TOKEN_ID,
             accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
@@ -73,7 +79,7 @@ export const createCredentialsRetriever = ({ options, fallbackFile, flySystem }:
     };
 
     const fetchAvailableTenantIdentifier = async (credentials: PimCredentials, identifier: string) => {
-        const apiClient = createClient({
+        const apiClient = createCrystallizeClient({
             tenantIdentifier: '',
             accessTokenId: credentials.ACCESS_TOKEN_ID,
             accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,

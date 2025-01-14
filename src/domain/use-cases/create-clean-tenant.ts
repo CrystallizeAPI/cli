@@ -1,10 +1,12 @@
-import { createClient } from '@crystallize/js-api-client';
+import type { createClient } from '@crystallize/js-api-client';
 import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import type { Tenant } from '../contracts/models/tenant';
 import type { CommandHandlerDefinition, Envelope } from 'missive.js';
 import type { PimCredentials } from '../contracts/models/credentials';
 
-type Deps = {};
+type Deps = {
+    createCrystallizeClient: typeof createClient;
+};
 type Command = {
     tenant: Tenant;
     credentials: PimCredentials;
@@ -18,13 +20,13 @@ export type CreateCleanTenantHandlerDefinition = CommandHandlerDefinition<
 
 const handler = async (
     envelope: Envelope<Command>,
-    _: Deps,
+    { createCrystallizeClient }: Deps,
 ): Promise<{
     id: string;
     identifier: string;
 }> => {
     const { tenant, credentials } = envelope.message;
-    const client = createClient({
+    const client = createCrystallizeClient({
         tenantIdentifier: '',
         accessTokenId: credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,

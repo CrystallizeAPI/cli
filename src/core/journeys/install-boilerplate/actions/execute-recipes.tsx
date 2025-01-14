@@ -2,9 +2,10 @@ import { Box, Text } from 'ink';
 import { useEffect, useState } from 'react';
 import { colors } from '../../../styles';
 import { Spinner } from '../../../../ui/components/spinner';
-import { createCommand, dispatchCommand, logger } from '../../../di';
 import type { InstallBoilerplateStore } from '../create-store';
 import { useAtom } from 'jotai';
+import type { CommandBus } from '../../../../domain/contracts/bus';
+import type { Logger } from '../../../../domain/contracts/logger';
 
 const feedbacks = [
     'Fetching the dependencies...',
@@ -21,8 +22,10 @@ const feedbacks = [
 
 type ExecuteRecipesProps = {
     store: InstallBoilerplateStore['atoms'];
+    commandBus: CommandBus;
+    logger: Logger;
 };
-export const ExecuteRecipes = ({ store }: ExecuteRecipesProps) => {
+export const ExecuteRecipes = ({ store, commandBus, logger }: ExecuteRecipesProps) => {
     const [state] = useAtom(store.stateAtom);
     const [isWizardFullfilled] = useAtom(store.isWizardFullfilledAtom);
     const [, startImport] = useAtom(store.startBoostrappingAtom);
@@ -36,20 +39,20 @@ export const ExecuteRecipes = ({ store }: ExecuteRecipesProps) => {
         }
 
         (async () => {
-            const setupBoilerplateCommand = createCommand('SetupBoilerplateProject', {
+            const setupBoilerplateCommand = commandBus.createCommand('SetupBoilerplateProject', {
                 folder: state.folder!,
                 credentials: state.credentials,
                 tenant: state.tenant!,
             });
             const [setupResult, tenantResult] = await Promise.allSettled([
-                dispatchCommand(setupBoilerplateCommand),
+                commandBus.dispatch(setupBoilerplateCommand),
                 (async () => {
                     if (state.bootstrapTenant) {
-                        const createTenantCommand = createCommand('CreateCleanTenant', {
+                        const createTenantCommand = commandBus.createCommand('CreateCleanTenant', {
                             tenant: state.tenant!,
                             credentials: state.credentials!,
                         });
-                        await dispatchCommand(createTenantCommand);
+                        await commandBus.dispatch(createTenantCommand);
                         startImport();
                     }
                 })(),

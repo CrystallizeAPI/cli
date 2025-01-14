@@ -9,6 +9,7 @@ import type { S3Uploader } from '../contracts/s3-uploader';
 type Deps = {
     logger: Logger;
     s3Uploader: S3Uploader;
+    createCrystallizeClient: typeof createClient;
 };
 
 type Command = {
@@ -23,10 +24,18 @@ export type RunMassOperationHandlerDefinition = CommandHandlerDefinition<
     Awaited<ReturnType<typeof handler>>
 >;
 
-const handler = async (envelope: Envelope<Command>, { logger, s3Uploader }: Deps) => {
+const handler = async (
+    envelope: Envelope<Command>,
+    { logger, s3Uploader, createCrystallizeClient }: Deps,
+): Promise<{
+    task: {
+        id: string;
+        status: string;
+    };
+}> => {
     const { tenantIdentifier, operations: operationsContent } = envelope.message;
 
-    const crystallizeClient = createClient({
+    const crystallizeClient = createCrystallizeClient({
         tenantIdentifier,
         accessTokenId: envelope.message.credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: envelope.message.credentials.ACCESS_TOKEN_SECRET,

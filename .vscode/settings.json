@@ -1,0 +1,59 @@
+{
+    "editor.detectIndentation": false,
+    "editor.tabSize": 4,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "typescript.suggest.paths": true,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/Thumbs.db": true,
+        "**/node_modules": true,
+        "**/.contentlayer": true,
+        "**/build": true,
+        "**/dist": true,
+        "**/.next": true,
+        "**/.astro": true,
+        "**/.turbo": true,
+        "**/.wrangler": true,
+        "**/.cache": true,
+        "**/.react-router": true
+    },
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/dist/*/**": true,
+        "**/build/*/**": true,
+        "**/.astro/*/**": true,
+        "**/.wrangler/*/**": true,
+        "**/coverage/*/**": true,
+        "**/tmp/*/**": true,
+        "**/.nx/*/**": true,
+        "**/.run/*/**": true
+    },
+    "todo-tree.general.tags": ["@todo:", "@fixme:", "@bug:"],
+    "todo-tree.general.statusBar": "top three",
+    "todo-tree.tree.groupedByTag": true,
+    "todo-tree.general.statusBarClickBehaviour": "reveal",
+    "todo-tree.general.tagGroups": {
+        "TODOs": ["@todo:"],
+        "BUGs": ["@fixme:", "@bug:"]
+    },
+    "todo-tree.highlights.customHighlight": {
+        "TODOs": {
+            "icon": "flame",
+            "foreground": "#ff9900"
+        },
+        "BUGs": {
+            "icon": "bug",
+            "foreground": "#ff0000"
+        }
+    },
+    "files.associations": {
+        "**/web/**/*.css": "tailwindcss"
+    }
+}

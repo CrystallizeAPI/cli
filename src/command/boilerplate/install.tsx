@@ -1,22 +1,26 @@
 import { Newline, render } from 'ink';
 import { Box, Text } from 'ink';
-import { InstallBoilerplateJourney } from '../core/journeys/install-boilerplate/install-boilerplate.journey';
+import { InstallBoilerplateJourney } from '../../ui/journeys/install-boilerplate/install-boilerplate.journey';
 import { Argument, Command, Option } from 'commander';
-import { boilerplates } from '../content/boilerplates';
-import type { FlySystem } from '../domain/contracts/fly-system';
-import type { InstallBoilerplateStore } from '../core/journeys/install-boilerplate/create-store';
+import { boilerplates } from '../../content/boilerplates';
+import type { FlySystem } from '../../domain/contracts/fly-system';
+import type { InstallBoilerplateStore } from '../../ui/journeys/install-boilerplate/create-store';
 import { Provider } from 'jotai';
-import type { CredentialRetriever } from '../domain/contracts/credential-retriever';
-import type { Logger } from '../domain/contracts/logger';
-import type { QueryBus, CommandBus } from '../domain/contracts/bus';
+import type { CredentialRetriever } from '../../domain/contracts/credential-retriever';
+import type { Logger } from '../../domain/contracts/logger';
+import type { QueryBus, CommandBus } from '../../domain/contracts/bus';
+import type { createClient } from '@crystallize/js-api-client';
+import type { FetchAvailableTenantIdentifier } from '../../domain/contracts/fetch-available-tenant-identifier';
 
 type Deps = {
     logLevels: ('info' | 'debug')[];
     flySystem: FlySystem;
     installBoilerplateCommandStore: InstallBoilerplateStore;
     credentialsRetriever: CredentialRetriever;
+    createCrystallizeClient: typeof createClient;
     logger: Logger;
     queryBus: QueryBus;
+    fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
     commandBus: CommandBus;
 };
 
@@ -27,9 +31,11 @@ export const createInstallBoilerplateCommand = ({
     credentialsRetriever,
     queryBus,
     commandBus,
+    createCrystallizeClient,
+    fetchAvailableTenantIdentifier,
     logLevels,
 }: Deps): Command => {
-    const command = new Command('install-boilerplate');
+    const command = new Command('install');
     command.description('Install a boilerplate into a folder.');
     command.addArgument(new Argument('<folder>', 'The folder to install the boilerplate into.'));
     command.addArgument(new Argument('[tenant-identifier]', 'The tenant identifier to use.'));
@@ -69,6 +75,8 @@ export const createInstallBoilerplateCommand = ({
                         <InstallBoilerplateJourney
                             queryBus={queryBus}
                             commandBus={commandBus}
+                            fetchAvailableTenantIdentifier={fetchAvailableTenantIdentifier}
+                            createCrystallizeClient={createCrystallizeClient}
                             logger={logger}
                             store={atoms}
                             credentialsRetriever={credentialsRetriever}

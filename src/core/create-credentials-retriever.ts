@@ -78,23 +78,10 @@ export const createCredentialsRetriever = ({
         await flySystem.saveFile(fallbackFile, JSON.stringify(credentials));
     };
 
-    const fetchAvailableTenantIdentifier = async (credentials: PimCredentials, identifier: string) => {
-        const apiClient = createCrystallizeClient({
-            tenantIdentifier: '',
-            accessTokenId: credentials.ACCESS_TOKEN_ID,
-            accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
-        });
-        const result = await apiClient.pimApi(
-            `query { tenant { suggestIdentifier ( desired: "${identifier}" ) { suggestion } } }`,
-        );
-        return result.tenant?.suggestIdentifier?.suggestion || identifier;
-    };
-
     return {
         getCredentials,
         checkCredentials,
         removeCredentials,
         saveCredentials,
-        fetchAvailableTenantIdentifier,
     };
 };

@@ -1,9 +1,9 @@
 import { Text } from 'ink';
 import { boilerplates } from '../../../../content/boilerplates';
 import type { Boilerplate } from '../../../../domain/contracts/models/boilerplate';
-import { BoilerplateChoice } from '../../../../ui/components/boilerplate-choice';
-import { colors } from '../../../styles';
-import { Select } from '../../../../ui/components/select';
+import { BoilerplateChoice } from '../../../components/boilerplate-choice';
+import { colors } from '../../../../core/styles';
+import { Select } from '../../../components/select';
 import type { InstallBoilerplateStore } from '../create-store';
 import { useAtom } from 'jotai';
 

@@ -7,15 +7,13 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - `CHANGELOG.md` file is not present and can be used.
+- add the `changelog` command.
 - script completion file is installed on program run, and the install bash is reloading the SHELL.
+- create tenant command
 
-### Change
+### Changed
 
--
-
-### Fixed
-
--
+- revamped the command organization. (BC)
 
 ## [5.0.1]
 

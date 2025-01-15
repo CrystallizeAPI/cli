@@ -2,9 +2,9 @@ import { Box, Newline, Text } from 'ink';
 import Link from 'ink-link';
 import { UncontrolledTextInput } from 'ink-text-input';
 import { useState } from 'react';
-import { Select } from '../../../../ui/components/select';
+import { Select } from '../../../components/select';
 import type { Tenant } from '../../../../domain/contracts/models/tenant';
-import { colors } from '../../../styles';
+import { colors } from '../../../../core/styles';
 import type { InstallBoilerplateStore } from '../create-store';
 import { useAtom } from 'jotai';
 

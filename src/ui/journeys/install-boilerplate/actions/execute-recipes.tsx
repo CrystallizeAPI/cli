@@ -1,7 +1,7 @@
 import { Box, Text } from 'ink';
 import { useEffect, useState } from 'react';
-import { colors } from '../../../styles';
-import { Spinner } from '../../../../ui/components/spinner';
+import { colors } from '../../../../core/styles';
+import { Spinner } from '../../../components/spinner';
 import type { InstallBoilerplateStore } from '../create-store';
 import { useAtom } from 'jotai';
 import type { CommandBus } from '../../../../domain/contracts/bus';

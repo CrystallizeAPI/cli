@@ -1,6 +1,6 @@
 #!/usr/bin/env bun
 
-import { Command, Option } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import packageJson from '../package.json';
 import pc from 'picocolors';
 import { buildServices } from './core/di';
@@ -49,9 +49,26 @@ program.action(async () => {
     program.help();
 });
 
-commands.forEach((command) => {
+commands.root.commands.forEach((command) => {
     command.configureHelp(helpStyling);
     program.addCommand(command);
+});
+
+Object.keys(commands).forEach((key) => {
+    if (key === 'root') return;
+    const group = new Command(key);
+    const description = commands[key as keyof typeof commands].description;
+    if (description) {
+        group.description(description);
+    }
+    commands[key as keyof typeof commands].commands.forEach((command) => {
+        command.configureHelp(helpStyling);
+        group.addCommand(command);
+        group.addArgument(new Argument(`[${command.name()}]`, command.description()));
+    });
+
+    group.configureHelp(helpStyling);
+    program.addCommand(group);
 });
 
 const logMemory = () => {
@@ -69,6 +86,10 @@ try {
     logger.flush();
     if (exception instanceof Error) {
         logger.fatal(`[${pc.bold(exception.name)}] ${exception.message} `);
+    } else if (typeof exception === 'string') {
+        logger.fatal(exception);
+    } else if (exception instanceof Object && 'message' in exception) {
+        logger.fatal(exception.message);
     } else {
         logger.fatal(`Unknown error.`);
     }

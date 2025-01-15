@@ -4,33 +4,67 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help install-boilerplate login whoami run-mass-operation"
+  local commands="help changelog boilerplate login whoami mass-operation"
   local program_options="--version"
   local default_options="--help"
+  local i_login_options="--no-interactive --token_id= --token_secret="
 
   COMPREPLY=()
 
+  if [[ "${COMP_CWORD}" -eq 1 ]]; then
+    COMPREPLY=($(compgen -W "${commands} ${program_options} ${default_options}" -- "${cur}"))
+    return 0
+  fi
+
   case "${cmd}" in
-    login)
+    login|whoami)
         local options="${default_options}"
         COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
         return 0
         ;;
-    install-boilerplate)
-      local options="${default_options} --bootstrap-tenant"
-      COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
-      return 0
+    boilerplate)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+            local options="install ${default_options}"
+            COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+            return 0
+        fi
+        case "${subcmd}" in
+            install)
+                local options="--bootstrap-tenant ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+        esac
       ;;
-    run-mass-operation)
-      local options="${default_options} --token_id= --token_secret= --legacy-spec" 
-      COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
-      return 0
+    mass-operation)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+                local options="run ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+        fi
+        case "${subcmd}" in
+            run)
+                local options="${i_login_options} --legacy-spec ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+        esac
       ;;
+    tenant)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+                local options="create ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+        fi
+        case "${subcmd}" in
+            create)
+                local options="${i_login_options} --fail-if-not-available ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+        esac
+    ;;
   esac
-
-  if [[ "${COMP_CWORD}" -eq 1 ]]; then
-    COMPREPLY=($(compgen -W "${commands} ${program_options} ${default_options}" -- "${cur}"))
-  fi
 }
 
 complete -F _crystallize_completions crystallize

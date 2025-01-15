@@ -2,7 +2,7 @@ import { asFunction, asValue, createContainer, InjectionMode } from 'awilix';
 import type { Logger } from '../domain/contracts/logger';
 import { createCommandBus, createQueryBus, type LoggerInterface } from 'missive.js';
 import type { CommandBus, CommandDefinitions, QueryBus, QueryDefinitions } from '../domain/contracts/bus';
-import { createInstallBoilerplateCommand } from '../command/install-boilerplate';
+import { createInstallBoilerplateCommand } from '../command/boilerplate/install';
 import type { Command } from 'commander';
 import { createLogger } from './create-logger';
 import type { FlySystem } from '../domain/contracts/fly-system';
@@ -13,16 +13,22 @@ import { createFetchTipsHandler } from '../domain/use-cases/fetch-tips';
 import { createCredentialsRetriever } from './create-credentials-retriever';
 import type { CredentialRetriever } from '../domain/contracts/credential-retriever';
 import { createSetupBoilerplateProjectHandler } from '../domain/use-cases/setup-boilerplate-project';
-import { createInstallBoilerplateCommandStore } from './journeys/install-boilerplate/create-store';
+import { createInstallBoilerplateCommandStore } from '../ui/journeys/install-boilerplate/create-store';
 import { createRunner } from './create-runner';
 import { createLoginCommand } from '../command/login';
 import { createWhoAmICommand } from '../command/whoami';
 import { createS3Uploader } from './create-s3-uploader';
 import os from 'os';
 import { createRunMassOperationHandler } from '../domain/use-cases/run-mass-operation';
-import { createRunMassOperationCommand } from '../command/run-mass-operation';
+import { createRunMassOperationCommand } from '../command/mass-operation/run';
 import type { createClient } from '@crystallize/js-api-client';
 import { createCrystallizeClientBuilder } from './create-crystallize-client-builder';
+import { createChangelogCommand } from '../command/changelog';
+import { createCreateTenantCommand } from '../command/tenant/create';
+import { createFetchAvailableTenantIdentifier } from './helpers/fetch-available-tenant-identifier';
+import { createGetAuthenticatedUserWithInteractivityIfPossible } from './helpers/interactive-get-user-if-possible';
+import type { GetAuthenticatedUser } from '../domain/contracts/get-authenticated-user';
+import type { FetchAvailableTenantIdentifier } from '../domain/contracts/fetch-available-tenant-identifier';
 
 export const buildServices = () => {
     const logLevels = (
@@ -41,6 +47,9 @@ export const buildServices = () => {
         createCrystallizeClient: typeof createClient;
         runner: ReturnType<typeof createRunner>;
         s3Uploader: ReturnType<typeof createS3Uploader>;
+        fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
+        getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
+
         // use cases
         createCleanTenant: ReturnType<typeof createCreateCleanTenantHandler>;
         downloadBoilerplateArchive: ReturnType<typeof createDownloadBoilerplateArchiveHandler>;
@@ -54,6 +63,8 @@ export const buildServices = () => {
         loginCommand: Command;
         whoAmICommand: Command;
         runMassOperationCommand: Command;
+        changeLogCommand: Command;
+        createTenantCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -74,6 +85,10 @@ export const buildServices = () => {
         createCrystallizeClient: asFunction(createCrystallizeClientBuilder).singleton(),
         runner: asFunction(createRunner).singleton(),
         s3Uploader: asFunction(createS3Uploader).singleton(),
+        fetchAvailableTenantIdentifier: asFunction(createFetchAvailableTenantIdentifier).singleton(),
+        getAuthenticatedUserWithInteractivityIfPossible: asFunction(
+            createGetAuthenticatedUserWithInteractivityIfPossible,
+        ).singleton(),
 
         // Use Cases
         createCleanTenant: asFunction(createCreateCleanTenantHandler).singleton(),
@@ -89,6 +104,8 @@ export const buildServices = () => {
         loginCommand: asFunction(createLoginCommand).singleton(),
         whoAmICommand: asFunction(createWhoAmICommand).singleton(),
         runMassOperationCommand: asFunction(createRunMassOperationCommand).singleton(),
+        changeLogCommand: asFunction(createChangelogCommand).singleton(),
+        createTenantCommand: asFunction(createCreateTenantCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -109,11 +126,27 @@ export const buildServices = () => {
         createQuery: container.cradle.queryBus.createQuery,
         dispatchQuery: container.cradle.queryBus.dispatch,
         runner: container.cradle.runner,
-        commands: [
-            container.cradle.installBoilerplateCommand,
-            container.cradle.loginCommand,
-            container.cradle.whoAmICommand,
-            container.cradle.runMassOperationCommand,
-        ],
+        commands: {
+            root: {
+                description: undefined,
+                commands: [
+                    container.cradle.loginCommand,
+                    container.cradle.whoAmICommand,
+                    container.cradle.changeLogCommand,
+                ],
+            },
+            boilerplate: {
+                description: 'All the commands related to Boilerplates.',
+                commands: [container.cradle.installBoilerplateCommand],
+            },
+            'mass-operation': {
+                description: 'All the commands related to Mass Operations.',
+                commands: [container.cradle.runMassOperationCommand],
+            },
+            tenant: {
+                description: 'All the commands related to Tenants.',
+                commands: [container.cradle.createTenantCommand],
+            },
+        },
     };
 };

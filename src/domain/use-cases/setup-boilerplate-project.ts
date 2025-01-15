@@ -4,7 +4,7 @@ import type { Tenant } from '../contracts/models/tenant';
 import type { PimCredentials } from '../contracts/models/credentials';
 import type { Logger } from '../contracts/logger';
 import type { Runner } from '../../core/create-runner';
-import type { InstallBoilerplateStore } from '../../core/journeys/install-boilerplate/create-store';
+import type { InstallBoilerplateStore } from '../../ui/journeys/install-boilerplate/create-store';
 import type { CredentialRetriever } from '../contracts/credential-retriever';
 
 type Deps = {

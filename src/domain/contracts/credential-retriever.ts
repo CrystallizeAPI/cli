@@ -11,5 +11,4 @@ export type CredentialRetriever = {
     checkCredentials: (credentials: PimCredentials) => Promise<PimAuthenticatedUser | undefined>;
     removeCredentials: () => Promise<void>;
     saveCredentials: (credentials: PimCredentials) => Promise<void>;
-    fetchAvailableTenantIdentifier: (credentials: PimCredentials, identifier: string) => Promise<string>;
 };

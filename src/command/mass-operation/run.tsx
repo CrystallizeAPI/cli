@@ -1,32 +1,35 @@
 import { Argument, Command } from 'commander';
-import type { Logger } from '../domain/contracts/logger';
-import type { CommandBus } from '../domain/contracts/bus';
+import type { Logger } from '../../domain/contracts/logger';
+import type { CommandBus } from '../../domain/contracts/bus';
 import type { Operation, Operations } from '@crystallize/schema/mass-operation';
-import type { CredentialRetriever } from '../domain/contracts/credential-retriever';
+import type { CredentialRetriever } from '../../domain/contracts/credential-retriever';
 import pc from 'picocolors';
 import { ZodError } from 'zod';
 import type { createClient } from '@crystallize/js-api-client';
+import type { GetAuthenticatedUser } from '../../domain/contracts/get-authenticated-user';
 
 type Deps = {
     logger: Logger;
     commandBus: CommandBus;
     credentialsRetriever: CredentialRetriever;
     createCrystallizeClient: typeof createClient;
+    getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
 };
 
 export const createRunMassOperationCommand = ({
     logger,
     commandBus,
-    credentialsRetriever,
     createCrystallizeClient,
+    getAuthenticatedUserWithInteractivityIfPossible: getAuthenticatedUser,
 }: Deps): Command => {
-    const command = new Command('run-mass-operation');
+    const command = new Command('run');
     command.description('Upload and start an Mass Operation Task in your tenant.');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier to use.'));
     command.addArgument(new Argument('<file>', 'The file that contains the Operations.'));
     command.option('--token_id <token_id>', 'Your access token id.');
     command.option('--token_secret <token_secret>', 'Your access token secret.');
     command.option('--legacy-spec', 'Use legacy spec format.');
+    command.option('--no-interactive', 'Disable the interactive mode.');
 
     command.action(async (tenantIdentifier: string, file: string, flags) => {
         let operationsContent: Operations;
@@ -59,16 +62,11 @@ export const createRunMassOperationCommand = ({
         }
 
         try {
-            const credentials = await credentialsRetriever.getCredentials({
+            const { credentials } = await getAuthenticatedUser({
+                isInteractive: !flags.noInteractive,
                 token_id: flags.token_id,
                 token_secret: flags.token_secret,
             });
-            const authenticatedUser = await credentialsRetriever.checkCredentials(credentials);
-            if (!authenticatedUser) {
-                throw new Error(
-                    'Credentials are invalid. Please run `crystallize login` to setup your credentials or provide correct credentials.',
-                );
-            }
             const intent = commandBus.createCommand('RunMassOperation', {
                 tenantIdentifier,
                 operations: operationsContent,

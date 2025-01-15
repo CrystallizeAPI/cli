@@ -3,25 +3,29 @@ import { SelectBoilerplate } from './questions/select-boilerplate';
 import { SelectTenant } from './questions/select-tenant';
 import { ExecuteRecipes } from './actions/execute-recipes';
 import { Text } from 'ink';
-import { colors } from '../../styles';
-import { SetupCredentials } from '../../../ui/components/setup-credentials';
+import { colors } from '../../../core/styles';
+import { SetupCredentials } from '../../components/setup-credentials';
 import type { PimAuthenticatedUser } from '../../../domain/contracts/models/authenticated-user';
 import type { PimCredentials } from '../../../domain/contracts/models/credentials';
-import { Messages } from '../../../ui/components/messages';
-import { Tips } from '../../../ui/components/tips';
-import { Success } from '../../../ui/components/success';
+import { Messages } from '../../components/messages';
+import { Tips } from '../../components/tips';
+import { Success } from '../../components/success';
 import type { InstallBoilerplateStore } from './create-store';
 import { useAtom } from 'jotai';
 import type { CredentialRetriever } from '../../../domain/contracts/credential-retriever';
 import type { CommandBus, QueryBus } from '../../../domain/contracts/bus';
 import type { Logger } from '../../../domain/contracts/logger';
+import type { createClient } from '@crystallize/js-api-client';
+import type { FetchAvailableTenantIdentifier } from '../../../domain/contracts/fetch-available-tenant-identifier';
 
 type InstallBoilerplateJourneyProps = {
     store: InstallBoilerplateStore['atoms'];
     credentialsRetriever: CredentialRetriever;
     queryBus: QueryBus;
     logger: Logger;
+    createCrystallizeClient: typeof createClient;
     commandBus: CommandBus;
+    fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
 };
 export const InstallBoilerplateJourney = ({
     store,
@@ -29,6 +33,7 @@ export const InstallBoilerplateJourney = ({
     queryBus,
     commandBus,
     logger,
+    fetchAvailableTenantIdentifier,
 }: InstallBoilerplateJourneyProps) => {
     const [state] = useAtom(store.stateAtom);
     const [, changeTenant] = useAtom(store.changeTenantAtom);
@@ -51,14 +56,14 @@ export const InstallBoilerplateJourney = ({
                 <SetupCredentials
                     credentialsRetriever={credentialsRetriever}
                     dispatch={(_: PimAuthenticatedUser, credentials: PimCredentials) => {
-                        credentialsRetriever
-                            .fetchAvailableTenantIdentifier(credentials, state.tenant!.identifier)
-                            .then((newIdentifier: string) => {
+                        fetchAvailableTenantIdentifier(credentials, state.tenant!.identifier).then(
+                            (newIdentifier: string) => {
                                 changeTenant({
                                     identifier: newIdentifier,
                                 });
                                 setCredentials(credentials);
-                            });
+                            },
+                        );
                     }}
                 />
             )}

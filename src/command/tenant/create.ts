@@ -1,8 +1,9 @@
-import { Argument, Command } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import type { Logger } from '../../domain/contracts/logger';
 import type { CommandBus } from '../../domain/contracts/bus';
 import type { GetAuthenticatedUser } from '../../domain/contracts/get-authenticated-user';
 import type { FetchAvailableTenantIdentifier } from '../../domain/contracts/fetch-available-tenant-identifier';
+import { addInteractiveAndTokenOption } from '../../core/helpers/add-iteractive-and-token-option';
 
 type Deps = {
     logger: Logger;
@@ -20,10 +21,10 @@ export const createCreateTenantCommand = ({
     const command = new Command('create');
     command.description('Create a tenant in Crystallize');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier that you would like.'));
-    command.option('--token_id <token_id>', 'Your access token id.');
-    command.option('--token_secret <token_secret>', 'Your access token secret.');
-    command.option('--no-interactive', 'Disable the interactive mode.');
-    command.option('--fail-if-not-available', 'Stop execution if the tenant identifier is not available.');
+    command.addOption(
+        new Option('--fail-if-not-available', 'Stop execution if the tenant identifier is not available.'),
+    );
+    addInteractiveAndTokenOption(command);
     command.action(async (tenantIdentifier: string, flags) => {
         const { credentials } = await getAuthenticatedUserWithInteractivityIfPossible({
             isInteractive: !flags.noInteractive,

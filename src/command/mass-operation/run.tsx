@@ -1,4 +1,4 @@
-import { Argument, Command } from 'commander';
+import { Argument, Command, Option } from 'commander';
 import type { Logger } from '../../domain/contracts/logger';
 import type { CommandBus } from '../../domain/contracts/bus';
 import type { Operation, Operations } from '@crystallize/schema/mass-operation';
@@ -7,6 +7,7 @@ import pc from 'picocolors';
 import { ZodError } from 'zod';
 import type { createClient } from '@crystallize/js-api-client';
 import type { GetAuthenticatedUser } from '../../domain/contracts/get-authenticated-user';
+import { addInteractiveAndTokenOption } from '../../core/helpers/add-iteractive-and-token-option';
 
 type Deps = {
     logger: Logger;
@@ -26,10 +27,8 @@ export const createRunMassOperationCommand = ({
     command.description('Upload and start an Mass Operation Task in your tenant.');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier to use.'));
     command.addArgument(new Argument('<file>', 'The file that contains the Operations.'));
-    command.option('--token_id <token_id>', 'Your access token id.');
-    command.option('--token_secret <token_secret>', 'Your access token secret.');
-    command.option('--legacy-spec', 'Use legacy spec format.');
-    command.option('--no-interactive', 'Disable the interactive mode.');
+    command.addOption(new Option('--legacy-spec', 'Use legacy spec format.'));
+    addInteractiveAndTokenOption(command);
 
     command.action(async (tenantIdentifier: string, file: string, flags) => {
         let operationsContent: Operations;

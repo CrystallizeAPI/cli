@@ -37,6 +37,7 @@ export const createGetAuthenticatedUserWithInteractivityIfPossible =
                     'Credentials are invalid. Please run `crystallize login` to setup your credentials or provide correct credentials.',
                 );
             }
+            logger.setBuffered(true);
             let authenticatedUser: PimAuthenticatedUser | undefined;
             let credentials: PimCredentials | undefined;
 
@@ -59,6 +60,8 @@ export const createGetAuthenticatedUserWithInteractivityIfPossible =
                 },
             );
             await waitUntilExit();
+            logger.flush();
+            logger.setBuffered(false);
             if (!authenticatedUser || !credentials) {
                 throw new Error(
                     'Credentials are invalid. Please run `crystallize login` to setup your credentials or provide correct credentials.',

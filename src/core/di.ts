@@ -29,6 +29,8 @@ import { createFetchAvailableTenantIdentifier } from './helpers/fetch-available-
 import { createGetAuthenticatedUserWithInteractivityIfPossible } from './helpers/interactive-get-user-if-possible';
 import type { GetAuthenticatedUser } from '../domain/contracts/get-authenticated-user';
 import type { FetchAvailableTenantIdentifier } from '../domain/contracts/fetch-available-tenant-identifier';
+import { createCreateInviteTokenCommand } from '../command/tenant/invite';
+import { createCreateTenantInviteTokenHandler } from '../domain/use-cases/create-invite-token';
 
 export const buildServices = () => {
     const logLevels = (
@@ -56,6 +58,7 @@ export const buildServices = () => {
         fetchTips: ReturnType<typeof createFetchTipsHandler>;
         setupBoilerplateProject: ReturnType<typeof createSetupBoilerplateProjectHandler>;
         runMassOperation: ReturnType<typeof createRunMassOperationHandler>;
+        createTenantInviteToken: ReturnType<typeof createCreateTenantInviteTokenHandler>;
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
         // commands
@@ -65,6 +68,7 @@ export const buildServices = () => {
         runMassOperationCommand: Command;
         changeLogCommand: Command;
         createTenantCommand: Command;
+        createInviteTokenCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -96,6 +100,8 @@ export const buildServices = () => {
         fetchTips: asFunction(createFetchTipsHandler).singleton(),
         setupBoilerplateProject: asFunction(createSetupBoilerplateProjectHandler).singleton(),
         runMassOperation: asFunction(createRunMassOperationHandler).singleton(),
+        createTenantInviteToken: asFunction(createCreateTenantInviteTokenHandler).singleton(),
+
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
 
@@ -106,12 +112,14 @@ export const buildServices = () => {
         runMassOperationCommand: asFunction(createRunMassOperationCommand).singleton(),
         changeLogCommand: asFunction(createChangelogCommand).singleton(),
         createTenantCommand: asFunction(createCreateTenantCommand).singleton(),
+        createInviteTokenCommand: asFunction(createCreateInviteTokenCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
     container.cradle.queryBus.register('FetchTips', container.cradle.fetchTips);
     container.cradle.commandBus.register('SetupBoilerplateProject', container.cradle.setupBoilerplateProject);
     container.cradle.commandBus.register('RunMassOperation', container.cradle.runMassOperation);
+    container.cradle.commandBus.register('CreateTenantInviteToken', container.cradle.createTenantInviteToken);
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -145,7 +153,7 @@ export const buildServices = () => {
             },
             tenant: {
                 description: 'All the commands related to Tenants.',
-                commands: [container.cradle.createTenantCommand],
+                commands: [container.cradle.createTenantCommand, container.cradle.createInviteTokenCommand],
             },
         },
     };

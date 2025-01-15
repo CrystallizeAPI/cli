@@ -4,11 +4,13 @@ import type { DownloadBoilerplateArchiveHandlerDefinition } from '../use-cases/d
 import type { FetchTipsHandlerDefinition } from '../use-cases/fetch-tips';
 import type { SetupBoilerplateProjectHandlerDefinition } from '../use-cases/setup-boilerplate-project';
 import type { RunMassOperationHandlerDefinition } from '../use-cases/run-mass-operation';
+import type { CreateTenantInviteTokenHandlerDefinition } from '../use-cases/create-invite-token';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition & FetchTipsHandlerDefinition;
 export type QueryBus = MissiveQueryBus<QueryDefinitions>;
 
 export type CommandDefinitions = CreateCleanTenantHandlerDefinition &
     SetupBoilerplateProjectHandlerDefinition &
-    RunMassOperationHandlerDefinition;
+    RunMassOperationHandlerDefinition &
+    CreateTenantInviteTokenHandlerDefinition;
 export type CommandBus = MissiveCommandBus<CommandDefinitions>;

@@ -4,7 +4,7 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help changelog boilerplate login whoami mass-operation"
+  local commands="help changelog boilerplate tenant login whoami mass-operation"
   local program_options="--version"
   local default_options="--help"
   local i_login_options="--no-interactive --token_id= --token_secret="
@@ -52,13 +52,37 @@ _crystallize_completions() {
       ;;
     tenant)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="create ${default_options}"
+                local options="create invite ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
         case "${subcmd}" in
             create)
                 local options="${i_login_options} --fail-if-not-available ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            invite)
+                local options="${i_login_options} --number= --role= --expiry= ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+            ;;
+        esac
+    ;;
+    token)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+                local options="shop-api static ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+        fi
+        case "${subcmd}" in
+            shop-api)
+                local options="${i_login_options} ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            static)
+                local options="${i_login_options} ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;

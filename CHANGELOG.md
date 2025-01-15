@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.0]
+
+### Added
+
+- create invite(s) command.
+- get Shop API token command.
+- get Static Auth token command.
+
+### Fixed
+
+- added missing `tenant` in the completion command list.
+
 ## [5.1.0]
 
 ### Added

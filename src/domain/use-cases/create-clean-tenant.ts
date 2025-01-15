@@ -32,7 +32,8 @@ const handler = async (
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });
     const createResult = await client.pimApi(
-        `mutation CREATE_TENANT ($identifier: String!, $name: String!) {
+        `#graphql 
+        mutation CREATE_TENANT ($identifier: String!, $name: String!) {
             tenant {
                 create(input: {
                     identifier: $identifier,

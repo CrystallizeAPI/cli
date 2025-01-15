@@ -4,6 +4,7 @@ import { Command, Option } from 'commander';
 import packageJson from '../package.json';
 import pc from 'picocolors';
 import { buildServices } from './core/di';
+import { installCompletion } from './domain/use-cases/install-completion';
 
 const services = buildServices();
 const { logger, commands } = services;
@@ -11,6 +12,8 @@ const { logger, commands } = services;
 const program = new Command();
 program.version(packageJson.version);
 program.name('crystallize');
+program.addOption(new Option('--install-completion', 'Install the completion').hideHelp());
+program.addOption(new Option('--uninstall-completion', 'Install the completion').hideHelp());
 
 const helpStyling = {
     styleTitle: (str: string) => pc.bold(str),
@@ -40,9 +43,13 @@ program.addHelpText('beforeAll', pc.cyanBright(logo));
 program.description(
     "Crystallize CLI helps you manage your Crystallize tenant(s) and improve your DX.\nWe've got your back(end)!\n        🤜✨🤛.",
 );
-program.addOption(new Option('-e, --env <env>', 'Environment to use').choices(['staging', 'production']));
+program.action(async () => {
+    const shell = Bun.env.SHELL || '/bin/bash';
+    await installCompletion(shell, { logger });
+    program.help();
+});
+
 commands.forEach((command) => {
-    // command.addOption(new Option('-e, --env <env>', 'Environment to use').choices(['staging', 'production']));
     command.configureHelp(helpStyling);
     program.addCommand(command);
 });

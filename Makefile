@@ -22,7 +22,7 @@ codeclean: ## Code Clean
 build: ## Build
 	@bun build --bundle src/index.ts --outfile crystallize.js --target=bun
 	@bun shim.ts
-	@bun build --compile crystallize.js --outfile crystallize
+	@bun build --compile --minify crystallize.js --outfile crystallize
 	@rm crystallize.js
 	@rm -f ./.*.bun-build
 

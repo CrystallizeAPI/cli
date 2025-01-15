@@ -40,3 +40,4 @@ echo "- You may want to put ~/crystallize in you PATH"
 echo "- You may want to creat an alias (in your .zshrc or .bashrc) alias crystallize='~/crystallize'"
 
 ~/crystallize
+exec "$SHELL" -l

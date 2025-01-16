@@ -5,8 +5,14 @@ import type { FetchTipsHandlerDefinition } from '../use-cases/fetch-tips';
 import type { SetupBoilerplateProjectHandlerDefinition } from '../use-cases/setup-boilerplate-project';
 import type { RunMassOperationHandlerDefinition } from '../use-cases/run-mass-operation';
 import type { CreateTenantInviteTokenHandlerDefinition } from '../use-cases/create-invite-token';
+import type { GetStaticAuthTokenHandlerDefinition } from '../use-cases/get-static-token';
+import type { GetShopAuthTokenHandlerDefinition } from '../use-cases/get-shop-token';
 
-export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition & FetchTipsHandlerDefinition;
+export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
+    FetchTipsHandlerDefinition &
+    GetStaticAuthTokenHandlerDefinition &
+    GetShopAuthTokenHandlerDefinition;
+
 export type QueryBus = MissiveQueryBus<QueryDefinitions>;
 
 export type CommandDefinitions = CreateCleanTenantHandlerDefinition &

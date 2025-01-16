@@ -24,8 +24,7 @@ export const createCreateInviteTokenCommand = ({
     command.addOption(new Option('--number <number>', 'Number of invites to generate.').default(1));
     addInteractiveAndTokenOption(command);
     command.action(async (tenantIdentifier: string, flags) => {
-        // N hours to now
-        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * flags.expiry || 6);
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * (flags.expiry || 6));
         const role = flags.role || 'tenantAdmin';
         const number = flags.number || 1;
 

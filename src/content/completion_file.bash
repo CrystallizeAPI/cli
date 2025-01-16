@@ -71,12 +71,17 @@ _crystallize_completions() {
     ;;
     token)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="shop-api static ${default_options}"
+                local options="pim static shop ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
         case "${subcmd}" in
-            shop-api)
+            shop)
+                local options="${i_login_options} --expiry= --scopes= ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            pim)
                 local options="${i_login_options} ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
@@ -85,7 +90,7 @@ _crystallize_completions() {
                 local options="${i_login_options} ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
-                ;;
+                ;;                
         esac
     ;;
   esac

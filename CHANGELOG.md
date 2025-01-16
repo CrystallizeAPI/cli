@@ -7,8 +7,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - create invite(s) command.
-- get Shop API token command.
+- get Shop Auth token command.
 - get Static Auth token command.
+- get Pim Auth token command.
 
 ### Fixed
 

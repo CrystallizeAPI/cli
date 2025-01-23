@@ -100,7 +100,6 @@ export const createRunMassOperationCommand = ({
                 for (const issue of error.issues) {
                     logger.error(`[${issue.path.join('.')}]: ${issue.message}`);
                 }
-                process.exit(1);
             }
             throw error;
         }

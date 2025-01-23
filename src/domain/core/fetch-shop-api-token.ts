@@ -1,5 +1,5 @@
-import type { FetchShopAuthToken } from '../../domain/contracts/fetch-shop-auth-token';
-import type { PimCredentials } from '../../domain/contracts/models/credentials';
+import type { FetchShopAuthToken } from '../contracts/fetch-shop-auth-token';
+import type { PimCredentials } from '../contracts/models/credentials';
 
 export const createFetchShopApiToken =
     (): FetchShopAuthToken =>

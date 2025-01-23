@@ -7,11 +7,13 @@ import type { RunMassOperationHandlerDefinition } from '../use-cases/run-mass-op
 import type { CreateTenantInviteTokenHandlerDefinition } from '../use-cases/create-invite-token';
 import type { GetStaticAuthTokenHandlerDefinition } from '../use-cases/get-static-token';
 import type { GetShopAuthTokenHandlerDefinition } from '../use-cases/get-shop-token';
+import type { CreateContentModelMassOperationFileHandlerDefinition } from '../use-cases/create-content-model-mass-operation';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
     FetchTipsHandlerDefinition &
     GetStaticAuthTokenHandlerDefinition &
-    GetShopAuthTokenHandlerDefinition;
+    GetShopAuthTokenHandlerDefinition &
+    CreateContentModelMassOperationFileHandlerDefinition;
 
 export type QueryBus = MissiveQueryBus<QueryDefinitions>;
 

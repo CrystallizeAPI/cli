@@ -6,6 +6,7 @@ import { VariableType, jsonToGraphQLQuery } from 'json-to-graphql-query';
 type Deps = {
     createCrystallizeClient: typeof createClient;
 };
+
 type Command = {
     expiresAt: Date;
     tenantIdentifier: string;

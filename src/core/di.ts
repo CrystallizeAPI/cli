@@ -25,8 +25,8 @@ import type { createClient } from '@crystallize/js-api-client';
 import { createCrystallizeClientBuilder } from './create-crystallize-client-builder';
 import { createChangelogCommand } from '../command/changelog';
 import { createCreateTenantCommand } from '../command/tenant/create';
-import { createFetchAvailableTenantIdentifier } from './helpers/fetch-available-tenant-identifier';
-import { createGetAuthenticatedUserWithInteractivityIfPossible } from './helpers/interactive-get-user-if-possible';
+import { createFetchAvailableTenantIdentifier } from '../domain/core/fetch-available-tenant-identifier';
+import { createGetAuthenticatedUserWithInteractivityIfPossible } from '../domain/core/interactive-get-user-if-possible';
 import type { GetAuthenticatedUser } from '../domain/contracts/get-authenticated-user';
 import type { FetchAvailableTenantIdentifier } from '../domain/contracts/fetch-available-tenant-identifier';
 import { createCreateInviteTokenCommand } from '../command/tenant/invite';
@@ -35,9 +35,11 @@ import { createGetStaticAuthTokenCommand } from '../command/token/static';
 import { createGetStaticAuthTokenHandler } from '../domain/use-cases/get-static-token';
 import { createGetPimAuthTokenCommand } from '../command/token/pim';
 import { createGetShopAuthTokenCommand } from '../command/token/shop';
-import { createFetchShopApiToken } from './helpers/fetch-shop-api-token';
+import { createFetchShopApiToken } from '../domain/core/fetch-shop-api-token';
 import type { FetchShopAuthToken } from '../domain/contracts/fetch-shop-auth-token';
 import { createGetShopAuthTokenHandler } from '../domain/use-cases/get-shop-token';
+import { createDumpContentModelMassOperationCommand } from '../command/mass-operation/dump-content-model';
+import { createCreateContentModelMassOperationFileHandler } from '../domain/use-cases/create-content-model-mass-operation';
 
 export const buildServices = () => {
     const logLevels = (
@@ -69,6 +71,8 @@ export const buildServices = () => {
         createTenantInviteToken: ReturnType<typeof createCreateTenantInviteTokenHandler>;
         getStaticAuthToken: ReturnType<typeof createGetStaticAuthTokenHandler>;
         getShopAuthToken: ReturnType<typeof createGetShopAuthTokenHandler>;
+        createContentModelMassOperationFile: ReturnType<typeof createCreateContentModelMassOperationFileHandler>;
+
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
         // commands
@@ -82,6 +86,7 @@ export const buildServices = () => {
         getStaticAuthTokenCommand: Command;
         getShopAuthTokenCommand: Command;
         getPimAuthTokenCommand: Command;
+        dumpContentModelMassOperationCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -117,6 +122,7 @@ export const buildServices = () => {
         createTenantInviteToken: asFunction(createCreateTenantInviteTokenHandler).singleton(),
         getStaticAuthToken: asFunction(createGetStaticAuthTokenHandler).singleton(),
         getShopAuthToken: asFunction(createGetShopAuthTokenHandler).singleton(),
+        createContentModelMassOperationFile: asFunction(createCreateContentModelMassOperationFileHandler).singleton(),
 
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
@@ -132,6 +138,7 @@ export const buildServices = () => {
         getStaticAuthTokenCommand: asFunction(createGetStaticAuthTokenCommand).singleton(),
         getShopAuthTokenCommand: asFunction(createGetShopAuthTokenCommand).singleton(),
         getPimAuthTokenCommand: asFunction(createGetPimAuthTokenCommand).singleton(),
+        dumpContentModelMassOperationCommand: asFunction(createDumpContentModelMassOperationCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -141,6 +148,10 @@ export const buildServices = () => {
     container.cradle.commandBus.register('CreateTenantInviteToken', container.cradle.createTenantInviteToken);
     container.cradle.queryBus.register('GetStaticAuthToken', container.cradle.getStaticAuthToken);
     container.cradle.queryBus.register('GetShopAuthToken', container.cradle.getShopAuthToken);
+    container.cradle.queryBus.register(
+        'CreateContentModelMassOperationFile',
+        container.cradle.createContentModelMassOperationFile,
+    );
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -170,7 +181,10 @@ export const buildServices = () => {
             },
             'mass-operation': {
                 description: 'All the commands related to Mass Operations.',
-                commands: [container.cradle.runMassOperationCommand],
+                commands: [
+                    container.cradle.runMassOperationCommand,
+                    container.cradle.dumpContentModelMassOperationCommand,
+                ],
             },
             tenant: {
                 description: 'All the commands related to Tenants.',

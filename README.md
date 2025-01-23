@@ -8,10 +8,10 @@ If you want to report or contribute, you should do it on the main repository: ht
 
 ---
 
-## Help
+## Install the CLI
 
 ```bash
-curl something
+curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash
 ```
 
 @todo!

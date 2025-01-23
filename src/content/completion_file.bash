@@ -38,13 +38,18 @@ _crystallize_completions() {
       ;;
     mass-operation)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="run ${default_options}"
+                local options="run dump-content-model ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
         case "${subcmd}" in
             run)
                 local options="${i_login_options} --legacy-spec ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            dump-content-model)
+                local options="${i_login_options} --force ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;

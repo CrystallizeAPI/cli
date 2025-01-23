@@ -10,6 +10,8 @@ const services = buildServices();
 const { logger, commands } = services;
 
 const program = new Command();
+program.allowExcessArguments(false);
+program.allowUnknownOption(false);
 program.version(packageJson.version);
 program.name('crystallize');
 program.addOption(new Option('--install-completion', 'Install the completion').hideHelp());
@@ -24,7 +26,6 @@ const helpStyling = {
     styleArgumentText: (str: string) => pc.yellow(str),
     styleSubcommandText: (str: string) => pc.cyan(str),
 };
-program.configureHelp(helpStyling);
 
 const logo: string = `
             /\\
@@ -40,17 +41,28 @@ const logo: string = `
  Crystallize CLI ${pc.italic(pc.yellow(packageJson.version))}
 `;
 program.addHelpText('beforeAll', pc.cyanBright(logo));
+const genericCommandOption = (command: Command) => {
+    command.configureHelp(helpStyling);
+    command.allowExcessArguments(false);
+    command.allowUnknownOption(false);
+    command.configureOutput({
+        writeErr: (str) => logger.error(str),
+    });
+};
+
 program.description(
     "Crystallize CLI helps you manage your Crystallize tenant(s) and improve your DX.\nWe've got your back(end)!\n        🤜✨🤛.",
 );
+
 program.action(async () => {
     const shell = Bun.env.SHELL || '/bin/bash';
     await installCompletion(shell, { logger });
     program.help();
 });
+genericCommandOption(program);
 
 commands.root.commands.forEach((command) => {
-    command.configureHelp(helpStyling);
+    genericCommandOption(command);
     program.addCommand(command);
 });
 
@@ -62,12 +74,12 @@ Object.keys(commands).forEach((key) => {
         group.description(description);
     }
     commands[key as keyof typeof commands].commands.forEach((command) => {
-        command.configureHelp(helpStyling);
+        genericCommandOption(command);
         group.addCommand(command);
         group.addArgument(new Argument(`[${command.name()}]`, command.description()));
     });
 
-    group.configureHelp(helpStyling);
+    genericCommandOption(group);
     program.addCommand(group);
 });
 

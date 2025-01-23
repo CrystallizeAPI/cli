@@ -1,8 +1,8 @@
 import { Box, render } from 'ink';
-import type { CredentialRetriever } from '../../domain/contracts/credential-retriever';
-import type { Logger } from '../../domain/contracts/logger';
-import type { PimAuthenticatedUser } from '../../domain/contracts/models/authenticated-user';
-import type { PimCredentials } from '../../domain/contracts/models/credentials';
+import type { CredentialRetriever } from '../contracts/credential-retriever';
+import type { Logger } from '../contracts/logger';
+import type { PimAuthenticatedUser } from '../contracts/models/authenticated-user';
+import type { PimCredentials } from '../contracts/models/credentials';
 import { SetupCredentials } from '../../ui/components/setup-credentials';
 
 type Deps = {

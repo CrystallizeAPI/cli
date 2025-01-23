@@ -1,5 +1,5 @@
 import type { createClient } from '@crystallize/js-api-client';
-import type { PimCredentials } from '../../domain/contracts/models/credentials';
+import type { PimCredentials } from '../contracts/models/credentials';
 
 type Deps = {
     createCrystallizeClient: typeof createClient;

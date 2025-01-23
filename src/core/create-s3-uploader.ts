@@ -2,7 +2,7 @@ import type { S3Uploader } from '../domain/contracts/s3-uploader';
 
 export const createS3Uploader = (): S3Uploader => {
     return async (payload, fileContent) => {
-        const formData: FormData = new FormData();
+        const formData = new FormData();
         payload.fields.forEach((field: { name: string; value: string }) => {
             formData.append(field.name, field.value);
         });

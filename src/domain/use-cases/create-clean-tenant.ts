@@ -119,9 +119,29 @@ const handler = async (
     }
 
     try {
+        const results = await cClient.pimApi(`#graphql
+            query { 
+                tenant {
+                    get(id:"${id}") {
+                        rootItemId
+                        vatTypes {
+                            id
+                        }
+                    }
+                }
+            }`);
+
+        const { rootItemId, vatTypes } = results.tenant.get;
+        const defaultVat = vatTypes[0].id;
+
         const extraMutationsFile = `${crytallizeHiddenFolder}/extra-mutations.json`;
         const extraMutationsContent = await flySystem.loadFile(extraMutationsFile);
-        const extraMutations = JSON.parse(extraMutationsContent.replaceAll('##TENANT_ID##', id)) as {
+        const extraMutations = JSON.parse(
+            extraMutationsContent
+                .replaceAll('##TENANT_ID##', id)
+                .replaceAll('##TENANT_DEFAULT_VATTYPE_ID##', defaultVat)
+                .replaceAll('##TENANT_ROOT_ID##', rootItemId),
+        ) as {
             mutation: string;
             sets: Record<string, VariableType>[];
         }[];

@@ -31,18 +31,26 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
     const { flySystem, logger, runner, installBoilerplateCommandStore } = deps;
     const { folder, tenant, credentials } = envelope.message;
     const { storage, atoms } = installBoilerplateCommandStore;
+
+    const crytallizeHiddenFolder = `${folder}/.crystallize`;
+
     const addTraceLog = (log: string) => storage.set(atoms.addTraceLogAtom, log);
     const addTraceError = (log: string) => storage.set(atoms.addTraceErrorAtom, log);
 
     const finalCredentials = credentials || (await deps.credentialsRetriever.getCredentials());
 
     logger.log(`Setting up boilerplate project in ${folder} for tenant ${tenant.identifier}`);
-    if (await flySystem.isFileExists(`${folder}/provisioning/clone/.env.dist`)) {
+
+    if (await flySystem.isFileExists(`${crytallizeHiddenFolder}/env`)) {
         try {
-            await flySystem.replaceInFile(`${folder}/provisioning/clone/.env.dist`, [
+            await flySystem.replaceInFile(`${crytallizeHiddenFolder}/env`, [
                 {
                     search: '##STOREFRONT_IDENTIFIER##',
                     replace: `storefront-${tenant.identifier}`,
+                },
+                {
+                    search: '##CRYSTALLIZE_TENANT_ID##',
+                    replace: '',
                 },
                 {
                     search: '##CRYSTALLIZE_TENANT_IDENTIFIER##',
@@ -60,28 +68,28 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
                     search: '##JWT_SECRET##',
                     replace: crypto.randomUUID(),
                 },
+                {
+                    search: '##AUTH_SECRET##',
+                    replace: crypto.randomUUID(),
+                },
             ]);
         } catch (e) {
-            logger.warn(`Could not replace values in provisioning/clone/.env.dist file from the boilerplate.`);
+            logger.warn(`Could not replace values in env file from the boilerplate.`);
         }
     } else {
-        logger.warn(`Could not find provisioning/clone/.env.dist file from the boilerplate.`);
+        logger.warn(`Could not find env file from the boilerplate.`);
     }
 
-    let readme = 'cd appplication && npm run dev';
-    if (await flySystem.isFileExists(`${folder}/provisioning/clone/success.md`)) {
+    let readme = 'npm run dev';
+    if (await flySystem.isFileExists(`${crytallizeHiddenFolder}/success.md`)) {
         try {
-            readme = await flySystem.loadFile(`${folder}/provisioning/clone/success.md`);
+            readme = await flySystem.loadFile(`${crytallizeHiddenFolder}/success.md`);
         } catch (e) {
-            logger.warn(
-                `Could not load provisioning/clone/success.md file from the boilerplate. Using default readme.`,
-            );
-            readme = 'cd appplication && npm run dev';
+            logger.warn(`Could not load success.md file from the boilerplate. Using default readme.`);
         }
     }
-    logger.debug(`> .env.dist replaced.`);
     await runner(
-        ['bash', `${folder}/provisioning/clone/setup.bash`],
+        ['bash', `${crytallizeHiddenFolder}/setup.bash`],
         (data) => {
             logger.debug(data.toString());
             addTraceLog(data.toString());

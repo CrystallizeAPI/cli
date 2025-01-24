@@ -5,7 +5,9 @@ import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import {
     type ChoiceConfig,
     type ChunksConfig,
+    type ComponentConfigInput,
     type ComponentDefinition,
+    type ComponentDefinitionInput,
     type ItemRelationsConfig,
     type MultipleChoicesConfig,
     type Piece,
@@ -152,10 +154,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
         }
     };
 
-    const mapConfig = (component: ComponentDefinition) => {
-        if (!component.config) {
-            return {};
-        }
+    const mapConfig = (component: ComponentDefinition): ComponentConfigInput => {
         if (component.type === 'piece') {
             const { components, ...config } = component.config as PieceConfig;
             return {
@@ -166,30 +165,30 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
         if (component.type === 'contentChunk') {
             const config = component.config as ChunksConfig;
             return {
-                ...config,
-                components: config!.components.map((subcomponent): ComponentDefinition => {
-                    return {
-                        ...subcomponent,
-                        config: {
-                            [component.type]: mapConfig(subcomponent),
-                        },
-                    };
-                }),
+                [component.type]: {
+                    ...config,
+                    components: config!.components.map((subcomponent): ComponentDefinitionInput => {
+                        return {
+                            ...subcomponent,
+                            config: mapConfig(subcomponent),
+                        };
+                    }),
+                },
             };
         }
 
         if (component.type === 'componentMultipleChoice' || component.type === 'componentChoice') {
             const config = component.config as MultipleChoicesConfig | ChoiceConfig;
             return {
-                ...config,
-                components: config!.choices.map((subcomponent): ComponentDefinition => {
-                    return {
-                        ...subcomponent,
-                        config: {
-                            [component.type]: mapConfig(subcomponent),
-                        },
-                    };
-                }),
+                [component.type]: {
+                    ...config,
+                    choices: config!.choices.map((subcomponent): ComponentDefinitionInput => {
+                        return {
+                            ...subcomponent,
+                            config: mapConfig(subcomponent),
+                        };
+                    }),
+                },
             };
         }
         return {
@@ -367,6 +366,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
             }
         }
     }
+
     return {
         content: {
             version: '0.0.1',

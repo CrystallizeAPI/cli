@@ -1,15 +1,26 @@
 import type { createClient } from '@crystallize/js-api-client';
-import { jsonToGraphQLQuery } from 'json-to-graphql-query';
+import { jsonToGraphQLQuery, VariableType } from 'json-to-graphql-query';
 import type { Tenant } from '../contracts/models/tenant';
 import type { CommandHandlerDefinition, Envelope } from 'missive.js';
 import type { PimCredentials } from '../contracts/models/credentials';
+import type { CredentialRetriever } from '../contracts/credential-retriever';
+import type { createRunMassOperationHandler, RunMassOperationCommand } from './run-mass-operation';
+import type { FlySystem } from '../contracts/fly-system';
+import type { Operations } from '@crystallize/schema/mass-operation';
+import type { Logger } from '../contracts/logger';
+import { getMassOperationBulkTask } from '../../command/mass-operation/run';
 
 type Deps = {
     createCrystallizeClient: typeof createClient;
+    runMassOperation: ReturnType<typeof createRunMassOperationHandler>;
+    credentialsRetriever: CredentialRetriever;
+    flySystem: FlySystem;
+    logger: Logger;
 };
 type Command = {
     tenant: Tenant;
     credentials: PimCredentials;
+    folder: string;
 };
 
 export type CreateCleanTenantHandlerDefinition = CommandHandlerDefinition<
@@ -20,16 +31,17 @@ export type CreateCleanTenantHandlerDefinition = CommandHandlerDefinition<
 
 const handler = async (
     envelope: Envelope<Command>,
-    { createCrystallizeClient }: Deps,
+    { createCrystallizeClient, credentialsRetriever, runMassOperation, flySystem, logger }: Deps,
 ): Promise<{
     id: string;
     identifier: string;
 }> => {
-    const { tenant, credentials } = envelope.message;
+    const { folder, tenant, credentials } = envelope.message;
+    const finalCredentials = credentials || (await credentialsRetriever.getCredentials());
     const client = createCrystallizeClient({
         tenantIdentifier: '',
-        accessTokenId: credentials.ACCESS_TOKEN_ID,
-        accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
+        accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
+        accessTokenSecret: finalCredentials.ACCESS_TOKEN_SECRET,
     });
     const createResult = await client.pimApi(
         `#graphql 
@@ -73,6 +85,57 @@ const handler = async (
     };
     const query = jsonToGraphQLQuery({ mutation });
     await client.pimApi(query);
+
+    const cClient = createCrystallizeClient({
+        tenantIdentifier: tenant.identifier,
+        tenantId: id,
+        accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
+        accessTokenSecret: finalCredentials.ACCESS_TOKEN_SECRET,
+    });
+
+    // now lets run the mass operation
+    const crytallizeHiddenFolder = `${folder}/.crystallize`;
+    try {
+        const massOperationFile = `${crytallizeHiddenFolder}/content-model.json`;
+        const operations = await flySystem.loadJsonFile<Operations>(massOperationFile);
+        let { task: startedTask } = await runMassOperation({
+            message: {
+                tenantIdentifier: tenant.identifier,
+                operations,
+                credentials: finalCredentials,
+            },
+        } as Envelope<RunMassOperationCommand>);
+        logger.debug('Mass operation task created', startedTask);
+        while (startedTask?.status !== 'complete') {
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            const get = await cClient.nextPimApi(getMassOperationBulkTask, { id: startedTask?.id });
+            if (get.bulkTask.error) {
+                throw new Error(get.data.bulkTask.error);
+            }
+            startedTask = get.bulkTask;
+        }
+    } catch (e) {
+        logger.error('Failed to run mass operation', e);
+    }
+
+    try {
+        const extraMutationsFile = `${crytallizeHiddenFolder}/extra-mutations.json`;
+        const extraMutationsContent = await flySystem.loadFile(extraMutationsFile);
+        const extraMutations = JSON.parse(extraMutationsContent.replaceAll('##TENANT_ID##', id)) as {
+            mutation: string;
+            sets: Record<string, VariableType>[];
+        }[];
+
+        for (const { mutation, sets } of Object.values(extraMutations)) {
+            await Promise.all([
+                sets.map(async (set) => {
+                    await cClient.pimApi(mutation, set);
+                }),
+            ]);
+        }
+    } catch (e) {
+        logger.error('Failed to run extra mutations', e);
+    }
     return {
         id,
         identifier,

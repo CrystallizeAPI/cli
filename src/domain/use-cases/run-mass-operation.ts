@@ -12,20 +12,21 @@ type Deps = {
     createCrystallizeClient: typeof createClient;
 };
 
-type Command = {
+export type RunMassOperationCommand = {
     tenantIdentifier: string;
     operations: Operations;
     credentials: PimCredentials;
 };
+export type RunMassOperationCommandResult = Awaited<ReturnType<typeof handler>>;
 
 export type RunMassOperationHandlerDefinition = CommandHandlerDefinition<
     'RunMassOperation',
-    Command,
-    Awaited<ReturnType<typeof handler>>
+    RunMassOperationCommand,
+    RunMassOperationCommandResult
 >;
 
 const handler = async (
-    envelope: Envelope<Command>,
+    envelope: Envelope<RunMassOperationCommand>,
     { logger, s3Uploader, createCrystallizeClient }: Deps,
 ): Promise<{
     task: {
@@ -76,7 +77,8 @@ const handler = async (
     };
 };
 
-export const createRunMassOperationHandler = (deps: Deps) => (command: Envelope<Command>) => handler(command, deps);
+export const createRunMassOperationHandler = (deps: Deps) => (command: Envelope<RunMassOperationCommand>) =>
+    handler(command, deps);
 
 const startMassOperationBulkTask = `#graphql
 mutation START($id: ID!) {

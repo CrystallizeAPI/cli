@@ -27,7 +27,6 @@ type ExecuteRecipesProps = {
 };
 export const ExecuteRecipes = ({ store, commandBus, logger }: ExecuteRecipesProps) => {
     const [state] = useAtom(store.stateAtom);
-    const [isWizardFullfilled] = useAtom(store.isWizardFullfilledAtom);
     const [, startImport] = useAtom(store.startBoostrappingAtom);
     const [, recipesDone] = useAtom(store.recipesDoneAtom);
     const isVerbose = state.isVerbose;
@@ -39,46 +38,33 @@ export const ExecuteRecipes = ({ store, commandBus, logger }: ExecuteRecipesProp
         }
 
         (async () => {
+            if (state.bootstrapTenant) {
+                startImport();
+                const createTenantCommand = commandBus.createCommand('CreateCleanTenant', {
+                    tenant: state.tenant!,
+                    credentials: state.credentials!,
+                    folder: state.folder!,
+                });
+                const tenantResult = await commandBus.dispatch(createTenantCommand);
+                logger.debug('Tenant creation succeeded', tenantResult.result);
+            }
+
             const setupBoilerplateCommand = commandBus.createCommand('SetupBoilerplateProject', {
                 folder: state.folder!,
                 credentials: state.credentials,
                 tenant: state.tenant!,
             });
-            const [setupResult, tenantResult] = await Promise.allSettled([
-                commandBus.dispatch(setupBoilerplateCommand),
-                (async () => {
-                    if (state.bootstrapTenant) {
-                        const createTenantCommand = commandBus.createCommand('CreateCleanTenant', {
-                            tenant: state.tenant!,
-                            credentials: state.credentials!,
-                        });
-                        await commandBus.dispatch(createTenantCommand);
-                        startImport();
-                    }
-                })(),
-            ]);
-
-            if (setupResult.status === 'fulfilled') {
-                logger.debug('Setup boilerplate project succeeded:', setupResult.value.result);
-                recipesDone(setupResult.value.result?.output || '');
-            } else {
-                logger.error('Setup boilerplate project failed:', setupResult.reason);
-            }
-            if (tenantResult.status === 'fulfilled') {
-                logger.debug('Tenant creation succeeded');
-            } else if (tenantResult) {
-                logger.error('Tenant creation failed:', tenantResult.reason);
-            }
+            const setupResult = await commandBus.dispatch(setupBoilerplateCommand);
+            logger.debug('Setup boilerplate project succeeded:', setupResult.result);
+            recipesDone(setupResult.result?.output || '');
         })();
     }, []);
 
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
-        if (!isWizardFullfilled) {
-            timer = setTimeout(() => {
-                setFeedbackIndex((feedbackIndex + 1) % feedbacks.length);
-            }, 2000);
-        }
+        timer = setTimeout(() => {
+            setFeedbackIndex((feedbackIndex + 1) % feedbacks.length);
+        }, 2000);
         return () => {
             clearTimeout(timer);
         };

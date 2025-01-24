@@ -107,7 +107,7 @@ export const createRunMassOperationCommand = ({
     return command;
 };
 
-const getMassOperationBulkTask = `#graphql
+export const getMassOperationBulkTask = `#graphql
 query GET($id:ID!) {
   bulkTask(id:$id) {
     ... on BulkTaskMassOperation {

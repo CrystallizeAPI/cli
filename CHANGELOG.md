@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+- new boilerplates
+- dump content model as Mass Operations
 - create invite(s) command.
 - get Shop Auth token command.
 - get Static Auth token command.

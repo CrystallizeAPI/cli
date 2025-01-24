@@ -11,6 +11,7 @@ import type { Logger } from '../../domain/contracts/logger';
 import type { QueryBus, CommandBus } from '../../domain/contracts/bus';
 import type { createClient } from '@crystallize/js-api-client';
 import type { FetchAvailableTenantIdentifier } from '../../domain/contracts/fetch-available-tenant-identifier';
+import { logo } from '../..';
 
 type Deps = {
     logLevels: ('info' | 'debug')[];
@@ -65,6 +66,7 @@ export const createInstallBoilerplateCommand = ({
         storage.set(atoms.setVerbosity, logLevels.length > 0);
 
         logger.log('Starting install boilerplate journey.');
+        console.log(logo);
         const { waitUntilExit } = render(
             <Box flexDirection="column" padding={1}>
                 <Box flexDirection="column" marginBottom={1}>

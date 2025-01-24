@@ -27,7 +27,7 @@ const helpStyling = {
     styleSubcommandText: (str: string) => pc.cyan(str),
 };
 
-const logo: string = `
+export const logo: string = `
             /\\
          /\\/  \\
      _  / /    \\

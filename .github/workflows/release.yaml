@@ -19,7 +19,7 @@ jobs:
             - name: ⎔ Setup bun
               uses: oven-sh/setup-bun@v2
               with:
-                  bun-version: latest
+                  bun-version: 1.1.45
 
             - name: 📥 Download deps
               run: bun install --frozen-lockfile

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.2.2]
+
+- fix bug introduced in the 5.2.1 for tenant create command
+
 ## [5.2.1]
 
 - capability to replace Root Tenant Id and Vat Type in the install process from the extra mutation.

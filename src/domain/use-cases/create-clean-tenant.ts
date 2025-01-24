@@ -20,7 +20,7 @@ type Deps = {
 type Command = {
     tenant: Tenant;
     credentials: PimCredentials;
-    folder: string;
+    folder?: string;
 };
 
 export type CreateCleanTenantHandlerDefinition = CommandHandlerDefinition<
@@ -36,7 +36,7 @@ const handler = async (
     id: string;
     identifier: string;
 }> => {
-    const { folder, tenant, credentials } = envelope.message;
+    const { tenant, credentials } = envelope.message;
     const finalCredentials = credentials || (await credentialsRetriever.getCredentials());
     const client = createCrystallizeClient({
         tenantIdentifier: '',
@@ -85,6 +85,15 @@ const handler = async (
     };
     const query = jsonToGraphQLQuery({ mutation });
     await client.pimApi(query);
+
+    // if we have a folder, we check that folder for .crystallize folder and convention
+    const { folder } = envelope.message;
+    if (!folder) {
+        return {
+            id,
+            identifier,
+        };
+    }
 
     const cClient = createCrystallizeClient({
         tenantIdentifier: tenant.identifier,

@@ -1,13 +1,102 @@
 <html>
     <head>
         <title>Crystallize CLI</title>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto Slab" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            body {
+                font-family: 'Roboto Slab', sans-serif;
+                text-align: center;
+                padding: 40px;
+                font-size: medium;
+                background-color: rgba(44, 36, 74);
+            }
+
+            main {
+                height: auto;
+                text-align: center;
+                background-color: rgb(44, 36, 74);
+                color: #fff;
+                padding: 100px;
+                border-radius: 8px;
+                box-shadow: 0 0 20px rgb(255, 191, 74);
+            }
+
+            .code-block {
+                position: relative;
+                background-color: #f5f5f5;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 20px 80px;
+                margin-top: 40px;
+                color: rgb(31, 25, 52);
+            }
+
+            pre {
+                margin: 0;
+                font-size: 14px;
+                white-space: pre-wrap;
+                word-wrap: break-word;
+            }
+
+            .copy-btn {
+                position: absolute;
+                top: 8px;
+                right: 8px;
+                background-color: rgb(255, 191, 74, 0.5);
+                color: rgb(31, 25, 52);
+                border: none;
+                border-radius: 4px;
+                padding: 8px 12px;
+                font-size: 12px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .copy-btn:hover {
+                background-color: rgba(255, 191, 74);
+            }
+        </style>
     </head>
     <body>
-        <pre>
-        <h1>Crystallize CLI</h1>
-        <p>Crystallize CLI is a command line tool that helps you to manage your Crystallize projects.</p>
-        <h2>Installation</h2>
-        <p>curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash</p>
-    </pre>
+        <main>
+            <img src="https://crystallize.com/static/logo/crystallize-logo-api-cyan.svg" alt="Crystallize" />
+            <h1>Crystallize CLI</h1>
+            <p>Crystallize CLI is a command line tool that helps you to manage your Crystallize projects.</p>
+
+            <div class="code-block">
+                <button class="copy-btn">Copy</button>
+                <pre id="code-snippet">curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash</pre>
+            </div>
+        </main>
+        <script type="text/javascript">
+            document.querySelector('.copy-btn').addEventListener('click', () => {
+                const copyButton = document.querySelector('.copy-btn');
+                const code = document.getElementById('code-snippet').textContent;
+                navigator.clipboard
+                    .writeText(code)
+                    .then(() => {
+                        const originalText = copyButton.textContent;
+                        copyButton.textContent = 'Copied!';
+                        copyButton.disabled = true;
+                        setTimeout(() => {
+                            copyButton.textContent = originalText;
+                            copyButton.disabled = false;
+                        }, 10000);
+                    })
+                    .catch((err) => {
+                        copyButton.textContent = 'Error!';
+                    });
+            });
+        </script>
     </body>
 </html>

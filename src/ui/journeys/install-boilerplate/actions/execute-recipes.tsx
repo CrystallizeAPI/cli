@@ -14,7 +14,10 @@ const feedbacks = [
     'Preparing files for install...',
     'Installing...',
     'Still installing...',
+    'Setting up tenant...',
+    'Discovering the meaning of life...',
     'Daydreaming...',
+    'Indexing...',
     'Growing that node_modules...',
     'Looking for car keys...',
     'Looking for the car...',
@@ -87,7 +90,7 @@ export const ExecuteRecipes = ({ store, commandBus, logger }: ExecuteRecipesProp
                 <>
                     <Text>
                         <Spinner />
-                        Importing tenant data
+                        Importing tenant data, it can take several minutes...
                     </Text>
                 </>
             )}

@@ -6,6 +6,7 @@ import type { Logger } from '../contracts/logger';
 import type { Runner } from '../../core/create-runner';
 import type { InstallBoilerplateStore } from '../../ui/journeys/install-boilerplate/create-store';
 import type { CredentialRetriever } from '../contracts/credential-retriever';
+import type { createClient } from '@crystallize/js-api-client';
 
 type Deps = {
     flySystem: FlySystem;
@@ -13,6 +14,7 @@ type Deps = {
     runner: Runner;
     installBoilerplateCommandStore: InstallBoilerplateStore;
     credentialsRetriever: CredentialRetriever;
+    createCrystallizeClient: typeof createClient;
 };
 
 type Command = {
@@ -28,7 +30,7 @@ export type SetupBoilerplateProjectHandlerDefinition = CommandHandlerDefinition<
 >;
 
 const handler = async (envelope: Envelope<Command>, deps: Deps) => {
-    const { flySystem, logger, runner, installBoilerplateCommandStore } = deps;
+    const { flySystem, logger, runner, installBoilerplateCommandStore, createCrystallizeClient } = deps;
     const { folder, tenant, credentials } = envelope.message;
     const { storage, atoms } = installBoilerplateCommandStore;
 
@@ -40,6 +42,17 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
     const finalCredentials = credentials || (await deps.credentialsRetriever.getCredentials());
 
     logger.log(`Setting up boilerplate project in ${folder} for tenant ${tenant.identifier}`);
+    const apiClient = createCrystallizeClient({
+        tenantIdentifier: tenant.identifier,
+        accessTokenId: finalCredentials?.ACCESS_TOKEN_ID,
+        accessTokenSecret: finalCredentials?.ACCESS_TOKEN_SECRET,
+    });
+
+    // let's get the Tenant Id
+    const tenantInfo = await apiClient.nextPimApi(
+        `query { tenant(identifier:"${tenant.identifier}") { ... on Tenant { id } } }`,
+    );
+    const tenantId = tenantInfo.tenant.id;
 
     if (await flySystem.isFileExists(`${crytallizeHiddenFolder}/env`)) {
         try {
@@ -50,7 +63,7 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
                 },
                 {
                     search: '##CRYSTALLIZE_TENANT_ID##',
-                    replace: '',
+                    replace: tenantId,
                 },
                 {
                     search: '##CRYSTALLIZE_TENANT_IDENTIFIER##',

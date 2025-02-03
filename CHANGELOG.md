@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.3.0]
+
+- fix tenantId that was not setup on the .env file after installation
+- add discovery api tenant ignition
+
 ## [5.2.2]
 
 - fix bug introduced in the 5.2.1 for tenant create command

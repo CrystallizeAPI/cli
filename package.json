@@ -1,6 +1,6 @@
 {
     "name": "@crystallize/cli",
-    "version": "5.2.2",
+    "version": "5.3.0",
     "description": "Crystallize CLI",
     "module": "src/index.ts",
     "repository": "https://github.com/CrystallizeAPI/crystallize-cli",

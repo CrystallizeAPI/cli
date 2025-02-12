@@ -264,7 +264,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     const operations: Operation[] = [];
 
     const placeholders = cycles.flatMap((cycle) =>
-        cycle.map((node) => {
+        [...new Set(cycle)].map((node) => {
             const [type, identifier] = node.split('/');
             if (type === 'shape') {
                 const shape = shapeSet.get(identifier);

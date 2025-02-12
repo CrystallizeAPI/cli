@@ -1,10 +1,10 @@
-import type { createClient } from '@crystallize/js-api-client';
 import type { PimCredentials } from '../contracts/models/credentials';
 import type { CommandHandlerDefinition, Envelope } from 'missive.js';
 import { VariableType, jsonToGraphQLQuery } from 'json-to-graphql-query';
+import type { AsyncCreateClient } from '../contracts/credential-retriever';
 
 type Deps = {
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
 };
 
 type Command = {
@@ -29,7 +29,7 @@ const handler = async (
 }> => {
     const { expiresAt, tenantIdentifier, credentials, number, role } = envelope.message;
 
-    const client = createCrystallizeClient({
+    const client = await createCrystallizeClient({
         tenantIdentifier: tenantIdentifier,
         accessTokenId: credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,

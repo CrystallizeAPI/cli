@@ -1,5 +1,6 @@
 export type FlySystem = {
     isDirectoryEmpty: (path: string) => Promise<boolean>;
+    loopInDirectory: (path: string) => AsyncGenerator<string>;
     makeDirectory: (path: string) => Promise<boolean>;
     createDirectoryOrFail: (path: string, message: string) => Promise<true>;
     isFileExists: (path: string) => Promise<boolean>;
@@ -9,4 +10,8 @@ export type FlySystem = {
     saveFile: (path: string, content: string) => Promise<void>;
     saveResponse: (path: string, response: Response) => Promise<void>;
     replaceInFile: (path: string, keyValues: { search: string; replace: string }[]) => Promise<void>;
+    loadBinaryFile: (path: string) => Promise<{
+        type: string;
+        content: ArrayBuffer;
+    }>;
 };

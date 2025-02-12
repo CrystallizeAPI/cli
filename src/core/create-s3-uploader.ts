@@ -6,7 +6,7 @@ export const createS3Uploader = (): S3Uploader => {
         payload.fields.forEach((field: { name: string; value: string }) => {
             formData.append(field.name, field.value);
         });
-        const arrayBuffer = Buffer.from(fileContent).buffer;
+        const arrayBuffer = fileContent instanceof ArrayBuffer ? fileContent : Buffer.from(fileContent).buffer;
         const buffer = Buffer.from(arrayBuffer);
         formData.append('file', new Blob([buffer]));
         await fetch(payload.url, {

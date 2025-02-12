@@ -15,6 +15,19 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
         }
     };
 
+    const loopInDirectory = async function* (path: string): AsyncGenerator<string> {
+        try {
+            const files = await readdir(path);
+            if (files.length > 0) {
+                for (const file of files) {
+                    yield `${path.replace(/\/$/, '')}/${file}`;
+                }
+            }
+        } catch {
+            // nothing to do
+        }
+    };
+
     const makeDirectory = async (path: string): Promise<boolean> => {
         logger.debug(`Creating directory: ${path}`);
         mkdir(path, { recursive: true });
@@ -47,6 +60,19 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
         return await file.json();
     };
 
+    const loadBinaryFile = async (
+        path: string,
+    ): Promise<{
+        type: string;
+        content: ArrayBuffer;
+    }> => {
+        const file = Bun.file(path);
+        return {
+            type: file.type,
+            content: await file.arrayBuffer(),
+        };
+    };
+
     const removeFile = async (path: string): Promise<void> => {
         logger.debug(`Removing file: ${path}`);
         return await unlink(path);
@@ -74,6 +100,8 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
     return {
         isDirectoryEmpty,
         makeDirectory,
+        loopInDirectory,
+        loadBinaryFile,
         createDirectoryOrFail,
         isFileExists,
         loadFile,

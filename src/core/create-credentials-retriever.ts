@@ -1,5 +1,8 @@
-import { createClient } from '@crystallize/js-api-client';
-import type { CredentialRetriever, CredentialRetrieverOptions } from '../domain/contracts/credential-retriever';
+import type {
+    AsyncCreateClient,
+    CredentialRetriever,
+    CredentialRetrieverOptions,
+} from '../domain/contracts/credential-retriever';
 import type { PimCredentials } from '../domain/contracts/models/credentials';
 import type { FlySystem } from '../domain/contracts/fly-system';
 import os from 'os';
@@ -8,7 +11,7 @@ type Deps = {
     options?: CredentialRetrieverOptions;
     fallbackFile: string;
     flySystem: FlySystem;
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
 };
 export const createCredentialsRetriever = ({
     options,
@@ -58,7 +61,7 @@ export const createCredentialsRetriever = ({
     };
 
     const checkCredentials = async (credentials: PimCredentials) => {
-        const apiClient = createCrystallizeClient({
+        const apiClient = await createCrystallizeClient({
             tenantIdentifier: '',
             accessTokenId: credentials.ACCESS_TOKEN_ID,
             accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,

@@ -5,8 +5,7 @@ import type { PimCredentials } from '../contracts/models/credentials';
 import type { Logger } from '../contracts/logger';
 import type { Runner } from '../../core/create-runner';
 import type { InstallBoilerplateStore } from '../../ui/journeys/install-boilerplate/create-store';
-import type { CredentialRetriever } from '../contracts/credential-retriever';
-import type { createClient } from '@crystallize/js-api-client';
+import type { AsyncCreateClient, CredentialRetriever } from '../contracts/credential-retriever';
 
 type Deps = {
     flySystem: FlySystem;
@@ -14,7 +13,7 @@ type Deps = {
     runner: Runner;
     installBoilerplateCommandStore: InstallBoilerplateStore;
     credentialsRetriever: CredentialRetriever;
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
 };
 
 type Command = {
@@ -42,17 +41,11 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
     const finalCredentials = credentials || (await deps.credentialsRetriever.getCredentials());
 
     logger.log(`Setting up boilerplate project in ${folder} for tenant ${tenant.identifier}`);
-    const apiClient = createCrystallizeClient({
+    const apiClient = await createCrystallizeClient({
         tenantIdentifier: tenant.identifier,
         accessTokenId: finalCredentials?.ACCESS_TOKEN_ID,
         accessTokenSecret: finalCredentials?.ACCESS_TOKEN_SECRET,
     });
-
-    // let's get the Tenant Id
-    const tenantInfo = await apiClient.nextPimApi(
-        `query { tenant(identifier:"${tenant.identifier}") { ... on Tenant { id } } }`,
-    );
-    const tenantId = tenantInfo.tenant.id;
 
     if (await flySystem.isFileExists(`${crytallizeHiddenFolder}/env`)) {
         try {
@@ -63,7 +56,7 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
                 },
                 {
                     search: '##CRYSTALLIZE_TENANT_ID##',
-                    replace: tenantId,
+                    replace: apiClient.config.tenantId!,
                 },
                 {
                     search: '##CRYSTALLIZE_TENANT_IDENTIFIER##',

@@ -38,7 +38,7 @@ _crystallize_completions() {
       ;;
     mass-operation)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="run dump-content-model ${default_options}"
+                local options="run dump-content-model execute-mutations ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
@@ -50,6 +50,11 @@ _crystallize_completions() {
                 ;;
             dump-content-model)
                 local options="${i_login_options} --force ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            execute-mutations)
+                local options="${i_login_options} ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;
@@ -96,6 +101,20 @@ _crystallize_completions() {
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;                
+        esac
+    ;;
+    image)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+                local options="upload ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+        fi
+        case "${subcmd}" in
+            upload)
+                local options="${i_login_options} --force ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;         
         esac
     ;;
   esac

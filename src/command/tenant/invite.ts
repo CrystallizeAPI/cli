@@ -3,13 +3,11 @@ import { addInteractiveAndTokenOption } from '../../core/helpers/add-iteractive-
 import type { Logger } from '../../domain/contracts/logger';
 import type { CommandBus } from '../../domain/contracts/bus';
 import type { GetAuthenticatedUser } from '../../domain/contracts/get-authenticated-user';
-import type { createClient } from '@crystallize/js-api-client';
 
 type Deps = {
     logger: Logger;
     commandBus: CommandBus;
     getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
-    createCrystallizeClient: typeof createClient;
 };
 export const createCreateInviteTokenCommand = ({
     getAuthenticatedUserWithInteractivityIfPossible,

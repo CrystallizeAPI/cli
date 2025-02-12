@@ -2,10 +2,9 @@ import { Argument, Command, Option } from 'commander';
 import type { Logger } from '../../domain/contracts/logger';
 import type { CommandBus } from '../../domain/contracts/bus';
 import type { Operation, Operations } from '@crystallize/schema/mass-operation';
-import type { CredentialRetriever } from '../../domain/contracts/credential-retriever';
+import type { AsyncCreateClient, CredentialRetriever } from '../../domain/contracts/credential-retriever';
 import pc from 'picocolors';
 import { ZodError } from 'zod';
-import type { createClient } from '@crystallize/js-api-client';
 import type { GetAuthenticatedUser } from '../../domain/contracts/get-authenticated-user';
 import { addInteractiveAndTokenOption } from '../../core/helpers/add-iteractive-and-token-option';
 
@@ -13,7 +12,7 @@ type Deps = {
     logger: Logger;
     commandBus: CommandBus;
     credentialsRetriever: CredentialRetriever;
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
     getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
 };
 
@@ -78,7 +77,7 @@ export const createRunMassOperationCommand = ({
                 throw new Error('Task not started. Please check the logs for more information.');
             }
 
-            const crystallizeClient = createCrystallizeClient({
+            const crystallizeClient = await createCrystallizeClient({
                 tenantIdentifier,
                 accessTokenId: credentials.ACCESS_TOKEN_ID,
                 accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,

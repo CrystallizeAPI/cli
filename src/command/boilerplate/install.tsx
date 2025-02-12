@@ -9,7 +9,6 @@ import { Provider } from 'jotai';
 import type { CredentialRetriever } from '../../domain/contracts/credential-retriever';
 import type { Logger } from '../../domain/contracts/logger';
 import type { QueryBus, CommandBus } from '../../domain/contracts/bus';
-import type { createClient } from '@crystallize/js-api-client';
 import type { FetchAvailableTenantIdentifier } from '../../domain/contracts/fetch-available-tenant-identifier';
 import { logo } from '../..';
 
@@ -18,7 +17,6 @@ type Deps = {
     flySystem: FlySystem;
     installBoilerplateCommandStore: InstallBoilerplateStore;
     credentialsRetriever: CredentialRetriever;
-    createCrystallizeClient: typeof createClient;
     logger: Logger;
     queryBus: QueryBus;
     fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
@@ -32,7 +30,6 @@ export const createInstallBoilerplateCommand = ({
     credentialsRetriever,
     queryBus,
     commandBus,
-    createCrystallizeClient,
     fetchAvailableTenantIdentifier,
     logLevels,
 }: Deps): Command => {
@@ -78,7 +75,6 @@ export const createInstallBoilerplateCommand = ({
                             queryBus={queryBus}
                             commandBus={commandBus}
                             fetchAvailableTenantIdentifier={fetchAvailableTenantIdentifier}
-                            createCrystallizeClient={createCrystallizeClient}
                             logger={logger}
                             store={atoms}
                             credentialsRetriever={credentialsRetriever}

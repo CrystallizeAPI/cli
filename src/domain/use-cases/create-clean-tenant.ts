@@ -1,24 +1,27 @@
-import type { createClient } from '@crystallize/js-api-client';
-import { jsonToGraphQLQuery, VariableType } from 'json-to-graphql-query';
+import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import type { Tenant } from '../contracts/models/tenant';
 import type { CommandHandlerDefinition, Envelope } from 'missive.js';
 import type { PimCredentials } from '../contracts/models/credentials';
-import type { CredentialRetriever } from '../contracts/credential-retriever';
+import type { AsyncCreateClient, CredentialRetriever } from '../contracts/credential-retriever';
 import type { createRunMassOperationHandler, RunMassOperationCommand } from './run-mass-operation';
 import type { FlySystem } from '../contracts/fly-system';
 import type { Operations } from '@crystallize/schema/mass-operation';
 import type { Logger } from '../contracts/logger';
 import { getMassOperationBulkTask } from '../../command/mass-operation/run';
 import type { InstallBoilerplateStore } from '../../ui/journeys/install-boilerplate/create-store';
+import type { createExecuteMutationsHandler, ExecuteMutationsCommand } from './execute-extra-mutations';
+import type { createUploadImagesHandler, UploadImagesCommand } from './upload-images';
 
 type Deps = {
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
     runMassOperation: ReturnType<typeof createRunMassOperationHandler>;
     credentialsRetriever: CredentialRetriever;
     crystallizeEnvironment: 'staging' | 'production';
     installBoilerplateCommandStore: InstallBoilerplateStore;
     flySystem: FlySystem;
     logger: Logger;
+    executeExtraMutations: ReturnType<typeof createExecuteMutationsHandler>;
+    uploadImages: ReturnType<typeof createUploadImagesHandler>;
 };
 type Command = {
     tenant: Tenant;
@@ -44,6 +47,8 @@ const handler = async (
         logger,
         crystallizeEnvironment,
         installBoilerplateCommandStore,
+        executeExtraMutations,
+        uploadImages,
     }: Deps,
 ): Promise<{
     id: string;
@@ -55,7 +60,7 @@ const handler = async (
 
     const { tenant, credentials } = envelope.message;
     const finalCredentials = credentials || (await credentialsRetriever.getCredentials());
-    const client = createCrystallizeClient({
+    const client = await createCrystallizeClient({
         tenantIdentifier: '',
         accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
         accessTokenSecret: finalCredentials.ACCESS_TOKEN_SECRET,
@@ -114,7 +119,7 @@ const handler = async (
         };
     }
 
-    const cClient = createCrystallizeClient({
+    const cClient = await createCrystallizeClient({
         tenantIdentifier: tenant.identifier,
         tenantId: id,
         accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
@@ -150,46 +155,46 @@ const handler = async (
     }
     addTraceLog(`Mass operation completed.`);
 
+    // now we upload the images
+    const images: string[] = [];
+    for await (const image of flySystem.loopInDirectory(`${crytallizeHiddenFolder}/images`)) {
+        images.push(image);
+    }
+    const { keys: imageMapping } = await uploadImages({
+        message: {
+            paths: images,
+            tenant: {
+                identifier,
+                id,
+            },
+            credentials: finalCredentials,
+        },
+    } as Envelope<UploadImagesCommand>);
+
+    addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`);
+
     // now the extra mutations
     try {
-        const results = await cClient.pimApi(`#graphql
-            query { 
-                tenant {
-                    get(id:"${id}") {
-                        rootItemId
-                        vatTypes {
-                            id
-                        }
-                    }
-                }
-            }`);
-
-        const { rootItemId, vatTypes } = results.tenant.get;
-        const defaultVat = vatTypes[0].id;
-
-        const extraMutationsFile = `${crytallizeHiddenFolder}/extra-mutations.json`;
-        const extraMutationsContent = await flySystem.loadFile(extraMutationsFile);
-        const extraMutations = JSON.parse(
-            extraMutationsContent
-                .replaceAll('##TENANT_ID##', id)
-                .replaceAll('##TENANT_DEFAULT_VATTYPE_ID##', defaultVat)
-                .replaceAll('##TENANT_ROOT_ID##', rootItemId),
-        ) as {
-            mutation: string;
-            sets: Record<string, VariableType>[];
-        }[];
-
-        for (const { mutation, sets } of Object.values(extraMutations)) {
-            await Promise.all(
-                sets.map(async (set) => {
-                    await cClient.pimApi(mutation, set);
-                }),
-            );
-        }
+        await executeExtraMutations({
+            message: {
+                filePath: `${crytallizeHiddenFolder}/extra-mutations.json`,
+                tenant: {
+                    identifier,
+                    id,
+                },
+                credentials: finalCredentials,
+                placeholderMap: {
+                    images: imageMapping,
+                },
+            },
+        } as unknown as Envelope<ExecuteMutationsCommand>);
     } catch (e) {
         addTraceError(`Failed to run extra mutations.`);
         logger.error('Failed to run extra mutations', e);
     }
+
+    addTraceLog(`Extra Mutations executed.`);
+    addTraceLog(`Starting the index for Discovery API.`);
 
     // now the index
     await cClient.nextPimApi(`mutation { igniteTenant }`);

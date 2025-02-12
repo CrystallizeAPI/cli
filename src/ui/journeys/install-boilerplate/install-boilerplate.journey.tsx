@@ -15,7 +15,6 @@ import { useAtom } from 'jotai';
 import type { CredentialRetriever } from '../../../domain/contracts/credential-retriever';
 import type { CommandBus, QueryBus } from '../../../domain/contracts/bus';
 import type { Logger } from '../../../domain/contracts/logger';
-import type { createClient } from '@crystallize/js-api-client';
 import type { FetchAvailableTenantIdentifier } from '../../../domain/contracts/fetch-available-tenant-identifier';
 
 type InstallBoilerplateJourneyProps = {
@@ -23,7 +22,6 @@ type InstallBoilerplateJourneyProps = {
     credentialsRetriever: CredentialRetriever;
     queryBus: QueryBus;
     logger: Logger;
-    createCrystallizeClient: typeof createClient;
     commandBus: CommandBus;
     fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
 };

@@ -24,7 +24,7 @@ export const createDumpContentModelMassOperationCommand = ({
     command.description('Create a valid Mass Operation file on your machine.');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier to use.'));
     command.addArgument(new Argument('<file>', 'The file that will contains the Operations.'));
-    command.addOption(new Option('-f, --force', 'Force and override the if it exits.'));
+    command.addOption(new Option('-f, --force', 'Force and override the file it it exits.'));
     addInteractiveAndTokenOption(command);
 
     command.action(async (tenantIdentifier: string, inputFile: string, flags) => {

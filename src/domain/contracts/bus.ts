@@ -8,6 +8,8 @@ import type { CreateTenantInviteTokenHandlerDefinition } from '../use-cases/crea
 import type { GetStaticAuthTokenHandlerDefinition } from '../use-cases/get-static-token';
 import type { GetShopAuthTokenHandlerDefinition } from '../use-cases/get-shop-token';
 import type { CreateContentModelMassOperationFileHandlerDefinition } from '../use-cases/create-content-model-mass-operation';
+import type { ExecuteMutationsHandlerDefinition } from '../use-cases/execute-extra-mutations';
+import type { UploadImagesHandlerDefinition } from '../use-cases/upload-images';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
     FetchTipsHandlerDefinition &
@@ -20,5 +22,7 @@ export type QueryBus = MissiveQueryBus<QueryDefinitions>;
 export type CommandDefinitions = CreateCleanTenantHandlerDefinition &
     SetupBoilerplateProjectHandlerDefinition &
     RunMassOperationHandlerDefinition &
-    CreateTenantInviteTokenHandlerDefinition;
+    CreateTenantInviteTokenHandlerDefinition &
+    ExecuteMutationsHandlerDefinition &
+    UploadImagesHandlerDefinition;
 export type CommandBus = MissiveCommandBus<CommandDefinitions>;

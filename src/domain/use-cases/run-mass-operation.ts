@@ -3,13 +3,13 @@ import { OperationsSchema, type Operations } from '@crystallize/schema/mass-oper
 import type { Logger } from '../contracts/logger';
 import pc from 'picocolors';
 import type { PimCredentials } from '../contracts/models/credentials';
-import { createClient } from '@crystallize/js-api-client';
 import type { S3Uploader } from '../contracts/s3-uploader';
+import type { AsyncCreateClient } from '../contracts/credential-retriever';
 
 type Deps = {
     logger: Logger;
     s3Uploader: S3Uploader;
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
 };
 
 export type RunMassOperationCommand = {
@@ -36,7 +36,7 @@ const handler = async (
 }> => {
     const { tenantIdentifier, operations: operationsContent } = envelope.message;
 
-    const crystallizeClient = createCrystallizeClient({
+    const crystallizeClient = await createCrystallizeClient({
         tenantIdentifier,
         accessTokenId: envelope.message.credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: envelope.message.credentials.ACCESS_TOKEN_SECRET,

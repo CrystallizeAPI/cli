@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.0]
+
+- add a command to upload assets
+- add a command to execute mutations with dependencies
+
 ## [5.3.0]
 
 - fix tenantId that was not setup on the .env file after installation

@@ -1,6 +1,5 @@
 import type { Envelope, QueryHandlerDefinition } from 'missive.js';
 import type { PimCredentials } from '../contracts/models/credentials';
-import type { createClient } from '@crystallize/js-api-client';
 import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import {
     type ChoiceConfig,
@@ -15,9 +14,10 @@ import {
     type Shape,
 } from '@crystallize/schema/pim';
 import type { Operation } from '@crystallize/schema/mass-operation';
+import type { AsyncCreateClient } from '../contracts/credential-retriever';
 
 type Deps = {
-    createCrystallizeClient: typeof createClient;
+    createCrystallizeClient: AsyncCreateClient;
 };
 
 type Query = {
@@ -35,7 +35,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     const { createCrystallizeClient } = deps;
     const { tenantIdentifier, credentials } = envelope.message;
 
-    const client = createCrystallizeClient({
+    const client = await createCrystallizeClient({
         tenantIdentifier: tenantIdentifier,
         accessTokenId: credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,

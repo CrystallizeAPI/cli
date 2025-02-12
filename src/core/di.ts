@@ -11,7 +11,7 @@ import { createCreateCleanTenantHandler } from '../domain/use-cases/create-clean
 import { createDownloadBoilerplateArchiveHandler } from '../domain/use-cases/download-boilerplate-archive';
 import { createFetchTipsHandler } from '../domain/use-cases/fetch-tips';
 import { createCredentialsRetriever } from './create-credentials-retriever';
-import type { CredentialRetriever } from '../domain/contracts/credential-retriever';
+import type { AsyncCreateClient, CredentialRetriever } from '../domain/contracts/credential-retriever';
 import { createSetupBoilerplateProjectHandler } from '../domain/use-cases/setup-boilerplate-project';
 import { createInstallBoilerplateCommandStore } from '../ui/journeys/install-boilerplate/create-store';
 import { createRunner } from './create-runner';
@@ -21,7 +21,6 @@ import { createS3Uploader } from './create-s3-uploader';
 import os from 'os';
 import { createRunMassOperationHandler } from '../domain/use-cases/run-mass-operation';
 import { createRunMassOperationCommand } from '../command/mass-operation/run';
-import type { createClient } from '@crystallize/js-api-client';
 import { createCrystallizeClientBuilder } from './create-crystallize-client-builder';
 import { createChangelogCommand } from '../command/changelog';
 import { createCreateTenantCommand } from '../command/tenant/create';
@@ -40,6 +39,10 @@ import type { FetchShopAuthToken } from '../domain/contracts/fetch-shop-auth-tok
 import { createGetShopAuthTokenHandler } from '../domain/use-cases/get-shop-token';
 import { createDumpContentModelMassOperationCommand } from '../command/mass-operation/dump-content-model';
 import { createCreateContentModelMassOperationFileHandler } from '../domain/use-cases/create-content-model-mass-operation';
+import { createExecuteMutationsCommand } from '../command/mass-operation/execute-mutations';
+import { createImageUploadCommand } from '../command/images/upload';
+import { createUploadImagesHandler } from '../domain/use-cases/upload-images';
+import { createExecuteMutationsHandler } from '../domain/use-cases/execute-extra-mutations';
 
 export const buildServices = () => {
     const logLevels = (
@@ -55,7 +58,7 @@ export const buildServices = () => {
         commandBus: CommandBus;
         flySystem: FlySystem;
         credentialsRetriever: CredentialRetriever;
-        createCrystallizeClient: typeof createClient;
+        createCrystallizeClient: AsyncCreateClient;
         runner: ReturnType<typeof createRunner>;
         s3Uploader: ReturnType<typeof createS3Uploader>;
         fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
@@ -72,6 +75,8 @@ export const buildServices = () => {
         getStaticAuthToken: ReturnType<typeof createGetStaticAuthTokenHandler>;
         getShopAuthToken: ReturnType<typeof createGetShopAuthTokenHandler>;
         createContentModelMassOperationFile: ReturnType<typeof createCreateContentModelMassOperationFileHandler>;
+        executeExtraMutations: ReturnType<typeof createExecuteMutationsHandler>;
+        uploadImages: ReturnType<typeof createUploadImagesHandler>;
 
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
@@ -87,6 +92,8 @@ export const buildServices = () => {
         getShopAuthTokenCommand: Command;
         getPimAuthTokenCommand: Command;
         dumpContentModelMassOperationCommand: Command;
+        executeMutationsCommand: Command;
+        imageUpload: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -123,7 +130,8 @@ export const buildServices = () => {
         getStaticAuthToken: asFunction(createGetStaticAuthTokenHandler).singleton(),
         getShopAuthToken: asFunction(createGetShopAuthTokenHandler).singleton(),
         createContentModelMassOperationFile: asFunction(createCreateContentModelMassOperationFileHandler).singleton(),
-
+        executeExtraMutations: asFunction(createExecuteMutationsHandler).singleton(),
+        uploadImages: asFunction(createUploadImagesHandler).singleton(),
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
 
@@ -139,6 +147,8 @@ export const buildServices = () => {
         getShopAuthTokenCommand: asFunction(createGetShopAuthTokenCommand).singleton(),
         getPimAuthTokenCommand: asFunction(createGetPimAuthTokenCommand).singleton(),
         dumpContentModelMassOperationCommand: asFunction(createDumpContentModelMassOperationCommand).singleton(),
+        executeMutationsCommand: asFunction(createExecuteMutationsCommand).singleton(),
+        imageUpload: asFunction(createImageUploadCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -152,6 +162,8 @@ export const buildServices = () => {
         'CreateContentModelMassOperationFile',
         container.cradle.createContentModelMassOperationFile,
     );
+    container.cradle.commandBus.register('ExecuteMutations', container.cradle.executeExtraMutations);
+    container.cradle.commandBus.register('UploadImages', container.cradle.uploadImages);
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -184,6 +196,7 @@ export const buildServices = () => {
                 commands: [
                     container.cradle.runMassOperationCommand,
                     container.cradle.dumpContentModelMassOperationCommand,
+                    container.cradle.executeMutationsCommand,
                 ],
             },
             tenant: {
@@ -197,6 +210,10 @@ export const buildServices = () => {
                     container.cradle.getStaticAuthTokenCommand,
                     container.cradle.getShopAuthTokenCommand,
                 ],
+            },
+            image: {
+                description: 'All the commands related to Images.',
+                commands: [container.cradle.imageUpload],
             },
         },
     };

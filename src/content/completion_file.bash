@@ -4,7 +4,7 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help changelog boilerplate tenant login whoami mass-operation"
+  local commands="help changelog doc boilerplate tenant login whoami mass-operation image"
   local program_options="--version"
   local default_options="--help"
   local i_login_options="--no-interactive --token_id= --token_secret="

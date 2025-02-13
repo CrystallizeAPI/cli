@@ -43,6 +43,7 @@ import { createExecuteMutationsCommand } from '../command/mass-operation/execute
 import { createImageUploadCommand } from '../command/images/upload';
 import { createUploadImagesHandler } from '../domain/use-cases/upload-images';
 import { createExecuteMutationsHandler } from '../domain/use-cases/execute-extra-mutations';
+import { createDocCommand } from '../command/doc';
 
 export const buildServices = () => {
     const logLevels = (
@@ -86,6 +87,7 @@ export const buildServices = () => {
         whoAmICommand: Command;
         runMassOperationCommand: Command;
         changeLogCommand: Command;
+        docCommand: Command;
         createTenantCommand: Command;
         createInviteTokenCommand: Command;
         getStaticAuthTokenCommand: Command;
@@ -141,6 +143,7 @@ export const buildServices = () => {
         whoAmICommand: asFunction(createWhoAmICommand).singleton(),
         runMassOperationCommand: asFunction(createRunMassOperationCommand).singleton(),
         changeLogCommand: asFunction(createChangelogCommand).singleton(),
+        docCommand: asFunction(createDocCommand).singleton(),
         createTenantCommand: asFunction(createCreateTenantCommand).singleton(),
         createInviteTokenCommand: asFunction(createCreateInviteTokenCommand).singleton(),
         getStaticAuthTokenCommand: asFunction(createGetStaticAuthTokenCommand).singleton(),
@@ -185,6 +188,7 @@ export const buildServices = () => {
                     container.cradle.loginCommand,
                     container.cradle.whoAmICommand,
                     container.cradle.changeLogCommand,
+                    container.cradle.docCommand,
                 ],
             },
             boilerplate: {

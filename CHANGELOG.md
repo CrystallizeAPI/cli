@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.3]
+
+- fix the completion file
+- add documentation
+- add doc command
+
 ## [5.4.2]
 
 - add the Furnitut boilerplate

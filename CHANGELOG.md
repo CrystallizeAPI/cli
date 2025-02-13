@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.2]
+
+- add the Furnitut boilerplate
+
+## [5.4.1]
+
+- Fix duplicates in the content model dump
+
 ## [5.4.0]
 
 - add a command to upload assets

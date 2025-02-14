@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.4]
+
+- adding the product configurator boilerplate
+- a bit more messages on the install trace
+
 ## [5.4.3]
 
 - fix the completion file

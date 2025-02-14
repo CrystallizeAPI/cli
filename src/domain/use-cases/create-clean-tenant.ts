@@ -156,22 +156,29 @@ const handler = async (
     addTraceLog(`Mass operation completed.`);
 
     // now we upload the images
+
     const images: string[] = [];
     for await (const image of flySystem.loopInDirectory(`${crytallizeHiddenFolder}/images`)) {
         images.push(image);
     }
-    const { keys: imageMapping } = await uploadImages({
-        message: {
-            paths: images,
-            tenant: {
-                identifier,
-                id,
+    try {
+        addTraceLog(`Uploading ${images.length} images.`);
+        const { keys: imageMapping } = await uploadImages({
+            message: {
+                paths: images,
+                tenant: {
+                    identifier,
+                    id,
+                },
+                credentials: finalCredentials,
             },
-            credentials: finalCredentials,
-        },
-    } as Envelope<UploadImagesCommand>);
+        } as Envelope<UploadImagesCommand>);
 
-    addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`);
+        addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`);
+    } catch (e) {
+        addTraceError(`Failed to upload images..`);
+        logger.error('Failed to upload images');
+    }
 
     // now the extra mutations
     try {

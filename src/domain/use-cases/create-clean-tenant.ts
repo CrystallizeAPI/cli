@@ -165,7 +165,7 @@ const handler = async (
     let imageMapping: Record<string, string> = {};
     try {
         addTraceLog(`Uploading ${images.length} images.`);
-        const { keys: imageMapping } = await uploadImages({
+        const imagResults = await uploadImages({
             message: {
                 paths: images,
                 tenant: {
@@ -176,6 +176,7 @@ const handler = async (
             },
         } as Envelope<UploadImagesCommand>);
 
+        imageMapping = imagResults.keys;
         addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`);
     } catch (e) {
         addTraceError(`Failed to upload images..`);

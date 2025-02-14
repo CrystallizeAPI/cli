@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.4.6]
+
+- really fixing typo introduced in 5.4.4
+
 ## [5.4.5]
 
 - fix typo introduced in 5.4.4

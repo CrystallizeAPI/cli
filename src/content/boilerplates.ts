@@ -19,4 +19,13 @@ export const boilerplates: Boilerplate[] = [
         blueprint: 'subscription-masterclass',
         git: 'https://github.com/CrystallizeAPI/nerd-factory-boilerplate',
     },
+    {
+        identifier: 'product-configurator-boilerplate',
+        name: 'Next.js Product Configurator',
+        baseline: 'Product Configurator boilerplate using Next.js',
+        description: 'Ecommerce product configurator with basket & checkout.',
+        demo: 'https://product-configurator.superfast.shop/',
+        blueprint: 'product-configurator',
+        git: 'https://github.com/CrystallizeAPI/product-configurator',
+    },
 ];

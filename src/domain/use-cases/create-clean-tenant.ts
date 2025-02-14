@@ -161,6 +161,8 @@ const handler = async (
     for await (const image of flySystem.loopInDirectory(`${crytallizeHiddenFolder}/images`)) {
         images.push(image);
     }
+
+    let imageMapping: Record<string, string> = {};
     try {
         addTraceLog(`Uploading ${images.length} images.`);
         const { keys: imageMapping } = await uploadImages({

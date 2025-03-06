@@ -5,7 +5,6 @@ YELLOW=$(shell echo "\033[00;33m")
 RED=$(shell echo "\033[00;31m")
 RESTORE=$(shell echo "\033[0m")
 BUN=bun
-# BUN=/opt/homebrew/Cellar/bun@1.1.45/1.1.45/bin/bun
 
 .DEFAULT_GOAL := list
 

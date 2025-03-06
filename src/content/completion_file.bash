@@ -120,4 +120,9 @@ _crystallize_completions() {
   esac
 }
 
+if [ "$SHELL" = "/bin/zsh" ]; then
+    if ! type complete &>/dev/null; then
+        autoload -U bashcompinit && bashcompinit
+    fi
+fi
 complete -F _crystallize_completions crystallize

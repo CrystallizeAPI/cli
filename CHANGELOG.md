@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.5.0]
+
+- bump Bun version to 1.2.4
+- call the bashcompinit if complete does not exist in the shell for autocompletion
+
 ## [5.4.6]
 
 - really fixing typo introduced in 5.4.4

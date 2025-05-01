@@ -16,7 +16,10 @@ else
   exit 1
 fi
 
-FILE="bun-${OS}-${ARCH}"
+case "$OS" in
+  windows|mingw*|msys*|cygwin*) FILE="bun-windows-${ARCH}.exe" ;;
+  *) FILE="bun-${OS}-${ARCH}" ;;
+esac
 
 LATEST_RELEASE=$(curl -s "https://api.github.com/repos/crystallizeapi/cli/releases/latest" | grep tag_name | cut -d'"' -f 4)
 URL="https://github.com/CrystallizeAPI/cli/releases/download/${LATEST_RELEASE}/crystallize-${FILE}"

@@ -5,6 +5,7 @@ import pc from 'picocolors';
 import type { PimCredentials } from '../contracts/models/credentials';
 import type { S3Uploader } from '../contracts/s3-uploader';
 import type { AsyncCreateClient } from '../contracts/credential-retriever';
+import { uploadMassOperationFileContent } from '../core/upload-mass-operation-file-content';
 
 type Deps = {
     logger: Logger;
@@ -46,18 +47,11 @@ const handler = async (
         `Operations file parsed successfully. ${pc.bold(pc.yellow(operations.operations.length))} operation(s) found.`,
     );
 
-    const uniquId = Math.random().toString(36).substring(7);
-    const file = `mass-operation-${uniquId}.json`;
-    const register = await crystallizeClient.nextPimApi(generatePresignedUploadRequest, { file });
-
-    if (register.generatePresignedUploadRequest.error) {
-        throw new Error(register.generatePresignedUploadRequest.error);
-    }
-    const uploadRequest = register.generatePresignedUploadRequest;
-    logger.debug(`Upload request generated successfully.`);
-
-    const key = await s3Uploader(uploadRequest, JSON.stringify(operationsContent));
-    logger.debug(`File uploaded successfully to ${pc.yellow(key)}`);
+    const key = await uploadMassOperationFileContent(JSON.stringify(operationsContent), {
+        crystallizeClient,
+        s3Uploader,
+        logger,
+    });
 
     const create = await crystallizeClient.nextPimApi(createMassOperationBulkTask, { key });
     if (create.createMassOperationBulkTask.error) {
@@ -71,7 +65,6 @@ const handler = async (
         throw new Error(start.startMassOperationBulkTask.error);
     }
     const startedTask = start.startMassOperationBulkTask;
-
     return {
         task: startedTask,
     };
@@ -108,24 +101,3 @@ const createMassOperationBulkTask = `#graphql
       }
     }
 `;
-const generatePresignedUploadRequest = `#graphql
-    mutation GET_URL($file: String!) {
-    generatePresignedUploadRequest(
-        filename: $file
-        contentType: "application/json"
-        type: MASS_OPERATIONS
-    ) {
-        ... on PresignedUploadRequest {
-          url
-          fields {
-            name
-            value
-          }
-          maxSize
-          lifetime
-        }
-        ... on BasicError {
-          error: message
-        }
-    }
-}`;

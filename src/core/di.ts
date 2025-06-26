@@ -44,6 +44,10 @@ import { createImageUploadCommand } from '../command/images/upload';
 import { createUploadImagesHandler } from '../domain/use-cases/upload-images';
 import { createExecuteMutationsHandler } from '../domain/use-cases/execute-extra-mutations';
 import { createDocCommand } from '../command/doc';
+import { createEnrollTenantCommand } from '../command/tenant/enroll';
+import { createEnrollTenantWithBoilerplatePackageHandler } from '../domain/use-cases/enroll-tenant-with-boilerplate-package';
+import type { TenantEnrollerBuilder } from '../domain/contracts/tenant-enroller';
+import { createTenantEnrollerBuilder } from '../domain/core/create-tenant-enroller';
 
 export const buildServices = () => {
     const logLevels = (
@@ -65,6 +69,7 @@ export const buildServices = () => {
         fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
         getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
         fetchShopApiToken: FetchShopAuthToken;
+        tenantEnrollerBuilder: TenantEnrollerBuilder;
 
         // use cases
         createCleanTenant: ReturnType<typeof createCreateCleanTenantHandler>;
@@ -78,9 +83,11 @@ export const buildServices = () => {
         createContentModelMassOperationFile: ReturnType<typeof createCreateContentModelMassOperationFileHandler>;
         executeExtraMutations: ReturnType<typeof createExecuteMutationsHandler>;
         uploadImages: ReturnType<typeof createUploadImagesHandler>;
+        enrollTenantWithBoilerplatePackage: ReturnType<typeof createEnrollTenantWithBoilerplatePackageHandler>;
 
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
+
         // commands
         installBoilerplateCommand: Command;
         loginCommand: Command;
@@ -95,7 +102,8 @@ export const buildServices = () => {
         getPimAuthTokenCommand: Command;
         dumpContentModelMassOperationCommand: Command;
         executeMutationsCommand: Command;
-        imageUpload: Command;
+        imageUploadCommand: Command;
+        enrollTenantCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -121,6 +129,7 @@ export const buildServices = () => {
             createGetAuthenticatedUserWithInteractivityIfPossible,
         ).singleton(),
         fetchShopApiToken: asFunction(createFetchShopApiToken).singleton(),
+        tenantEnrollerBuilder: asFunction(createTenantEnrollerBuilder).singleton(),
 
         // Use Cases
         createCleanTenant: asFunction(createCreateCleanTenantHandler).singleton(),
@@ -134,6 +143,8 @@ export const buildServices = () => {
         createContentModelMassOperationFile: asFunction(createCreateContentModelMassOperationFileHandler).singleton(),
         executeExtraMutations: asFunction(createExecuteMutationsHandler).singleton(),
         uploadImages: asFunction(createUploadImagesHandler).singleton(),
+        enrollTenantWithBoilerplatePackage: asFunction(createEnrollTenantWithBoilerplatePackageHandler).singleton(),
+
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
 
@@ -151,7 +162,8 @@ export const buildServices = () => {
         getPimAuthTokenCommand: asFunction(createGetPimAuthTokenCommand).singleton(),
         dumpContentModelMassOperationCommand: asFunction(createDumpContentModelMassOperationCommand).singleton(),
         executeMutationsCommand: asFunction(createExecuteMutationsCommand).singleton(),
-        imageUpload: asFunction(createImageUploadCommand).singleton(),
+        imageUploadCommand: asFunction(createImageUploadCommand).singleton(),
+        enrollTenantCommand: asFunction(createEnrollTenantCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -167,6 +179,10 @@ export const buildServices = () => {
     );
     container.cradle.commandBus.register('ExecuteMutations', container.cradle.executeExtraMutations);
     container.cradle.commandBus.register('UploadImages', container.cradle.uploadImages);
+    container.cradle.commandBus.register(
+        'EnrollTenantWithBoilerplatePackage',
+        container.cradle.enrollTenantWithBoilerplatePackage,
+    );
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -205,7 +221,11 @@ export const buildServices = () => {
             },
             tenant: {
                 description: 'All the commands related to Tenants.',
-                commands: [container.cradle.createTenantCommand, container.cradle.createInviteTokenCommand],
+                commands: [
+                    container.cradle.createTenantCommand,
+                    container.cradle.enrollTenantCommand,
+                    container.cradle.createInviteTokenCommand,
+                ],
             },
             token: {
                 description: 'All the commands related to Tokens.',
@@ -217,7 +237,7 @@ export const buildServices = () => {
             },
             image: {
                 description: 'All the commands related to Images.',
-                commands: [container.cradle.imageUpload],
+                commands: [container.cradle.imageUploadCommand],
             },
         },
     };

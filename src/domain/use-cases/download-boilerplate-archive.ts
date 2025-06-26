@@ -7,18 +7,18 @@ import os from 'os';
 type Deps = {
     flySystem: FlySystem;
 };
-type Query = {
+export type DownloadBoilerplateQuery = {
     boilerplate: Boilerplate;
     destination: string;
 };
 
 export type DownloadBoilerplateArchiveHandlerDefinition = QueryHandlerDefinition<
     'DownloadBoilerplateArchive',
-    Query,
+    DownloadBoilerplateQuery,
     Awaited<ReturnType<typeof handler>>
 >;
 
-const handler = async (envelope: Envelope<Query>, deps: Deps) => {
+const handler = async (envelope: Envelope<DownloadBoilerplateQuery>, deps: Deps) => {
     const tempDir = os.tmpdir();
     const uniqueId = Math.random().toString(36).substring(7);
 
@@ -37,4 +37,5 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     await flySystem.removeFile(tarFilePath);
 };
 
-export const createDownloadBoilerplateArchiveHandler = (deps: Deps) => (query: Envelope<Query>) => handler(query, deps);
+export const createDownloadBoilerplateArchiveHandler = (deps: Deps) => (query: Envelope<DownloadBoilerplateQuery>) =>
+    handler(query, deps);

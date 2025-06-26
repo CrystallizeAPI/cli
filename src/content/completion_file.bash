@@ -62,7 +62,7 @@ _crystallize_completions() {
       ;;
     tenant)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="create invite ${default_options}"
+                local options="create invite enroll ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
@@ -74,6 +74,11 @@ _crystallize_completions() {
                 ;;
             invite)
                 local options="${i_login_options} --number= --role= --expiry= ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+            ;;
+            enroll)
+                local options="${i_login_options} --ignite ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
             ;;

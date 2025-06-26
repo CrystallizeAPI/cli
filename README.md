@@ -25,7 +25,6 @@ curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash
 The CLI enhances Developer Experience while also being CI/CD-friendly for automation.
 
 - **Boilerplate Installation:** Automates tedious setup steps:
-
     1. Cloning the repository
     2. Creating the tenant
     3. Populating data in the tenant

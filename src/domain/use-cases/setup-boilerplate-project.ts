@@ -43,8 +43,9 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
     logger.log(`Setting up boilerplate project in ${folder} for tenant ${tenant.identifier}`);
     const apiClient = await createCrystallizeClient({
         tenantIdentifier: tenant.identifier,
-        accessTokenId: finalCredentials?.ACCESS_TOKEN_ID,
-        accessTokenSecret: finalCredentials?.ACCESS_TOKEN_SECRET,
+        sessionId: finalCredentials.sessionId,
+        accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
+        accessTokenSecret: finalCredentials.ACCESS_TOKEN_SECRET,
     });
 
     if (await flySystem.isFileExists(`${crytallizeHiddenFolder}/env`)) {

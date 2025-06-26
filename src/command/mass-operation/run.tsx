@@ -79,6 +79,7 @@ export const createRunMassOperationCommand = ({
 
             const crystallizeClient = await createCrystallizeClient({
                 tenantIdentifier,
+                sessionId: credentials.sessionId,
                 accessTokenId: credentials.ACCESS_TOKEN_ID,
                 accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
             });

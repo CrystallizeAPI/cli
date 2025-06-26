@@ -10,6 +10,7 @@ import type { GetShopAuthTokenHandlerDefinition } from '../use-cases/get-shop-to
 import type { CreateContentModelMassOperationFileHandlerDefinition } from '../use-cases/create-content-model-mass-operation';
 import type { ExecuteMutationsHandlerDefinition } from '../use-cases/execute-extra-mutations';
 import type { UploadImagesHandlerDefinition } from '../use-cases/upload-images';
+import type { EnrollTenantWithBoilerplatePackageHandlerDefinition } from '../use-cases/enroll-tenant-with-boilerplate-package';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
     FetchTipsHandlerDefinition &
@@ -24,5 +25,6 @@ export type CommandDefinitions = CreateCleanTenantHandlerDefinition &
     RunMassOperationHandlerDefinition &
     CreateTenantInviteTokenHandlerDefinition &
     ExecuteMutationsHandlerDefinition &
-    UploadImagesHandlerDefinition;
+    UploadImagesHandlerDefinition &
+    EnrollTenantWithBoilerplatePackageHandlerDefinition;
 export type CommandBus = MissiveCommandBus<CommandDefinitions>;

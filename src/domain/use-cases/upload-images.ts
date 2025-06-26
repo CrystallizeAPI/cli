@@ -5,6 +5,7 @@ import type { Logger } from '../contracts/logger';
 import type { S3Uploader } from '../contracts/s3-uploader';
 import type { FlySystem } from '../contracts/fly-system';
 import pc from 'picocolors';
+import type { Tenant } from '../contracts/models/tenant';
 
 type Deps = {
     createCrystallizeClient: AsyncCreateClient;
@@ -16,10 +17,7 @@ type Deps = {
 export type UploadImagesCommand = {
     paths: string[];
     credentials: PimCredentials;
-    tenant: {
-        id?: string;
-        identifier: string;
-    };
+    tenant: Tenant;
 };
 
 export type UploadImagesHandlerDefinition = CommandHandlerDefinition<
@@ -34,7 +32,7 @@ const handler = async (envelope: Envelope<UploadImagesCommand>, deps: Deps) => {
 
     const apiClient = await createCrystallizeClient({
         tenantIdentifier: tenant.identifier,
-        tenantId: tenant.id,
+        sessionId: credentials.sessionId,
         accessTokenId: credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });

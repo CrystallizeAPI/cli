@@ -41,22 +41,13 @@ export const createTenantEnrollerBuilder = ({
     return async ({ tenant, credentials, folder }, { addTraceError, addTraceLog }) => {
         const crytallizeHiddenFolder = `${folder}/.crystallize`;
         const finalCredentials = credentials || (await credentialsRetriever.getCredentials());
+
         const cClient = await createCrystallizeClient({
             tenantIdentifier: tenant.identifier,
+            sessionId: finalCredentials.sessionId,
             accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
             accessTokenSecret: finalCredentials.ACCESS_TOKEN_SECRET,
         });
-
-        if (!tenant.id) {
-            const results = await cClient.nextPimApi(`query { tenant { ... on Tenant { id } } }`);
-            tenant = {
-                identifier: tenant.identifier,
-                id: results.tenant.id,
-            };
-        }
-        if (!tenant.id) {
-            throw new Error('Tenant ID is required to enroll the tenant with a boilerplate package.');
-        }
 
         const downloadArchive = async (boilerplate: Boilerplate) => {
             await downloadBoilerplateArchive({
@@ -127,7 +118,7 @@ export const createTenantEnrollerBuilder = ({
                 await executeExtraMutations({
                     message: {
                         filePath: `${crytallizeHiddenFolder}/extra-mutations.json`,
-                        tenant: tenant,
+                        tenant,
                         credentials: finalCredentials,
                         placeholderMap: {
                             images: imageMapping,

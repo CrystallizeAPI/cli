@@ -22,6 +22,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     const { tenantIdentifier, credentials } = envelope.message;
     const client = await createCrystallizeClient({
         tenantIdentifier: tenantIdentifier,
+        sessionId: credentials.sessionId,
         accessTokenId: credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });

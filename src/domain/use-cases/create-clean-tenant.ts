@@ -44,6 +44,7 @@ const handler = async (
     const finalCredentials = credentials || (await credentialsRetriever.getCredentials());
     const client = await createCrystallizeClient({
         tenantIdentifier: '',
+        sessionId: finalCredentials.sessionId,
         accessTokenId: finalCredentials.ACCESS_TOKEN_ID,
         accessTokenSecret: finalCredentials.ACCESS_TOKEN_SECRET,
     });
@@ -105,7 +106,6 @@ const handler = async (
         {
             tenant: {
                 identifier,
-                id,
             },
             credentials: finalCredentials,
             folder,

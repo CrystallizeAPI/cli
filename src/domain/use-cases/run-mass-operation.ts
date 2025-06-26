@@ -39,6 +39,7 @@ const handler = async (
 
     const crystallizeClient = await createCrystallizeClient({
         tenantIdentifier,
+        sessionId: envelope.message.credentials.sessionId,
         accessTokenId: envelope.message.credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: envelope.message.credentials.ACCESS_TOKEN_SECRET,
     });

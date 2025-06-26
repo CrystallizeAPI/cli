@@ -10,6 +10,7 @@ export const createFetchAvailableTenantIdentifier =
     async (credentials: PimCredentials, identifier: string) => {
         const apiClient = await createCrystallizeClient({
             tenantIdentifier: '',
+            sessionId: credentials.sessionId,
             accessTokenId: credentials.ACCESS_TOKEN_ID,
             accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
         });

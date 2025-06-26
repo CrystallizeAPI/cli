@@ -48,6 +48,9 @@ import { createEnrollTenantCommand } from '../command/tenant/enroll';
 import { createEnrollTenantWithBoilerplatePackageHandler } from '../domain/use-cases/enroll-tenant-with-boilerplate-package';
 import type { TenantEnrollerBuilder } from '../domain/contracts/tenant-enroller';
 import { createTenantEnrollerBuilder } from '../domain/core/create-tenant-enroller';
+import { createServeCommand } from '../command/serve';
+import type { FeedbackPiper } from '../domain/contracts/feedback-piper';
+import { createFeedbackPiper } from '../domain/core/create-feedback-piper';
 
 export const buildServices = () => {
     const logLevels = (
@@ -70,6 +73,7 @@ export const buildServices = () => {
         getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
         fetchShopApiToken: FetchShopAuthToken;
         tenantEnrollerBuilder: TenantEnrollerBuilder;
+        feedbackPiper: FeedbackPiper;
 
         // use cases
         createCleanTenant: ReturnType<typeof createCreateCleanTenantHandler>;
@@ -104,6 +108,7 @@ export const buildServices = () => {
         executeMutationsCommand: Command;
         imageUploadCommand: Command;
         enrollTenantCommand: Command;
+        serveCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -130,6 +135,7 @@ export const buildServices = () => {
         ).singleton(),
         fetchShopApiToken: asFunction(createFetchShopApiToken).singleton(),
         tenantEnrollerBuilder: asFunction(createTenantEnrollerBuilder).singleton(),
+        feedbackPiper: asFunction(createFeedbackPiper).singleton(),
 
         // Use Cases
         createCleanTenant: asFunction(createCreateCleanTenantHandler).singleton(),
@@ -164,6 +170,7 @@ export const buildServices = () => {
         executeMutationsCommand: asFunction(createExecuteMutationsCommand).singleton(),
         imageUploadCommand: asFunction(createImageUploadCommand).singleton(),
         enrollTenantCommand: asFunction(createEnrollTenantCommand).singleton(),
+        serveCommand: asFunction(createServeCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -205,6 +212,7 @@ export const buildServices = () => {
                     container.cradle.whoAmICommand,
                     container.cradle.changeLogCommand,
                     container.cradle.docCommand,
+                    container.cradle.serveCommand,
                 ],
             },
             boilerplate: {

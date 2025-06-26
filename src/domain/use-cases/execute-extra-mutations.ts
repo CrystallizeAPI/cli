@@ -3,6 +3,7 @@ import type { PimCredentials } from '../contracts/models/credentials';
 import type { CommandHandlerDefinition, Envelope } from 'missive.js';
 import { MutationsInputSchema } from '../contracts/models/mutations';
 import type { AsyncCreateClient } from '../contracts/credential-retriever';
+import type { Tenant } from '../contracts/models/tenant';
 
 type Deps = {
     flySystem: FlySystem;
@@ -11,10 +12,7 @@ type Deps = {
 
 export type ExecuteMutationsCommand = {
     filePath: string;
-    tenant: {
-        id?: string;
-        identifier: string;
-    };
+    tenant: Tenant;
     credentials: PimCredentials;
     placeholderMap?: Record<string, any | any[]>;
 };
@@ -30,7 +28,7 @@ const handler = async (envelope: Envelope<ExecuteMutationsCommand>, { flySystem,
 
     const apiClient = await createCrystallizeClient({
         tenantIdentifier: tenant.identifier,
-        tenantId: tenant.id,
+        sessionId: credentials.sessionId,
         accessTokenId: credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });

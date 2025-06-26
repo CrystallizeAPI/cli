@@ -5,11 +5,13 @@ import type { Logger } from '../contracts/logger';
 import type { TenantEnrollerBuilder } from '../contracts/tenant-enroller';
 import os from 'os';
 import type { FlySystem } from '../contracts/fly-system';
+import type { FeedbackPiper } from '../contracts/feedback-piper';
 
 type Deps = {
     logger: Logger;
     tenantEnrollerBuilder: TenantEnrollerBuilder;
     flySystem: FlySystem;
+    feedbackPiper: FeedbackPiper;
 };
 type Command = {
     boilerplate: Boilerplate;
@@ -26,7 +28,7 @@ export type EnrollTenantWithBoilerplatePackageHandlerDefinition = CommandHandler
 
 const handler = async (envelope: Envelope<Command>, deps: Deps) => {
     const { boilerplate, tenantIdentifier, credentials, doIgnite } = envelope.message;
-    const { tenantEnrollerBuilder, logger, flySystem } = deps;
+    const { tenantEnrollerBuilder, logger, flySystem, feedbackPiper } = deps;
     const uniquId = Math.random().toString(36).substring(7);
     const folder = os.tmpdir() + `/crystallize-boilerplate-${uniquId}`;
     await flySystem.createDirectoryOrFail(folder, 'Failed to create temporary directory for boilerplate enrollment.');
@@ -39,8 +41,14 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
             folder,
         },
         {
-            addTraceLog: (log: string) => logger.info(log),
-            addTraceError: (log: string) => logger.error(log),
+            addTraceLog: (log: string) => {
+                logger.info(log);
+                feedbackPiper.info(log);
+            },
+            addTraceError: (log: string) => {
+                logger.error(log);
+                feedbackPiper.error(log);
+            },
         },
     );
 

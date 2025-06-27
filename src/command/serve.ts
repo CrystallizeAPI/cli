@@ -5,14 +5,16 @@ import type { Boilerplate } from '../domain/contracts/models/boilerplate';
 import { boilerplates } from '../content/boilerplates';
 import type { FeedbackMessage, FeedbackPiper } from '../domain/contracts/feedback-piper';
 import packageJson from '../../package.json';
+import pc from 'picocolors';
 
 type Deps = {
     logger: Logger;
     commandBus: CommandBus;
     feedbackPiper: FeedbackPiper;
+    crystallizeEnvironment: 'staging' | 'production';
 };
 
-export const createServeCommand = ({ logger, commandBus, feedbackPiper }: Deps): Command => {
+export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystallizeEnvironment }: Deps): Command => {
     const command = new Command('serve');
     command.description('Serve the CLI as a HTTP web server to expose a subset of the available commands.');
     command.action(async () => {
@@ -108,10 +110,14 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper }: Deps):
                         },
                     },
                     fetch: () => {
-                        return new Response('Crystallize CLI - Web Server - ' + packageJson.version);
+                        return new Response(
+                            `Crystallize CLI - Web Server ${packageJson.version} - ${crystallizeEnvironment}`,
+                        );
                     },
                 });
-                logger.info(`Server running on http://localhost:${server.port}`);
+                logger.info(
+                    `Server ${pc.yellowBright(packageJson.version)} running on ${pc.yellow(`http://localhost:${server.port}`)}, plugged to ${pc.yellowBright(crystallizeEnvironment)} environment.`,
+                );
                 process.on('SIGINT', () => {
                     logger.info('Shutting down server...');
                     server.stop();

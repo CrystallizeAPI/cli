@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import type { Boilerplate } from '../domain/contracts/models/boilerplate';
 import { boilerplates } from '../content/boilerplates';
 import type { FeedbackMessage, FeedbackPiper } from '../domain/contracts/feedback-piper';
+import packageJson from '../../package.json';
 
 type Deps = {
     logger: Logger;
@@ -107,7 +108,7 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper }: Deps):
                         },
                     },
                     fetch: () => {
-                        return new Response('Crystallize CLI - Web Server');
+                        return new Response('Crystallize CLI - Web Server - ' + packageJson.version);
                     },
                 });
                 logger.info(`Server running on http://localhost:${server.port}`);

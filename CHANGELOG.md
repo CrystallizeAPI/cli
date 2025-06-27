@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.8.0]
+
+- simplify building
+
+## [5.7.0]
+
+- expose the CLI enroll command
+- add the enroll command
+
+## [5.6.0]
+
+- bumping libs
+
 ## [5.5.0]
 
 - bump Bun version to 1.2.4

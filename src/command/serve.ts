@@ -20,11 +20,42 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
     command.action(async () => {
         return new Promise<void>((resolve, reject) => {
             try {
+                const allowedHostnames = Bun.env.ALLOWED_CORS_HOSTNAMES?.split(',').map((h) => h.trim()) || [];
+                const isOriginAllowed = (origin: string): boolean => {
+                    try {
+                        const url = new URL(origin);
+                        if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+                            return true;
+                        }
+                        return allowedHostnames.some(
+                            (hostname) => url.hostname === hostname || url.hostname.endsWith(`.${hostname}`),
+                        );
+                    } catch {
+                        return false;
+                    }
+                };
+
+                const getCorsHeaders = (origin?: string): Record<string, string> => {
+                    if (!origin) {
+                        return {};
+                    }
+                    if (!isOriginAllowed(origin)) {
+                        return {};
+                    }
+                    return {
+                        'Access-Control-Allow-Origin': origin,
+                        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                        'Access-Control-Allow-Headers':
+                            'Content-Type, X-Crystallize-Access-Token-Id, X-Crystallize-Access-Token-Secret',
+                        'Access-Control-Allow-Credentials': 'true',
+                    };
+                };
                 const server = Bun.serve({
                     idleTimeout: 255,
                     port: 3000,
                     routes: {
                         '/enroll-tenant/:tenantIdentifier/:boiler': (req) => {
+                            const origin = req.headers.get('origin');
                             const tenantIdentifier = req.params.tenantIdentifier;
                             const boiler = req.params.boiler;
                             const url = new URL(req.url);
@@ -33,7 +64,7 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
                                 (b) => b.identifier === boiler,
                             );
                             if (!boilerplate) {
-                                return new Response('Missing boilerplate', { status: 400 });
+                                return new Response('Boilerplate identifier is not valid.', { status: 400 });
                             }
                             const sessionId = req.headers.get('cookie')?.match(/connect\.sid=([^;]+)/)?.[1];
                             const tokenId = req.headers.get('X-Crystallize-Access-Token-Id');
@@ -105,13 +136,25 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
                                     'Content-Type': 'text/event-stream',
                                     'Cache-Control': 'no-cache',
                                     Connection: 'keep-alive',
+                                    ...getCorsHeaders(origin || undefined),
                                 },
                             });
                         },
                     },
-                    fetch: () => {
+                    fetch: (req) => {
+                        const origin = req.headers.get('origin');
+                        if (req.method === 'OPTIONS') {
+                            return new Response(null, {
+                                status: 200,
+                                headers: getCorsHeaders(origin || undefined),
+                            });
+                        }
+
                         return new Response(
                             `Crystallize CLI - Web Server ${packageJson.version} - ${crystallizeEnvironment}`,
+                            {
+                                headers: getCorsHeaders(origin || undefined),
+                            },
                         );
                     },
                 });

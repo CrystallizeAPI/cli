@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.7.3]
+
+- Enable CORS
+
 ## [5.7.2]
 
 - Expose the Crystallize Env in the web server default response

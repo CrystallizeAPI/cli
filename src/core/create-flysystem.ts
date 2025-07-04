@@ -87,7 +87,7 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
         const file = Bun.file(path);
         const content = await file.text();
         const newContent = keyValues.reduce((memo: string, keyValue: { search: string; replace: string }) => {
-            return memo.replace(keyValue.search, keyValue.replace);
+            return memo.replaceAll(keyValue.search, keyValue.replace);
         }, content);
         await saveFile(path, newContent);
     };

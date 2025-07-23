@@ -35,10 +35,10 @@ jobs:
 
             - name: 🚀 Upload Assets
               run: |
-                  ASSET_PLATFORMS=("bun-linux-x64" "bun-linux-arm64" "bun-windows-x64.exe" "bun-darwin-x64" "bun-darwin-arm64")
+                  ASSET_PLATFORMS=("bun-linux-x64" "bun-linux-arm64" "bun-darwin-x64" "bun-darwin-arm64" "bun-windows-x64.exe")
                   for platform in "${ASSET_PLATFORMS[@]}"; do
                     if [ -f "crystallize-$platform" ]; then
-                      gh release upload "${GITHUB_REF_NAME}" "crystallize-$platform" --clobber
+                      gh release upload "${GITHUB_REF_NAME}" "crystallize-$platform" --clobber || true
                       echo "✅ Uploaded file for platform $platform"
                     else
                       echo "❌ File for platform $platform not found, skipping."

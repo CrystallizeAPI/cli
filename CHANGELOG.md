@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.7.5]
+
+- schema 4.0.0
+- compatible with Mass Operations for Customers
+
+## [5.7.4]
+
+- replace all iteration of the placeholders in the install process
+
 ## [5.7.3]
 
 - Enable CORS

@@ -41,13 +41,13 @@ const handler = async (envelope: Envelope<Command>, deps: Deps) => {
             folder,
         },
         {
-            addTraceLog: (log: string) => {
+            addTraceLog: (log: string, code: number) => {
                 logger.info(log);
-                feedbackPiper.info(log);
+                feedbackPiper.info(log, code);
             },
-            addTraceError: (log: string) => {
+            addTraceError: (log: string, code: number) => {
                 logger.error(log);
-                feedbackPiper.error(log);
+                feedbackPiper.error(log, code);
             },
         },
     );

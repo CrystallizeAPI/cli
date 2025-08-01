@@ -7,6 +7,7 @@ import type { FlySystem } from '../contracts/fly-system';
 import type { Logger } from '../contracts/logger';
 import type { InstallBoilerplateStore } from '../../ui/journeys/install-boilerplate/create-store';
 import type { TenantEnrollerBuilder } from '../contracts/tenant-enroller';
+import { MessageCode } from '../contracts/message-codes';
 
 type Deps = {
     createCrystallizeClient: AsyncCreateClient;
@@ -37,8 +38,8 @@ const handler = async (
     identifier: string;
 }> => {
     const { storage, atoms } = installBoilerplateCommandStore;
-    const addTraceLog = (log: string) => storage.set(atoms.addTraceLogAtom, log);
-    const addTraceError = (log: string) => storage.set(atoms.addTraceErrorAtom, log);
+    const addTraceLog = (log: string, _: number) => storage.set(atoms.addTraceLogAtom, log);
+    const addTraceError = (log: string, _: number) => storage.set(atoms.addTraceErrorAtom, log);
 
     const { tenant, credentials } = envelope.message;
     const finalCredentials = credentials || (await credentialsRetriever.getCredentials());
@@ -72,7 +73,7 @@ const handler = async (
         },
     );
     const { id, identifier } = createResult.tenant.create;
-    addTraceLog(`Tenant created with id: ${id}.`);
+    addTraceLog(`Tenant created with id: ${id}.`, MessageCode.TENANT_CREATED);
     const shapeIdentifiers = ['default-product', 'default-folder', 'default-document'];
     const mutation = {
         shape: shapeIdentifiers.reduce((memo: Record<string, any>, shapeIdentifier: string) => {
@@ -91,7 +92,7 @@ const handler = async (
     };
     const query = jsonToGraphQLQuery({ mutation });
     await client.pimApi(query);
-    addTraceLog(`Shape cleaned.`);
+    addTraceLog(`Shape cleaned.`, MessageCode.SHAPE_CLEANED);
 
     // if we have a folder, we check that folder for .crystallize folder and convention
     const { folder } = envelope.message;

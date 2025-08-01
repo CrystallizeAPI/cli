@@ -3,8 +3,8 @@ import type { PimCredentials } from './models/credentials';
 import type { Tenant } from './models/tenant';
 
 type Deps = {
-    addTraceLog: (log: string) => void;
-    addTraceError: (log: string) => void;
+    addTraceLog: (log: string, code: number) => void;
+    addTraceError: (log: string, code: number) => void;
 };
 
 type Args = {

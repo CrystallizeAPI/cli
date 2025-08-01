@@ -13,6 +13,7 @@ import type {
 } from '../use-cases/download-boilerplate-archive';
 import type { TenantEnrollerBuilder } from '../contracts/tenant-enroller';
 import type { Boilerplate } from '../contracts/models/boilerplate';
+import { MessageCode } from '../contracts/message-codes';
 
 type Deps = {
     credentialsRetriever: CredentialRetriever;
@@ -70,7 +71,7 @@ export const createTenantEnrollerBuilder = ({
                     },
                 } as Envelope<RunMassOperationCommand>);
                 logger.debug('Mass operation task created', startedTask);
-                addTraceLog(`Mass operation task created: ${startedTask?.id}`);
+                addTraceLog(`Mass operation task created: ${startedTask?.id}`, MessageCode.MASS_OPERATION_CREATED);
                 await sleep(10); // we have an easy 10 sec sleep here to let the task start
                 while (startedTask?.status !== 'complete') {
                     const get = await cClient.nextPimApi(getMassOperationBulkTask, { id: startedTask?.id });
@@ -81,10 +82,10 @@ export const createTenantEnrollerBuilder = ({
                     await sleep(3); // then we check every 3 seconds
                 }
             } catch (e) {
-                addTraceError(`Failed to run mass operation.`);
+                addTraceError(`Failed to run mass operation.`, MessageCode.MASS_OPERATION_FAILED);
                 logger.error('Failed to run mass operation', e);
             }
-            addTraceLog(`Mass operation completed.`);
+            addTraceLog(`Mass operation completed.`, MessageCode.MASS_OPERATION_COMPLETED);
         };
 
         const uploadAssets = async () => {
@@ -95,7 +96,7 @@ export const createTenantEnrollerBuilder = ({
             }
 
             try {
-                addTraceLog(`Uploading ${images.length} images.`);
+                addTraceLog(`Uploading ${images.length} images.`, MessageCode.ASSET_UPLOAD_STARTED);
                 const imagResults = await uploadImages({
                     message: {
                         paths: images,
@@ -105,9 +106,9 @@ export const createTenantEnrollerBuilder = ({
                 } as Envelope<UploadImagesCommand>);
 
                 imageMapping = imagResults.keys;
-                addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`);
+                addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`, MessageCode.ASSET_UPLOAD_COMPLETED);
             } catch (e) {
-                addTraceError(`Failed to upload images..`);
+                addTraceError(`Failed to upload images..`, MessageCode.ASSET_UPLOAD_FAILED);
                 logger.error('Failed to upload images');
             }
             return imageMapping;
@@ -126,14 +127,14 @@ export const createTenantEnrollerBuilder = ({
                     },
                 } as unknown as Envelope<ExecuteMutationsCommand>);
             } catch (e) {
-                addTraceError(`Failed to run extra mutations.`);
+                addTraceError(`Failed to run extra mutations.`, MessageCode.MUTATIONS_FAILED);
                 logger.error('Failed to run extra mutations', e);
             }
 
-            addTraceLog(`Extra Mutations executed.`);
+            addTraceLog(`Extra Mutations executed.`, MessageCode.MUTATIONS_EXECUTED);
         };
         const ignite = async () => {
-            addTraceLog(`Starting the index for Discovery API.`);
+            addTraceLog(`Starting the index for Discovery API.`, MessageCode.DISCOVERY_API_START);
             await cClient.nextPimApi(`mutation { igniteTenant }`);
             // check the 404
 
@@ -147,7 +148,7 @@ export const createTenantEnrollerBuilder = ({
                 discoApiPingResponseCode = discoApiPingResponse.status;
                 sleep(5); // then every 5 seconds
             } while (discoApiPingResponseCode === 404);
-            addTraceLog(`Tenant ignited in Discovery API.`);
+            addTraceLog(`Tenant ignited in Discovery API.`, MessageCode.DISCOVERY_API_IGNITED);
         };
 
         return {

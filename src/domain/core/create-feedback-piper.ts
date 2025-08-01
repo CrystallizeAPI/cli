@@ -23,16 +23,18 @@ export const createFeedbackPiper = (): FeedbackPiper => {
         clear: (): void => {
             listeners.clear();
         },
-        info: (message: string): void => {
+        info: (message: string, code: number): void => {
             dispatch({
                 level: 'info',
                 message,
+                code,
             });
         },
-        error: (message: string): void => {
+        error: (message: string, code: number): void => {
             dispatch({
                 level: 'error',
                 message,
+                code,
             });
         },
     };

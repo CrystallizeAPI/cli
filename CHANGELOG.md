@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.7.6]
+
+- adds codes to messages that are streamed to FE while tenant is being updated with selected template
+
 ## [5.7.5]
 
 - schema 4.0.0

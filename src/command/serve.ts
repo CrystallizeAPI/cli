@@ -4,6 +4,7 @@ import { Command } from 'commander';
 import type { Boilerplate } from '../domain/contracts/models/boilerplate';
 import { boilerplates } from '../content/boilerplates';
 import type { FeedbackMessage, FeedbackPiper } from '../domain/contracts/feedback-piper';
+import { MessageCode } from '../domain/contracts/message-codes';
 import packageJson from '../../package.json';
 import pc from 'picocolors';
 
@@ -91,6 +92,7 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
                                     send({
                                         level: 'info',
                                         message: `Enrolling tenant ${tenantIdentifier} with boilerplate ${boilerplate.name} started.`,
+                                        code: MessageCode.ENROLLMENT_STARTED,
                                     });
                                     try {
                                         const intent = commandBus.createCommand('EnrollTenantWithBoilerplatePackage', {
@@ -112,17 +114,20 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
                                             send({
                                                 level: 'error',
                                                 message: `Enrolling tenant ${tenantIdentifier} with boilerplate ${boilerplate.name} failed.`,
+                                                code: MessageCode.ENROLLMENT_FAILED,
                                             });
                                         }
 
                                         send({
                                             level: 'info',
                                             message: `Enrolling tenant ${tenantIdentifier} with boilerplate ${boilerplate.name} done!`,
+                                            code: MessageCode.ENROLLMENT_COMPLETED,
                                         });
                                     } catch (err) {
                                         send({
                                             level: 'error',
                                             message: `${(err as Error).message}`,
+                                            code: MessageCode.ENROLLMENT_ERROR,
                                         });
                                     } finally {
                                         clearInterval(pingInterval);

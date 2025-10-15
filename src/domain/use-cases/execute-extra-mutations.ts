@@ -33,7 +33,9 @@ const handler = async (envelope: Envelope<ExecuteMutationsCommand>, { flySystem,
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });
 
-    const results = await apiClient.pimApi(`#graphql
+    const results = await apiClient.pimApi<{
+        tenant: { get: { rootItemId: string; vatTypes: { id: string }[] } };
+    }>(`#graphql
             query { 
                 tenant {
                     get(id:"${apiClient.config.tenantId}") {

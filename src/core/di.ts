@@ -17,7 +17,6 @@ import { createInstallBoilerplateCommandStore } from '../ui/journeys/install-boi
 import { createRunner } from './create-runner';
 import { createLoginCommand } from '../command/login';
 import { createWhoAmICommand } from '../command/whoami';
-import { createS3Uploader } from './create-s3-uploader';
 import os from 'os';
 import { createRunMassOperationHandler } from '../domain/use-cases/run-mass-operation';
 import { createRunMassOperationCommand } from '../command/mass-operation/run';
@@ -41,7 +40,7 @@ import { createDumpContentModelMassOperationCommand } from '../command/mass-oper
 import { createCreateContentModelMassOperationFileHandler } from '../domain/use-cases/create-content-model-mass-operation';
 import { createExecuteMutationsCommand } from '../command/mass-operation/execute-mutations';
 import { createImageUploadCommand } from '../command/images/upload';
-import { createUploadImagesHandler } from '../domain/use-cases/upload-images';
+import { createUploadBinariesHandler } from '../domain/use-cases/upload-binaries';
 import { createExecuteMutationsHandler } from '../domain/use-cases/execute-extra-mutations';
 import { createDocCommand } from '../command/doc';
 import { createEnrollTenantCommand } from '../command/tenant/enroll';
@@ -51,6 +50,7 @@ import { createTenantEnrollerBuilder } from '../domain/core/create-tenant-enroll
 import { createServeCommand } from '../command/serve';
 import type { FeedbackPiper } from '../domain/contracts/feedback-piper';
 import { createFeedbackPiper } from '../domain/core/create-feedback-piper';
+import { createFileUploadCommand } from '../command/files/upload';
 
 export const buildServices = () => {
     const logLevels = (
@@ -68,7 +68,6 @@ export const buildServices = () => {
         credentialsRetriever: CredentialRetriever;
         createCrystallizeClient: AsyncCreateClient;
         runner: ReturnType<typeof createRunner>;
-        s3Uploader: ReturnType<typeof createS3Uploader>;
         fetchAvailableTenantIdentifier: FetchAvailableTenantIdentifier;
         getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
         fetchShopApiToken: FetchShopAuthToken;
@@ -86,7 +85,7 @@ export const buildServices = () => {
         getShopAuthToken: ReturnType<typeof createGetShopAuthTokenHandler>;
         createContentModelMassOperationFile: ReturnType<typeof createCreateContentModelMassOperationFileHandler>;
         executeExtraMutations: ReturnType<typeof createExecuteMutationsHandler>;
-        uploadImages: ReturnType<typeof createUploadImagesHandler>;
+        uploadBinaries: ReturnType<typeof createUploadBinariesHandler>;
         enrollTenantWithBoilerplatePackage: ReturnType<typeof createEnrollTenantWithBoilerplatePackageHandler>;
 
         // stores
@@ -107,6 +106,7 @@ export const buildServices = () => {
         dumpContentModelMassOperationCommand: Command;
         executeMutationsCommand: Command;
         imageUploadCommand: Command;
+        fileUploadCommand: Command;
         enrollTenantCommand: Command;
         serveCommand: Command;
     }>({
@@ -128,7 +128,6 @@ export const buildServices = () => {
             .singleton(),
         createCrystallizeClient: asFunction(createCrystallizeClientBuilder).singleton(),
         runner: asFunction(createRunner).singleton(),
-        s3Uploader: asFunction(createS3Uploader).singleton(),
         fetchAvailableTenantIdentifier: asFunction(createFetchAvailableTenantIdentifier).singleton(),
         getAuthenticatedUserWithInteractivityIfPossible: asFunction(
             createGetAuthenticatedUserWithInteractivityIfPossible,
@@ -148,7 +147,7 @@ export const buildServices = () => {
         getShopAuthToken: asFunction(createGetShopAuthTokenHandler).singleton(),
         createContentModelMassOperationFile: asFunction(createCreateContentModelMassOperationFileHandler).singleton(),
         executeExtraMutations: asFunction(createExecuteMutationsHandler).singleton(),
-        uploadImages: asFunction(createUploadImagesHandler).singleton(),
+        uploadBinaries: asFunction(createUploadBinariesHandler).singleton(),
         enrollTenantWithBoilerplatePackage: asFunction(createEnrollTenantWithBoilerplatePackageHandler).singleton(),
 
         // Stores
@@ -169,6 +168,7 @@ export const buildServices = () => {
         dumpContentModelMassOperationCommand: asFunction(createDumpContentModelMassOperationCommand).singleton(),
         executeMutationsCommand: asFunction(createExecuteMutationsCommand).singleton(),
         imageUploadCommand: asFunction(createImageUploadCommand).singleton(),
+        fileUploadCommand: asFunction(createFileUploadCommand).singleton(),
         enrollTenantCommand: asFunction(createEnrollTenantCommand).singleton(),
         serveCommand: asFunction(createServeCommand).singleton(),
     });
@@ -185,7 +185,7 @@ export const buildServices = () => {
         container.cradle.createContentModelMassOperationFile,
     );
     container.cradle.commandBus.register('ExecuteMutations', container.cradle.executeExtraMutations);
-    container.cradle.commandBus.register('UploadImages', container.cradle.uploadImages);
+    container.cradle.commandBus.register('UploadBinaries', container.cradle.uploadBinaries);
     container.cradle.commandBus.register(
         'EnrollTenantWithBoilerplatePackage',
         container.cradle.enrollTenantWithBoilerplatePackage,
@@ -246,6 +246,10 @@ export const buildServices = () => {
             image: {
                 description: 'All the commands related to Images.',
                 commands: [container.cradle.imageUploadCommand],
+            },
+            file: {
+                description: 'All the commands related to Files.',
+                commands: [container.cradle.fileUploadCommand],
             },
         },
     };

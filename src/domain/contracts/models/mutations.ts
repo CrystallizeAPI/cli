@@ -7,5 +7,5 @@ export const MutationInputSchema = z.object({
 });
 export type MutationInput = z.infer<typeof MutationInputSchema>;
 
-export const MutationsInputSchema = z.record(MutationInputSchema);
+export const MutationsInputSchema = z.record(z.string(), MutationInputSchema);
 export type MutationsInput = z.infer<typeof MutationsInputSchema>;

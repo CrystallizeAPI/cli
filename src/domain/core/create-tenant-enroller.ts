@@ -5,8 +5,7 @@ import type { createRunMassOperationHandler, RunMassOperationCommand } from '../
 import type { Logger } from '../contracts/logger';
 import type { FlySystem } from '../contracts/fly-system';
 import type { createExecuteMutationsHandler, ExecuteMutationsCommand } from '../use-cases/execute-extra-mutations';
-import type { createUploadImagesHandler, UploadImagesCommand } from '../use-cases/upload-images';
-import { getMassOperationBulkTask } from '../../command/mass-operation/run';
+import { getMassOperationBulkTask, type MassOperationBulkTaskResponse } from '../../command/mass-operation/run';
 import type {
     createDownloadBoilerplateArchiveHandler,
     DownloadBoilerplateQuery,
@@ -14,6 +13,7 @@ import type {
 import type { TenantEnrollerBuilder } from '../contracts/tenant-enroller';
 import type { Boilerplate } from '../contracts/models/boilerplate';
 import { MessageCode } from '../contracts/message-codes';
+import type { createUploadBinariesHandler, UploadBinariesCommand } from '../use-cases/upload-binaries';
 
 type Deps = {
     credentialsRetriever: CredentialRetriever;
@@ -24,7 +24,7 @@ type Deps = {
     crystallizeEnvironment: 'staging' | 'production';
     flySystem: FlySystem;
     executeExtraMutations: ReturnType<typeof createExecuteMutationsHandler>;
-    uploadImages: ReturnType<typeof createUploadImagesHandler>;
+    uploadBinaries: ReturnType<typeof createUploadBinariesHandler>;
 };
 
 export const createTenantEnrollerBuilder = ({
@@ -34,7 +34,7 @@ export const createTenantEnrollerBuilder = ({
     downloadBoilerplateArchive,
     crystallizeEnvironment,
     executeExtraMutations,
-    uploadImages,
+    uploadBinaries,
     flySystem,
     logger,
 }: Deps): TenantEnrollerBuilder => {
@@ -74,11 +74,15 @@ export const createTenantEnrollerBuilder = ({
                 addTraceLog(`Mass operation task created: ${startedTask?.id}`, MessageCode.MASS_OPERATION_CREATED);
                 await sleep(10); // we have an easy 10 sec sleep here to let the task start
                 while (startedTask?.status !== 'complete') {
-                    const get = await cClient.nextPimApi(getMassOperationBulkTask, { id: startedTask?.id });
-                    if (get.bulkTask.error) {
-                        throw new Error(get.data.bulkTask.error);
+                    const res: MassOperationBulkTaskResponse = await cClient.nextPimApi<MassOperationBulkTaskResponse>(
+                        getMassOperationBulkTask,
+                        { id: startedTask?.id },
+                    );
+                    const { bulkTask } = res;
+                    if ('error' in bulkTask) {
+                        throw new Error(bulkTask.error);
                     }
-                    startedTask = get.bulkTask;
+                    startedTask = bulkTask;
                     await sleep(3); // then we check every 3 seconds
                 }
             } catch (e) {
@@ -91,19 +95,20 @@ export const createTenantEnrollerBuilder = ({
         const uploadAssets = async () => {
             let imageMapping: Record<string, string> = {};
             const images: string[] = [];
+
             for await (const image of flySystem.loopInDirectory(`${crytallizeHiddenFolder}/images`)) {
                 images.push(image);
             }
-
             try {
                 addTraceLog(`Uploading ${images.length} images.`, MessageCode.ASSET_UPLOAD_STARTED);
-                const imagResults = await uploadImages({
+                const imagResults = await uploadBinaries({
                     message: {
                         paths: images,
                         tenant,
+                        type: 'MEDIA',
                         credentials: finalCredentials,
                     },
-                } as Envelope<UploadImagesCommand>);
+                } as Envelope<UploadBinariesCommand>);
 
                 imageMapping = imagResults.keys;
                 addTraceLog(`${Object.keys(imageMapping).length} images Uploaded.`, MessageCode.ASSET_UPLOAD_COMPLETED);
@@ -111,19 +116,44 @@ export const createTenantEnrollerBuilder = ({
                 addTraceError(`Failed to upload images..`, MessageCode.ASSET_UPLOAD_FAILED);
                 logger.error('Failed to upload images');
             }
-            return imageMapping;
+
+            let fileMapping: Record<string, string> = {};
+            const files: string[] = [];
+            for await (const file of flySystem.loopInDirectory(`${crytallizeHiddenFolder}/files`)) {
+                files.push(file);
+            }
+            try {
+                addTraceLog(`Uploading ${files.length} files.`, MessageCode.ASSET_UPLOAD_STARTED);
+                const fileResults = await uploadBinaries({
+                    message: {
+                        paths: files,
+                        tenant,
+                        type: 'STATIC',
+                        credentials: finalCredentials,
+                    },
+                } as Envelope<UploadBinariesCommand>);
+
+                fileMapping = fileResults.keys;
+                addTraceLog(`${Object.keys(fileMapping).length} files Uploaded.`, MessageCode.ASSET_UPLOAD_COMPLETED);
+            } catch (e) {
+                addTraceError(`Failed to upload files..`, MessageCode.ASSET_UPLOAD_FAILED);
+                logger.error('Failed to upload files');
+            }
+
+            return {
+                images: imageMapping,
+                files: fileMapping,
+            };
         };
 
-        const executeMutations = async (imageMapping: Record<string, string>) => {
+        const executeMutations = async (mapping: { images: Record<string, string>; files: Record<string, string> }) => {
             try {
                 await executeExtraMutations({
                     message: {
                         filePath: `${crytallizeHiddenFolder}/extra-mutations.json`,
                         tenant,
                         credentials: finalCredentials,
-                        placeholderMap: {
-                            images: imageMapping,
-                        },
+                        placeholderMap: mapping,
                     },
                 } as unknown as Envelope<ExecuteMutationsCommand>);
             } catch (e) {

@@ -3,13 +3,11 @@ import { OperationsSchema, type Operations } from '@crystallize/schema/mass-oper
 import type { Logger } from '../contracts/logger';
 import pc from 'picocolors';
 import type { PimCredentials } from '../contracts/models/credentials';
-import type { S3Uploader } from '../contracts/s3-uploader';
 import type { AsyncCreateClient } from '../contracts/credential-retriever';
 import { uploadMassOperationFileContent } from '../core/upload-mass-operation-file-content';
 
 type Deps = {
     logger: Logger;
-    s3Uploader: S3Uploader;
     createCrystallizeClient: AsyncCreateClient;
 };
 
@@ -28,7 +26,7 @@ export type RunMassOperationHandlerDefinition = CommandHandlerDefinition<
 
 const handler = async (
     envelope: Envelope<RunMassOperationCommand>,
-    { logger, s3Uploader, createCrystallizeClient }: Deps,
+    { logger, createCrystallizeClient }: Deps,
 ): Promise<{
     task: {
         id: string;
@@ -50,18 +48,22 @@ const handler = async (
 
     const key = await uploadMassOperationFileContent(JSON.stringify(operationsContent), {
         crystallizeClient,
-        s3Uploader,
         logger,
     });
 
-    const create = await crystallizeClient.nextPimApi(createMassOperationBulkTask, { key });
+    const create = await crystallizeClient.nextPimApi<{
+        createMassOperationBulkTask: { error?: string; id: never } | { id: string; error?: never };
+    }>(createMassOperationBulkTask, { key });
     if (create.createMassOperationBulkTask.error) {
         throw new Error(create.createMassOperationBulkTask.error);
     }
     const task = create.createMassOperationBulkTask;
     logger.debug(`Task created successfully. Task ID: ${pc.yellow(task.id)}`);
-
-    const start = await crystallizeClient.nextPimApi(startMassOperationBulkTask, { id: task.id });
+    const start = await crystallizeClient.nextPimApi<{
+        startMassOperationBulkTask:
+            | { error: string; id: never; status: never }
+            | { error?: never; id: string; status: string };
+    }>(startMassOperationBulkTask, { id: task.id });
     if (start.startMassOperationBulkTask.error) {
         throw new Error(start.startMassOperationBulkTask.error);
     }
@@ -79,7 +81,6 @@ mutation START($id: ID!) {
   startMassOperationBulkTask(id: $id) {
     ... on BulkTaskMassOperation {
       id
-      type
       status
     }
     ... on BasicError {
@@ -94,7 +95,6 @@ const createMassOperationBulkTask = `#graphql
         ... on BulkTaskMassOperation {
           id
           status
-          type
         }
         ... on BasicError {
           error: message

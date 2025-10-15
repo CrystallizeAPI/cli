@@ -8,6 +8,12 @@ import { ZodError } from 'zod';
 import type { GetAuthenticatedUser } from '../../domain/contracts/get-authenticated-user';
 import { addInteractiveAndTokenOption } from '../../core/helpers/add-iteractive-and-token-option';
 
+type MassOperationBulkTaskError = { error: string };
+type MassOperationBulkTaskSuccess = { id: string; status: string };
+export type MassOperationBulkTaskResponse = {
+    bulkTask: MassOperationBulkTaskError | MassOperationBulkTaskSuccess;
+};
+
 type Deps = {
     logger: Logger;
     commandBus: CommandBus;
@@ -72,7 +78,7 @@ export const createRunMassOperationCommand = ({
             });
             const { result } = await commandBus.dispatch(intent);
 
-            let startedTask = result?.task;
+            let startedTask: MassOperationBulkTaskSuccess | undefined = result?.task;
             if (!startedTask) {
                 throw new Error('Task not started. Please check the logs for more information.');
             }
@@ -85,14 +91,18 @@ export const createRunMassOperationCommand = ({
             });
 
             logger.info(`Now, Waiting for task ${pc.yellow(startedTask.id)} to complete...`);
-            while (startedTask?.status !== 'complete') {
-                logger.info(`Task status: ${pc.yellow(startedTask?.status)}`);
+            while (startedTask.status !== 'complete') {
+                logger.info(`Task status: ${pc.yellow(startedTask.status)}`);
                 await new Promise((resolve) => setTimeout(resolve, 1000));
-                const get = await crystallizeClient.nextPimApi(getMassOperationBulkTask, { id: startedTask?.id });
-                if (get.bulkTask.error) {
-                    throw new Error(get.data.bulkTask.error);
+                const res: MassOperationBulkTaskResponse =
+                    await crystallizeClient.nextPimApi<MassOperationBulkTaskResponse>(getMassOperationBulkTask, {
+                        id: startedTask.id,
+                    });
+                const { bulkTask } = res;
+                if ('error' in bulkTask) {
+                    throw new Error(bulkTask.error);
                 }
-                startedTask = get.bulkTask;
+                startedTask = bulkTask;
             }
             logger.success(`Task completed successfully. Task ID: ${pc.yellow(startedTask.id)}`);
         } catch (error) {

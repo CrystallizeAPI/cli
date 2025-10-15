@@ -16,8 +16,11 @@ type Args = {
 export type TenantEnroller = {
     downloadArchive: (boilerplate: Boilerplate) => Promise<void>;
     runOperations: () => Promise<void>;
-    uploadAssets: () => Promise<Record<string, string>>;
-    executeMutations: (imageMapping: Record<string, string>) => Promise<void>;
+    uploadAssets: () => Promise<{
+        images: Record<string, string>;
+        files: Record<string, string>;
+    }>;
+    executeMutations: (mapping: { images: Record<string, string>; files: Record<string, string> }) => Promise<void>;
     ignite: () => Promise<void>;
 };
 export type TenantEnrollerBuilder = (args: Args, deps: Deps) => Promise<TenantEnroller>;

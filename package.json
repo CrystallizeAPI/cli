@@ -1,6 +1,6 @@
 {
     "name": "@crystallize/cli",
-    "version": "5.7.6",
+    "version": "5.8",
     "description": "Crystallize CLI",
     "module": "src/index.ts",
     "repository": "https://github.com/CrystallizeAPI/crystallize-cli",
@@ -10,40 +10,41 @@
     ],
     "type": "module",
     "peerDependencies": {
-        "typescript": "^5.8.3"
+        "typescript": "^5"
     },
     "engines": {
-        "bun": ">=1.2.19"
+        "bun": ">=1.3"
     },
     "devDependencies": {
-        "@commitlint/cli": "^19.8.1",
-        "@commitlint/config-conventional": "^19.8.1",
+        "@commitlint/cli": "^20.1.0",
+        "@commitlint/config-conventional": "^20.0.0",
         "@types/bun": "latest",
         "@types/marked": "^6.0.0",
         "@types/marked-terminal": "^6.1.1",
-        "@types/react": "^19.1.8",
+        "@types/react": "^19.2.2",
         "@types/signale": "^1.4.7",
-        "react-devtools-core": "^6.1.2"
+        "react-devtools-core": "^7.0.0"
     },
     "dependencies": {
-        "@crystallize/js-api-client": "^4.3.0",
-        "@crystallize/schema": "^4.0.0",
+        "@crystallize/js-api-client": "^5",
+        "@crystallize/schema": "^5",
         "awilix": "^12.0.5",
-        "cli-spinners": "^3.2.0",
-        "commander": "^14.0.0",
-        "ink": "^6.0.1",
-        "ink-link": "^4.1.0",
+        "cli-spinners": "^3.3.0",
+        "commander": "^14.0.1",
+        "ink": "^6.3.1",
+        "ink-link": "^5.0.0",
         "ink-text-input": "^6.0.0",
-        "jotai": "^2.12.5",
+        "jotai": "^2.15.0",
         "json-to-graphql-query": "^2.3.0",
-        "marked": "^15.0.12",
+        "marked": "^16.0.4",
         "marked-terminal": "^7.3.0",
-        "meow": "^13.2.0",
+        "meow": "^14.0.0",
         "missive.js": "^0.5.0",
         "picocolors": "^1.1.1",
-        "prettier": "^3.6.1",
-        "react": "^19.1.0",
+        "prettier": "^3.6.2",
+        "react": "^19.2.0",
         "signale": "^1.4.0",
-        "tar": "^7.4.3"
+        "tar": "^7.5.1",
+        "zod": "^4.1.12"
     }
 }

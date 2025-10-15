@@ -14,16 +14,16 @@ type Deps = {
     getAuthenticatedUserWithInteractivityIfPossible: GetAuthenticatedUser;
     createCrystallizeClient: AsyncCreateClient;
 };
-export const createImageUploadCommand = ({
+export const createFileUploadCommand = ({
     getAuthenticatedUserWithInteractivityIfPossible,
     commandBus,
     logger,
     flySystem,
 }: Deps): Command => {
     const command = new Command('upload');
-    command.description('Upload images(s) to a Tenant.');
+    command.description('Upload file(s) to a Tenant.');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier to upload on.'));
-    command.addArgument(new Argument('<file>', 'The file or the folder that contains the Images.'));
+    command.addArgument(new Argument('<file>', 'The file or the folder that contains the Files.'));
     command.addArgument(new Argument('[output-file]', 'An optional file that will contain the mapping path:key.'));
     command.addOption(new Option('-f, --force', 'Force and override the output-file if it exits.'));
 
@@ -51,7 +51,7 @@ export const createImageUploadCommand = ({
         const intent = commandBus.createCommand('UploadBinaries', {
             paths: images,
             credentials,
-            type: 'MEDIA',
+            type: 'STATIC',
             tenant: {
                 identifier: tenantIdentifier,
             },
@@ -59,10 +59,10 @@ export const createImageUploadCommand = ({
         const { result } = await commandBus.dispatch(intent);
 
         if (!result) {
-            logger.error(`Failed to upload images.`);
+            logger.error(`Failed to upload files.`);
             return;
         }
-        logger.success(`Images uploaded.`);
+        logger.success(`Files uploaded.`);
         if (!outputFile) {
             for (const [path, key] of Object.entries(result.keys)) {
                 logger.complete(`\t - ${path} -> ${pc.yellowBright(key)}`);

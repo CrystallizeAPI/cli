@@ -4,7 +4,7 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help changelog doc boilerplate tenant login whoami mass-operation image"
+  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file"
   local program_options="--version"
   local default_options="--help"
   local i_login_options="--no-interactive --token_id= --token_secret="
@@ -109,6 +109,20 @@ _crystallize_completions() {
         esac
     ;;
     image)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+                local options="upload ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+        fi
+        case "${subcmd}" in
+            upload)
+                local options="${i_login_options} --force ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;         
+        esac
+    ;;
+    file)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
                 local options="upload ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))

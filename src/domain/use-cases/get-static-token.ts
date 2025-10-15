@@ -27,7 +27,9 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });
 
-    const results = await client.nextPimApi(`#graphql
+    const results = await client.nextPimApi<{
+        tenant: { error: string; staticAuthToken?: never } | { staticAuthToken: string; error?: never };
+    }>(`#graphql
         query {
             tenant {
                 ... on Tenant {

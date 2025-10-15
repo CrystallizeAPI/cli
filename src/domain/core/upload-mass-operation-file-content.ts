@@ -1,51 +1,19 @@
-import type { ClientInterface } from '@crystallize/js-api-client';
-import type { S3Uploader } from '../contracts/s3-uploader';
+import { createBinaryFileManager, type ClientInterface } from '@crystallize/js-api-client';
 import type { Logger } from '../contracts/logger';
 import pc from 'picocolors';
+import { tmpdir } from 'os';
 
 type Deps = {
     crystallizeClient: ClientInterface;
-    s3Uploader: S3Uploader;
     logger: Logger;
 };
 
-export const uploadMassOperationFileContent = async (
-    content: string,
-    { crystallizeClient, s3Uploader, logger }: Deps,
-) => {
+export const uploadMassOperationFileContent = async (content: string, { crystallizeClient, logger }: Deps) => {
     const uniquId = Math.random().toString(36).substring(7);
-    const file = `mass-operation-${uniquId}.json`;
-    const register = await crystallizeClient.nextPimApi(generatePresignedUploadRequest, { file });
-
-    if (register.generatePresignedUploadRequest.error) {
-        throw new Error(register.generatePresignedUploadRequest.error);
-    }
-    const uploadRequest = register.generatePresignedUploadRequest;
-    logger.debug(`Upload request generated successfully.`);
-
-    const key = await s3Uploader(uploadRequest, content);
+    const file = `/${tmpdir()}/mass-operation-${uniquId}.json`;
+    await Bun.write(file, content);
+    const manager = createBinaryFileManager(crystallizeClient);
+    const key = await manager.uploadMassOperationFile(file);
     logger.debug(`File uploaded successfully to ${pc.yellow(key)}`);
     return key;
 };
-
-const generatePresignedUploadRequest = `#graphql
-    mutation GET_URL($file: String!) {
-    generatePresignedUploadRequest(
-        filename: $file
-        contentType: "application/json"
-        type: MASS_OPERATIONS
-    ) {
-        ... on PresignedUploadRequest {
-          url
-          fields {
-            name
-            value
-          }
-          maxSize
-          lifetime
-        }
-        ... on BasicError {
-          error: message
-        }
-    }
-}`;

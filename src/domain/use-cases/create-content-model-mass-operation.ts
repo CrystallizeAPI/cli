@@ -42,6 +42,60 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
         accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
     });
 
+    const getPieceIdentifierToNameMap = async (): Promise<Record<string, string>> => {
+        const map: Record<string, string> = {};
+        const query = {
+            pieces: {
+                __args: {
+                    first: 100,
+                    after: '',
+                },
+                __on: {
+                    __typeName: 'PieceConnection',
+                    pageInfo: {
+                        endCursor: true,
+                        hasNextPage: true,
+                    },
+                    edges: {
+                        node: {
+                            identifier: true,
+                            name: true,
+                        },
+                    },
+                },
+            },
+        };
+        let data: {
+            pieces: {
+                pageInfo: {
+                    endCursor: string;
+                    hasNextPage: boolean;
+                };
+                edges: {
+                    node: {
+                        identifier: string;
+                        name: string;
+                    };
+                }[];
+            };
+        };
+        let cursor: string | undefined = undefined;
+        do {
+            if (cursor) {
+                query.pieces.__args = {
+                    first: 100,
+                    after: cursor,
+                };
+            }
+            data = await client.nextPimApi(jsonToGraphQLQuery({ query }));
+            for (const edge of data.pieces.edges) {
+                map[edge.node.identifier] = edge.node.name;
+            }
+            cursor = data.pieces.pageInfo.endCursor;
+        } while (data.pieces.pageInfo.hasNextPage);
+        return map;
+    };
+
     const buildQueryFrom = (cursor?: string) => {
         const args: {
             first: number;
@@ -200,6 +254,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     const graph: Record<string, string[]> = {};
     const pieceSet: Map<string, Omit<Piece, 'name'>> = new Map();
     const shapeSet: Map<string, Shape> = new Map();
+    const pieceIdentifierToNameMap = await getPieceIdentifierToNameMap();
     for await (const shape of fetch()) {
         shapeSet.set(shape.identifier, shape);
         graph[`shape/${shape.identifier}`] = [];
@@ -307,7 +362,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
             if (piece) {
                 operations.push({
                     intent: 'piece/create',
-                    name: piece.identifier, // @todo: we need to fetch the name here or change the `resolvedConfiguration` to include the name
+                    name: pieceIdentifierToNameMap[piece.identifier],
                     identifier: piece.identifier,
                     components: [],
                 });
@@ -353,7 +408,7 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
             if (piece) {
                 operations.push({
                     intent: 'piece/upsert',
-                    name: piece.identifier, // @todo: we need to fetch the name here or change the `resolvedConfiguration` to include the name
+                    name: pieceIdentifierToNameMap[piece.identifier],
                     identifier: piece.identifier,
                     components:
                         piece.components?.map((component) => ({

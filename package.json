@@ -1,6 +1,6 @@
 {
     "name": "@crystallize/cli",
-    "version": "5.8",
+    "version": "5.8.1",
     "description": "Crystallize CLI",
     "module": "src/index.ts",
     "repository": "https://github.com/CrystallizeAPI/crystallize-cli",
@@ -26,7 +26,7 @@
         "react-devtools-core": "^7.0.0"
     },
     "dependencies": {
-        "@crystallize/js-api-client": "^5",
+        "@crystallize/js-api-client": "^5.2.0",
         "@crystallize/schema": "^5",
         "awilix": "^12.0.5",
         "cli-spinners": "^3.3.0",

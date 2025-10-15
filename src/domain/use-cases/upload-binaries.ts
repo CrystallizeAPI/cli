@@ -42,15 +42,6 @@ const handler = async (envelope: Envelope<UploadBinariesCommand>, deps: Deps) =>
     for (const file of paths) {
         const cleanPath = file.split('/').slice(-2).join('/');
         logger.info(`Uploading file: ${pc.yellow(file)}`);
-        if (!file.startsWith('/')) {
-            throw new Error(`File path must be absolute: ${file}`);
-        }
-        if (file.includes('..')) {
-            throw new Error(`File path must not contain .. : ${file}`);
-        }
-        if (file.endsWith('/')) {
-            throw new Error(`File path must not be a folder: ${file}`);
-        }
         const key = await getKey(file, type);
         logger.debug(`File uploaded and registered successfully to ${pc.yellow(key)}`);
         results[cleanPath.replaceAll('/', '-').replaceAll('.', '-')] = key;

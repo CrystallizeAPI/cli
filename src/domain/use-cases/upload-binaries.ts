@@ -41,7 +41,7 @@ const handler = async (envelope: Envelope<UploadBinariesCommand>, deps: Deps) =>
         type === 'MEDIA' ? await manager.uploadImage(path) : await manager.uploadFile(path);
     for (const file of paths) {
         const cleanPath = file.split('/').slice(-2).join('/');
-        logger.info(`Uploading file: ${pc.yellow(file)}`);
+        logger.debug(`Uploading file: ${pc.yellow(file)}`);
         const key = await getKey(file, type);
         logger.debug(`File uploaded and registered successfully to ${pc.yellow(key)}`);
         results[cleanPath.replaceAll('/', '-').replaceAll('.', '-')] = key;

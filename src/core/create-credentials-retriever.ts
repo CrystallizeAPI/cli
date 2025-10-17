@@ -6,6 +6,7 @@ import type {
 import type { PimCredentials } from '../domain/contracts/models/credentials';
 import type { FlySystem } from '../domain/contracts/fly-system';
 import os from 'os';
+import type { PimAuthenticatedUser } from '../domain/contracts/models/authenticated-user';
 
 type Deps = {
     options?: CredentialRetrieverOptions;
@@ -68,7 +69,9 @@ export const createCredentialsRetriever = ({
             accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
         });
         const result = await apiClient
-            .pimApi('{ me { id firstName lastName email tenants { tenant { id identifier name } } } }')
+            .pimApi<{
+                me: PimAuthenticatedUser;
+            }>('{ me { id firstName lastName email tenants { tenant { id identifier name } } } }')
             .catch(() => {});
         return result?.me ?? undefined;
     };

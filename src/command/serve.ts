@@ -65,6 +65,7 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
                                 (b) => b.identifier === boiler,
                             );
                             if (!boilerplate) {
+                                logger.error('Invalid boilerplate identifier used: ' + boiler);
                                 return new Response('Boilerplate identifier is not valid.', { status: 400 });
                             }
                             const sessionId = req.headers.get('cookie')?.match(/connect\.sid=([^;]+)/)?.[1];
@@ -72,6 +73,7 @@ export const createServeCommand = ({ logger, commandBus, feedbackPiper, crystall
                             const tokenSecret = req.headers.get('X-Crystallize-Access-Token-Secret');
                             if (!sessionId) {
                                 if (!tokenId || !tokenSecret) {
+                                    logger.error('Missing credentials for enrolling tenant ' + tenantIdentifier);
                                     return new Response('Missing credentials', { status: 400 });
                                 }
                             }

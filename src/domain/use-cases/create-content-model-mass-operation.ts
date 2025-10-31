@@ -23,6 +23,7 @@ type Deps = {
 type Query = {
     tenantIdentifier: string;
     credentials: PimCredentials;
+    withItemIds?: boolean;
 };
 
 export type CreateContentModelMassOperationFileHandlerDefinition = QueryHandlerDefinition<
@@ -33,7 +34,7 @@ export type CreateContentModelMassOperationFileHandlerDefinition = QueryHandlerD
 
 const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     const { createCrystallizeClient } = deps;
-    const { tenantIdentifier, credentials } = envelope.message;
+    const { tenantIdentifier, credentials, withItemIds } = envelope.message;
 
     const client = await createCrystallizeClient({
         tenantIdentifier: tenantIdentifier,
@@ -246,6 +247,20 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
                 },
             };
         }
+        if (component.type === 'itemRelations') {
+            const config = component.config as ItemRelationsConfig;
+            return {
+                [component.type]: {
+                    ...config,
+                    ...(config.quickSelect && {
+                        quickSelect: {
+                            ...config.quickSelect,
+                            folders: withItemIds === false ? [] : config.quickSelect.folders,
+                        },
+                    }),
+                },
+            };
+        }
         return {
             [component.type]: component.config,
         };
@@ -390,15 +405,15 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
                         })) || [],
                     ...(shape.type === 'product'
                         ? {
-                              variantComponents:
-                                  shape.variantComponents?.map((component) => ({
-                                      id: component.id,
-                                      type: component.type,
-                                      name: component.name,
-                                      description: component.description,
-                                      config: mapConfig(component),
-                                  })) || [],
-                          }
+                            variantComponents:
+                                shape.variantComponents?.map((component) => ({
+                                    id: component.id,
+                                    type: component.type,
+                                    name: component.name,
+                                    description: component.description,
+                                    config: mapConfig(component),
+                                })) || [],
+                        }
                         : {}),
                 });
             }

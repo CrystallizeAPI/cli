@@ -24,6 +24,7 @@ export const createDumpContentModelMassOperationCommand = ({
     command.description('Create a valid Mass Operation file on your machine.');
     command.addArgument(new Argument('<tenant-identifier>', 'The tenant identifier to use.'));
     command.addArgument(new Argument('<file>', 'The file that will contains the Operations.'));
+    command.addOption(new Option('--no-item-ids', 'Remove all reference to exising itemId. (like for Quick Select)'));
     command.addOption(new Option('-f, --force', 'Force and override the file it it exits.'));
     addInteractiveAndTokenOption(command);
 
@@ -41,6 +42,7 @@ export const createDumpContentModelMassOperationCommand = ({
             const intent = queryBus.createQuery('CreateContentModelMassOperationFile', {
                 tenantIdentifier,
                 credentials,
+                withItemIds: flags.itemIds,
             });
             const { result } = await queryBus.dispatch(intent);
             if (!result) {

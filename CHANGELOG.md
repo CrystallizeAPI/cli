@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.10.1]
+
+- bump libs and schema lib to 5.3.
+
 ## [5.10.0]
 
 - add an option to dump the model without any item id references.

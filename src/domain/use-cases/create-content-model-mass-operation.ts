@@ -405,15 +405,15 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
                         })) || [],
                     ...(shape.type === 'product'
                         ? {
-                            variantComponents:
-                                shape.variantComponents?.map((component) => ({
-                                    id: component.id,
-                                    type: component.type,
-                                    name: component.name,
-                                    description: component.description,
-                                    config: mapConfig(component),
-                                })) || [],
-                        }
+                              variantComponents:
+                                  shape.variantComponents?.map((component) => ({
+                                      id: component.id,
+                                      type: component.type,
+                                      name: component.name,
+                                      description: component.description,
+                                      config: mapConfig(component),
+                                  })) || [],
+                          }
                         : {}),
                 });
             }

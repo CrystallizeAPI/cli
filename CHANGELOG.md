@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.11.1]
+
+- really bump the libs.
+
 ## [5.11.0]
 
 - bump libs and schema lib to 6.0.0.

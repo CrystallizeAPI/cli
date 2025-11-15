@@ -1,6 +1,6 @@
 {
     "name": "@crystallize/cli",
-    "version": "5.11.1",
+    "version": "5.11.2",
     "description": "Crystallize CLI",
     "module": "src/index.ts",
     "repository": "https://github.com/CrystallizeAPI/crystallize-cli",
@@ -27,7 +27,7 @@
     },
     "dependencies": {
         "@crystallize/js-api-client": "^5.2.0",
-        "@crystallize/schema": "^6.0.0",
+        "@crystallize/schema": "^6.1.0",
         "awilix": "^12.0.5",
         "cli-spinners": "^3.3.0",
         "commander": "^14.0.2",

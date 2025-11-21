@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.11.3]
+
+- really bump the libs for topics
+
 ## [5.11.2]
 
 - really bump the libs.

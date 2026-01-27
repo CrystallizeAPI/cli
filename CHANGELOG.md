@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [5.11.4]
 
+- bump the schema lib to 6.3.4
+
+## [5.11.4]
+
 - bump the libs for pricelists fix
 
 ## [5.11.3]

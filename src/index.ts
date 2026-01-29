@@ -5,6 +5,7 @@ import packageJson from '../package.json';
 import pc from 'picocolors';
 import { buildServices } from './core/di';
 import { installCompletion } from './domain/use-cases/install-completion';
+import { checkForUpdate } from './core/check-for-update';
 
 const services = buildServices();
 const { logger, commands } = services;
@@ -93,6 +94,7 @@ const logMemory = () => {
 };
 
 try {
+    await checkForUpdate(logger, packageJson.version);
     await program.parseAsync(process.argv);
 } catch (exception) {
     logger.flush();

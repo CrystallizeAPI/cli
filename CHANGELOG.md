@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.12.0]
+
+- bump the schema lib to 6.5.0
+- adding a new check on start to check if the CLI running version is the last one
+
 ## [5.11.4]
 
 - bump the schema lib to 6.3.4

@@ -39,6 +39,7 @@ import { createGetShopAuthTokenHandler } from '../domain/use-cases/get-shop-toke
 import { createDumpContentModelMassOperationCommand } from '../command/mass-operation/dump-content-model';
 import { createCreateContentModelMassOperationFileHandler } from '../domain/use-cases/create-content-model-mass-operation';
 import { createExecuteMutationsCommand } from '../command/mass-operation/execute-mutations';
+import { createAddOperationMassOperationCommand } from '../command/mass-operation/add-operation';
 import { createImageUploadCommand } from '../command/images/upload';
 import { createUploadBinariesHandler } from '../domain/use-cases/upload-binaries';
 import { createExecuteMutationsHandler } from '../domain/use-cases/execute-extra-mutations';
@@ -107,6 +108,7 @@ export const buildServices = () => {
         executeMutationsCommand: Command;
         imageUploadCommand: Command;
         fileUploadCommand: Command;
+        addOperationMassOperationCommand: Command;
         enrollTenantCommand: Command;
         serveCommand: Command;
     }>({
@@ -169,6 +171,7 @@ export const buildServices = () => {
         executeMutationsCommand: asFunction(createExecuteMutationsCommand).singleton(),
         imageUploadCommand: asFunction(createImageUploadCommand).singleton(),
         fileUploadCommand: asFunction(createFileUploadCommand).singleton(),
+        addOperationMassOperationCommand: asFunction(createAddOperationMassOperationCommand).singleton(),
         enrollTenantCommand: asFunction(createEnrollTenantCommand).singleton(),
         serveCommand: asFunction(createServeCommand).singleton(),
     });
@@ -225,6 +228,7 @@ export const buildServices = () => {
                     container.cradle.runMassOperationCommand,
                     container.cradle.dumpContentModelMassOperationCommand,
                     container.cradle.executeMutationsCommand,
+                    container.cradle.addOperationMassOperationCommand,
                 ],
             },
             tenant: {

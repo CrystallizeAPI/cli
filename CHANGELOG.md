@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.20.0]
+
+- bump the schema lib to 6.9.0
+- add a new `mass-operation` `add-operation` command to help people create their mass operation file.
+
 ## [5.15.0]
 
 - bump the schema lib to 6.8.0

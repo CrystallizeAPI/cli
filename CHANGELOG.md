@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.21.0]
+
+- display operation logs in real-time during `mass-operation run`, with color-coded status and a final drain to ensure all logs are shown
+
 ## [5.20.0]
 
 - bump the schema lib to 6.9.0

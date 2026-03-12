@@ -14,6 +14,14 @@ export type MassOperationBulkTaskResponse = {
     bulkTask: MassOperationBulkTaskError | MassOperationBulkTaskSuccess;
 };
 
+type OperationLogNode = { id: string; input: string; output: string; message: string; status: string; statusCode: number };
+type OperationLogsResponse = {
+    operationLogs: {
+        pageInfo: { endCursor: string; hasNextPage: boolean };
+        edges: { node: OperationLogNode }[];
+    };
+};
+
 type Deps = {
     logger: Logger;
     commandBus: CommandBus;
@@ -90,20 +98,75 @@ export const createRunMassOperationCommand = ({
                 accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
             });
 
+            const fetchAndDisplayLogs = async (
+                taskId: string,
+                cursor: string | null,
+            ): Promise<{ cursor: string | null; hasNextPage: boolean }> => {
+                const res = await crystallizeClient.nextPimApi<OperationLogsResponse>(getOperationLogs, {
+                    operationId: taskId,
+                    after: cursor || '',
+                    first: 100,
+                });
+                const { operationLogs } = res;
+                if (!operationLogs?.edges) {
+                    return { cursor, hasNextPage: false };
+                }
+                for (const { node } of operationLogs.edges) {
+                    const colorFn =
+                        node.statusCode >= 200 && node.statusCode < 300
+                            ? pc.green
+                            : node.statusCode >= 400
+                                ? pc.red
+                                : pc.yellow;
+                    logger.info(`${colorFn(`[${node.statusCode}]`)} ${node.status} - Operation ${node.id}: ${node.message}`);
+                    if (node.input) {
+                        logger.debug(`  Input: ${JSON.stringify(node.input)}`);
+                    }
+                    if (node.output) {
+                        logger.debug(`  Output: ${JSON.stringify(node.output)}`);
+                    }
+                }
+                return {
+                    cursor: operationLogs.pageInfo.endCursor || cursor,
+                    hasNextPage: operationLogs.pageInfo.hasNextPage,
+                };
+            };
+
             logger.info(`Now, Waiting for task ${pc.yellow(startedTask.id)} to complete...`);
+            let logCursor: string | null = null;
+
             while (startedTask.status !== 'complete') {
-                logger.info(`Task status: ${pc.yellow(startedTask.status)}`);
                 await new Promise((resolve) => setTimeout(resolve, 1000));
-                const res: MassOperationBulkTaskResponse =
-                    await crystallizeClient.nextPimApi<MassOperationBulkTaskResponse>(getMassOperationBulkTask, {
-                        id: startedTask.id,
-                    });
-                const { bulkTask } = res;
+                const results: [MassOperationBulkTaskResponse, { cursor: string | null; hasNextPage: boolean }] =
+                    await Promise.all([
+                        crystallizeClient.nextPimApi<MassOperationBulkTaskResponse>(getMassOperationBulkTask, {
+                            id: startedTask.id,
+                        }),
+                        fetchAndDisplayLogs(startedTask.id, logCursor),
+                    ]);
+                const [taskRes, logResult] = results;
+                logCursor = logResult.cursor;
+                // Drain all available log pages before continuing
+                while (logResult.hasNextPage) {
+                    const next = await fetchAndDisplayLogs(startedTask.id, logCursor);
+                    logCursor = next.cursor;
+                    logResult.hasNextPage = next.hasNextPage;
+                }
+                const { bulkTask } = taskRes;
                 if ('error' in bulkTask) {
                     throw new Error(bulkTask.error);
                 }
                 startedTask = bulkTask;
             }
+
+            // Drain remaining logs
+            let hasMoreLogs = true;
+            while (hasMoreLogs) {
+                const logResult = await fetchAndDisplayLogs(startedTask.id, logCursor);
+                logCursor = logResult.cursor;
+                hasMoreLogs = logResult.hasNextPage;
+            }
+
             logger.success(`Task completed successfully. Task ID: ${pc.yellow(startedTask.id)}`);
         } catch (error) {
             if (error instanceof ZodError) {
@@ -128,6 +191,16 @@ query GET($id:ID!) {
     }
     ... on BasicError {
       error: message
+    }
+  }
+}`;
+
+const getOperationLogs = `#graphql
+query GET_OPERATION_LOGS($operationId: ID!, $after: String, $first: Int) {
+  operationLogs(after: $after, first: $first, filter: { operationId: $operationId }) {
+    ... on OperationLogConnection {
+      pageInfo { endCursor hasNextPage }
+      edges { node { id input output message status statusCode } }
     }
   }
 }`;

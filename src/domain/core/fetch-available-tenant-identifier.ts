@@ -7,19 +7,19 @@ type Deps = {
 
 export const createFetchAvailableTenantIdentifier =
     ({ createCrystallizeClient }: Deps) =>
-        async (credentials: PimCredentials, identifier: string) => {
-            const apiClient = await createCrystallizeClient({
-                tenantIdentifier: '',
-                sessionId: credentials.sessionId,
-                accessTokenId: credentials.ACCESS_TOKEN_ID,
-                accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
-            });
-            const result = await apiClient.pimApi<{
-                tenant: {
-                    suggestIdentifier: {
-                        suggestion: string;
-                    };
+    async (credentials: PimCredentials, identifier: string) => {
+        const apiClient = await createCrystallizeClient({
+            tenantIdentifier: '',
+            sessionId: credentials.sessionId,
+            accessTokenId: credentials.ACCESS_TOKEN_ID,
+            accessTokenSecret: credentials.ACCESS_TOKEN_SECRET,
+        });
+        const result = await apiClient.pimApi<{
+            tenant: {
+                suggestIdentifier: {
+                    suggestion: string;
                 };
-            }>(`query { tenant { suggestIdentifier ( desired: "${identifier}" ) { suggestion } } }`);
-            return result.tenant?.suggestIdentifier?.suggestion || identifier;
-        };
+            };
+        }>(`query { tenant { suggestIdentifier ( desired: "${identifier}" ) { suggestion } } }`);
+        return result.tenant?.suggestIdentifier?.suggestion || identifier;
+    };

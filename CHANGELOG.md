@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.21.1]
+
+- update the version checker to fetch the remote changelog file instead and get proper changes.
+
 ## [5.21.0]
 
 - display operation logs in real-time during `mass-operation run`, with color-coded status and a final drain to ensure all logs are shown

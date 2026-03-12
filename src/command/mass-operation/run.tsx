@@ -14,7 +14,14 @@ export type MassOperationBulkTaskResponse = {
     bulkTask: MassOperationBulkTaskError | MassOperationBulkTaskSuccess;
 };
 
-type OperationLogNode = { id: string; input: string; output: string; message: string; status: string; statusCode: number };
+type OperationLogNode = {
+    id: string;
+    input: string;
+    output: string;
+    message: string;
+    status: string;
+    statusCode: number;
+};
 type OperationLogsResponse = {
     operationLogs: {
         pageInfo: { endCursor: string; hasNextPage: boolean };
@@ -116,9 +123,11 @@ export const createRunMassOperationCommand = ({
                         node.statusCode >= 200 && node.statusCode < 300
                             ? pc.green
                             : node.statusCode >= 400
-                                ? pc.red
-                                : pc.yellow;
-                    logger.info(`${colorFn(`[${node.statusCode}]`)} ${node.status} - Operation ${node.id}: ${node.message}`);
+                              ? pc.red
+                              : pc.yellow;
+                    logger.info(
+                        `${colorFn(`[${node.statusCode}]`)} ${node.status} - Operation ${node.id}: ${node.message}`,
+                    );
                     if (node.input) {
                         logger.debug(`  Input: ${JSON.stringify(node.input)}`);
                     }

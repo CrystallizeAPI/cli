@@ -1,12 +1,12 @@
 import pc from 'picocolors';
 import type { Logger } from '../domain/contracts/logger';
-//@ts-expect-error - This is a workaround to import the changelog file as text. It's working with bun.
-import Changelog from '../../CHANGELOG.md' with { type: 'text' };
 import { marked } from 'marked';
 import { Box, render, Text } from 'ink';
 import { colors } from './styles';
 
 const GITHUB_RELEASES_URL = 'https://api.github.com/repos/crystallizeapi/cli/releases/latest';
+const GITHUB_CHANGELOG_URL = (version: string) =>
+    `https://raw.githubusercontent.com/CrystallizeAPI/cli/${version}/CHANGELOG.md`;
 const REINSTALL_COMMAND = 'curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash';
 
 type ChangelogEntry = {
@@ -38,9 +38,27 @@ const compareVersions = (left: string, right: string) => {
     return 0;
 };
 
-const loadChangelog = async () => {
+const fetchChangelog = async (tag: string): Promise<string | null> => {
     try {
-        const lines = Changelog.split(/\r?\n/);
+        const response = await fetch(GITHUB_CHANGELOG_URL(tag), {
+            headers: { 'User-Agent': 'crystallize-cli' },
+        });
+        if (!response.ok) {
+            return null;
+        }
+        return await response.text();
+    } catch {
+        return null;
+    }
+};
+
+const loadChangelog = async (tag: string) => {
+    try {
+        const content = await fetchChangelog(tag);
+        if (!content) {
+            return [];
+        }
+        const lines = content.split(/\r?\n/);
         const entries: ChangelogEntry[] = [];
         let current: ChangelogEntry | null = null;
 
@@ -70,7 +88,7 @@ const loadChangelog = async () => {
 };
 
 const getChangelogNotes = async (currentVersion: string, latestVersion: string) => {
-    const entries = await loadChangelog();
+    const entries = await loadChangelog(latestVersion);
     if (entries.length === 0) {
         return '';
     }

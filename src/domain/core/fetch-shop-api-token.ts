@@ -9,8 +9,8 @@ export const createFetchShopApiToken =
             headers: {
                 'Content-Type': 'application/json',
                 Accept: 'application/json',
-                'x-crystallize-access-token-id': credentials.ACCESS_TOKEN_ID,
-                'x-crystallize-access-token-secret': credentials.ACCESS_TOKEN_SECRET,
+                'x-crystallize-access-token-id': `${credentials.ACCESS_TOKEN_ID}`,
+                'x-crystallize-access-token-secret': `${credentials.ACCESS_TOKEN_SECRET}`,
             },
             body: JSON.stringify({
                 scopes,

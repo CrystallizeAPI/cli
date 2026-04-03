@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.22.0]
+
+- added `add-mcp` command to add the Crystallize MCP server to your environment
+- added `add-skills` command to add Crystallize AI skills
+- added `update-skills` command to update Crystallize AI skills
+- added bash completion for `serve`, `add-mcp`, `add-skills`, `update-skills` commands
+- bumped `@crystallize/schema` to 6.11.0
+- updated libraries (awilix, commander, ink, jotai, marked, meow, tar, zod, TypeScript 6)
+- moved from prettier to `oxfmt` for code formatting
+
 ## [5.21.1]
 
 - update the version checker to fetch the remote changelog file instead and get proper changes.

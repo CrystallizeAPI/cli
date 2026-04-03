@@ -52,6 +52,9 @@ import { createServeCommand } from '../command/serve';
 import type { FeedbackPiper } from '../domain/contracts/feedback-piper';
 import { createFeedbackPiper } from '../domain/core/create-feedback-piper';
 import { createFileUploadCommand } from '../command/files/upload';
+import { createAddMcpCommand } from '../command/add-mcp';
+import { createAddSkillsCommand } from '../command/add-skills';
+import { createUpdateSkillsCommand } from '../command/update-skills';
 
 export const buildServices = () => {
     const logLevels = (
@@ -111,6 +114,9 @@ export const buildServices = () => {
         addOperationMassOperationCommand: Command;
         enrollTenantCommand: Command;
         serveCommand: Command;
+        addMcpCommand: Command;
+        addSkillsCommand: Command;
+        updateSkillsCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -174,6 +180,9 @@ export const buildServices = () => {
         addOperationMassOperationCommand: asFunction(createAddOperationMassOperationCommand).singleton(),
         enrollTenantCommand: asFunction(createEnrollTenantCommand).singleton(),
         serveCommand: asFunction(createServeCommand).singleton(),
+        addMcpCommand: asFunction(createAddMcpCommand).singleton(),
+        addSkillsCommand: asFunction(createAddSkillsCommand).singleton(),
+        updateSkillsCommand: asFunction(createUpdateSkillsCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -216,6 +225,9 @@ export const buildServices = () => {
                     container.cradle.changeLogCommand,
                     container.cradle.docCommand,
                     container.cradle.serveCommand,
+                    container.cradle.addMcpCommand,
+                    container.cradle.addSkillsCommand,
+                    container.cradle.updateSkillsCommand,
                 ],
             },
             boilerplate: {

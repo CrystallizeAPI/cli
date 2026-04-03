@@ -16,7 +16,7 @@ program.allowUnknownOption(false);
 program.version(packageJson.version);
 program.name('crystallize');
 program.addOption(new Option('--install-completion', 'Install the completion').hideHelp());
-program.addOption(new Option('--uninstall-completion', 'Install the completion').hideHelp());
+program.addOption(new Option('--uninstall-completion', 'Uninstall the completion').hideHelp());
 
 const helpStyling = {
     styleTitle: (str: string) => pc.bold(str),

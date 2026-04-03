@@ -4,7 +4,7 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file"
+  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file serve add-mcp add-skills update-skills"
   local program_options="--version"
   local default_options="--help"
   local i_login_options="--no-interactive --token_id= --token_secret="
@@ -17,8 +17,13 @@ _crystallize_completions() {
   fi
 
   case "${cmd}" in
-    login|whoami)
+    login|whoami|serve|add-skills|update-skills)
         local options="${default_options}"
+        COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+        return 0
+        ;;
+    add-mcp)
+        local options="${i_login_options} ${default_options}"
         COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
         return 0
         ;;

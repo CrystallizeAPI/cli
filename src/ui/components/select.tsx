@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { Text, useInput, Box, Newline } from 'ink';
 import { colors } from '../../core/styles';
 

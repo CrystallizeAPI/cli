@@ -17,7 +17,8 @@ list:
 
 .PHONY: codeclean
 codeclean: ## Code Clean
-	@$(BUN) prettier --write .
+	@$(BUN) oxfmt .
+	@$(BUN) oxfmt --check .
 
 .PHONY: run
 run: ## Run ARGS=""

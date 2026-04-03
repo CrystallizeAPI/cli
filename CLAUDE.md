@@ -9,7 +9,7 @@ make run ARGS="<command>"          # Run CLI locally (e.g. ARGS="whoami")
 make staging-run ARGS="<command>"  # Run against staging environment
 make build                         # Build single-platform binary
 make build-all                     # Build all platform binaries
-make codeclean                     # Format with prettier
+make codeclean                     # Format with oxfmt
 ```
 
 The runtime is **Bun** (>=1.3). No test framework is configured.
@@ -52,6 +52,6 @@ Resolved in priority order: env vars (`CRYSTALLIZE_ACCESS_TOKEN_ID`/`SECRET`) â†
 
 ## Code Style
 
-- Prettier: 4-space indent, single quotes, trailing commas, semicolons, 120 char width
+- oxfmt: 4-space indent, single quotes, trailing commas, semicolons, 120 char width
 - Commit messages: conventional commits (feat, fix, chore, refactor, etc.)
 - TypeScript strict mode with `verbatimModuleSyntax`

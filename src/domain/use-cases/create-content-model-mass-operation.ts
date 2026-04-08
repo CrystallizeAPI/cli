@@ -89,7 +89,8 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
                 };
             }
             data = await client.nextPimApi(jsonToGraphQLQuery({ query }));
-            for (const edge of data.pieces.edges) {
+            const pieceEdges = data?.pieces?.edges ?? [];
+            for (const edge of pieceEdges) {
                 map[edge.node.identifier] = edge.node.name;
             }
             cursor = data.pieces.pageInfo.endCursor;

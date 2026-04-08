@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.22.1]
+
+- fix dump mass-operation dump-content-model command when the tenant has no Piece.
+
 ## [5.22.0]
 
 - added `add-mcp` command to add the Crystallize MCP server to your environment

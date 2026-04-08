@@ -55,6 +55,8 @@ import { createFileUploadCommand } from '../command/files/upload';
 import { createAddMcpCommand } from '../command/add-mcp';
 import { createAddSkillsCommand } from '../command/add-skills';
 import { createUpdateSkillsCommand } from '../command/update-skills';
+import { createUpdateCommand } from '../command/update';
+import { createUpdater, type Updater } from './create-updater';
 
 export const buildServices = () => {
     const logLevels = (
@@ -77,6 +79,7 @@ export const buildServices = () => {
         fetchShopApiToken: FetchShopAuthToken;
         tenantEnrollerBuilder: TenantEnrollerBuilder;
         feedbackPiper: FeedbackPiper;
+        updater: Updater;
 
         // use cases
         createCleanTenant: ReturnType<typeof createCreateCleanTenantHandler>;
@@ -117,6 +120,7 @@ export const buildServices = () => {
         addMcpCommand: Command;
         addSkillsCommand: Command;
         updateSkillsCommand: Command;
+        updateCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -143,6 +147,7 @@ export const buildServices = () => {
         fetchShopApiToken: asFunction(createFetchShopApiToken).singleton(),
         tenantEnrollerBuilder: asFunction(createTenantEnrollerBuilder).singleton(),
         feedbackPiper: asFunction(createFeedbackPiper).singleton(),
+        updater: asFunction(createUpdater).singleton(),
 
         // Use Cases
         createCleanTenant: asFunction(createCreateCleanTenantHandler).singleton(),
@@ -183,6 +188,7 @@ export const buildServices = () => {
         addMcpCommand: asFunction(createAddMcpCommand).singleton(),
         addSkillsCommand: asFunction(createAddSkillsCommand).singleton(),
         updateSkillsCommand: asFunction(createUpdateSkillsCommand).singleton(),
+        updateCommand: asFunction(createUpdateCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -211,6 +217,7 @@ export const buildServices = () => {
     container.cradle.commandBus.useLoggerMiddleware({ logger: proxyLogger });
     return {
         logger,
+        updater: container.cradle.updater,
         createCommand: container.cradle.commandBus.createCommand,
         dispatchCommand: container.cradle.commandBus.dispatch,
         createQuery: container.cradle.queryBus.createQuery,
@@ -228,6 +235,7 @@ export const buildServices = () => {
                     container.cradle.addMcpCommand,
                     container.cradle.addSkillsCommand,
                     container.cradle.updateSkillsCommand,
+                    container.cradle.updateCommand,
                 ],
             },
             boilerplate: {

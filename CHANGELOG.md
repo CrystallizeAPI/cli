@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.23.0]
+
+- added `update` command to self-update the CLI binary in-place
+- startup update notification now hints at `crystallize update` instead of showing the curl reinstall command
+
 ## [5.22.1]
 
 - fix dump mass-operation dump-content-model command when the tenant has no Piece.

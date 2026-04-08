@@ -5,10 +5,9 @@ import packageJson from '../package.json';
 import pc from 'picocolors';
 import { buildServices } from './core/di';
 import { installCompletion } from './domain/use-cases/install-completion';
-import { checkForUpdate } from './core/check-for-update';
 
 const services = buildServices();
-const { logger, commands } = services;
+const { logger, updater, commands } = services;
 
 const program = new Command();
 program.allowExcessArguments(false);
@@ -94,7 +93,10 @@ const logMemory = () => {
 };
 
 try {
-    await checkForUpdate(logger, packageJson.version);
+    const isUpdateCommand = process.argv.slice(2).includes('update');
+    if (!isUpdateCommand) {
+        await updater.checkForUpdate(packageJson.version);
+    }
     await program.parseAsync(process.argv);
 } catch (exception) {
     logger.flush();

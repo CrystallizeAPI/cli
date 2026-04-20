@@ -273,28 +273,22 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
     const pieceIdentifierToNameMap = await getPieceIdentifierToNameMap();
     for await (const shape of fetch()) {
         shapeSet.set(shape.identifier, shape);
-        graph[`shape/${shape.identifier}`] = [];
+        const edges = new Set<string>();
         for (const dependency of extractDependencies(shape)) {
-            const dep = {
-                identifier: dependency.identifier,
-                type: dependency.type,
-            };
-            graph[`shape/${shape.identifier}`].push(`${dep.type}/${dep.identifier}`);
+            edges.add(`${dependency.type}/${dependency.identifier}`);
             if (dependency.type === 'piece') {
                 pieceSet.set(dependency.identifier, dependency.data);
             }
         }
+        graph[`shape/${shape.identifier}`] = [...edges];
     }
 
     for (const piece of pieceSet.values()) {
-        graph[`piece/${piece.identifier}`] = [];
+        const edges = new Set<string>();
         for (const dependency of extractDependencies(piece)) {
-            const dep = {
-                identifier: dependency.identifier,
-                type: dependency.type,
-            };
-            graph[`piece/${piece.identifier}`].push(`${dep.type}/${dep.identifier}`);
+            edges.add(`${dependency.type}/${dependency.identifier}`);
         }
+        graph[`piece/${piece.identifier}`] = [...edges];
     }
 
     const calculateDeps = (graph: Record<string, string[]>): { cycles: string[][]; dependencies: string[] } => {
@@ -335,30 +329,35 @@ const handler = async (envelope: Envelope<Query>, deps: Deps) => {
 
     const operations: Operation[] = [];
 
-    const placeholders = cycles.flatMap((cycle) =>
-        [...new Set(cycle)].map((node) => {
-            const [type, identifier] = node.split('/');
-            if (type === 'shape') {
-                const shape = shapeSet.get(identifier);
-                if (shape) {
-                    return {
-                        identifier: shape.identifier,
-                        type: 'shape',
-                    };
-                }
+    const cyclicNodes = new Set<string>();
+    for (const cycle of cycles) {
+        for (const node of cycle) {
+            cyclicNodes.add(node);
+        }
+    }
+
+    const placeholders = [...cyclicNodes].map((node) => {
+        const [type, identifier] = node.split('/');
+        if (type === 'shape') {
+            const shape = shapeSet.get(identifier);
+            if (shape) {
+                return {
+                    identifier: shape.identifier,
+                    type: 'shape',
+                };
             }
-            if (type === 'piece') {
-                const piece = pieceSet.get(identifier);
-                if (piece) {
-                    return {
-                        identifier: piece.identifier,
-                        type: 'piece',
-                    };
-                }
+        }
+        if (type === 'piece') {
+            const piece = pieceSet.get(identifier);
+            if (piece) {
+                return {
+                    identifier: piece.identifier,
+                    type: 'piece',
+                };
             }
-            throw new Error(`Unknown type ${type}`);
-        }),
-    );
+        }
+        throw new Error(`Unknown type ${type}`);
+    });
 
     for (const placeholder of placeholders) {
         if (placeholder.type === 'shape') {

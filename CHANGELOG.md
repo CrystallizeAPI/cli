@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.23.1]
+
+- fix `mass-operation dump-content-model` generating thousands of duplicate `shape/create` and `piece/create` placeholders on tenants with cyclic content models (cycles are now deduplicated across the whole graph, and adjacency edges are deduplicated)
+
 ## [5.23.0]
 
 - added `update` command to self-update the CLI binary in-place

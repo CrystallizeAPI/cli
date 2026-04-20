@@ -43,7 +43,7 @@ _crystallize_completions() {
       ;;
     mass-operation)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="run dump-content-model execute-mutations add-operation ${default_options}"
+                local options="run dump-content-model execute-mutations add-operation validate ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
@@ -65,6 +65,11 @@ _crystallize_completions() {
                 ;;
             add-operation)
                 local options="--operation= --no-interactive ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            validate)
+                local options="${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;

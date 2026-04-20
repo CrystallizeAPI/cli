@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.24.0]
+
+- added `mass-operation validate` command to locally validate a Mass Operation file against the schema, with per-operation grouped error display and non-zero exit on failure (no credentials or network required, CI-friendly)
+
 ## [5.23.1]
 
 - fix `mass-operation dump-content-model` generating thousands of duplicate `shape/create` and `piece/create` placeholders on tenants with cyclic content models (cycles are now deduplicated across the whole graph, and adjacency edges are deduplicated)

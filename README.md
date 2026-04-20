@@ -123,6 +123,17 @@ Creates a Mass Operation file containing the content model (_Shapes_ and _Pieces
 
 Use `--force` to overwrite an existing file.
 
+### Validating a Mass Operation file
+
+Performs a local schema validation of a Mass Operation file. No credentials or network access are required, so it's ideal for CI/pre-commit checks.
+
+```bash
+~/crystallize mass-operation validate <file>
+```
+
+- Exits with a non-zero status code if the file is invalid.
+- Groups issues per operation index, with a cyan field path, the message, and the Zod error code.
+
 ### Running a Mass Operation
 
 Executes a Mass Operation file by uploading it, registering the operation, and waiting for completion.

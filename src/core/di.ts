@@ -40,6 +40,7 @@ import { createDumpContentModelMassOperationCommand } from '../command/mass-oper
 import { createCreateContentModelMassOperationFileHandler } from '../domain/use-cases/create-content-model-mass-operation';
 import { createExecuteMutationsCommand } from '../command/mass-operation/execute-mutations';
 import { createAddOperationMassOperationCommand } from '../command/mass-operation/add-operation';
+import { createValidateMassOperationCommand } from '../command/mass-operation/validate';
 import { createImageUploadCommand } from '../command/images/upload';
 import { createUploadBinariesHandler } from '../domain/use-cases/upload-binaries';
 import { createExecuteMutationsHandler } from '../domain/use-cases/execute-extra-mutations';
@@ -115,6 +116,7 @@ export const buildServices = () => {
         imageUploadCommand: Command;
         fileUploadCommand: Command;
         addOperationMassOperationCommand: Command;
+        validateMassOperationCommand: Command;
         enrollTenantCommand: Command;
         serveCommand: Command;
         addMcpCommand: Command;
@@ -183,6 +185,7 @@ export const buildServices = () => {
         imageUploadCommand: asFunction(createImageUploadCommand).singleton(),
         fileUploadCommand: asFunction(createFileUploadCommand).singleton(),
         addOperationMassOperationCommand: asFunction(createAddOperationMassOperationCommand).singleton(),
+        validateMassOperationCommand: asFunction(createValidateMassOperationCommand).singleton(),
         enrollTenantCommand: asFunction(createEnrollTenantCommand).singleton(),
         serveCommand: asFunction(createServeCommand).singleton(),
         addMcpCommand: asFunction(createAddMcpCommand).singleton(),
@@ -249,6 +252,7 @@ export const buildServices = () => {
                     container.cradle.dumpContentModelMassOperationCommand,
                     container.cradle.executeMutationsCommand,
                     container.cradle.addOperationMassOperationCommand,
+                    container.cradle.validateMassOperationCommand,
                 ],
             },
             tenant: {

@@ -57,6 +57,9 @@ import { createAddMcpCommand } from '../command/add-mcp';
 import { createAddSkillsCommand } from '../command/add-skills';
 import { createUpdateSkillsCommand } from '../command/update-skills';
 import { createUpdateCommand } from '../command/update';
+import { createPluginKeygenCommand } from '../command/plugin/keygen';
+import { createPluginDecryptPayloadCommand } from '../command/plugin/decrypt-payload';
+import { createGeneratePluginKeypairHandler } from '../domain/use-cases/generate-plugin-keypair';
 import { createUpdater, type Updater } from './create-updater';
 
 export const buildServices = () => {
@@ -95,6 +98,7 @@ export const buildServices = () => {
         executeExtraMutations: ReturnType<typeof createExecuteMutationsHandler>;
         uploadBinaries: ReturnType<typeof createUploadBinariesHandler>;
         enrollTenantWithBoilerplatePackage: ReturnType<typeof createEnrollTenantWithBoilerplatePackageHandler>;
+        generatePluginKeypair: ReturnType<typeof createGeneratePluginKeypairHandler>;
 
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
@@ -123,6 +127,8 @@ export const buildServices = () => {
         addSkillsCommand: Command;
         updateSkillsCommand: Command;
         updateCommand: Command;
+        pluginKeygenCommand: Command;
+        pluginDecryptPayloadCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -164,6 +170,7 @@ export const buildServices = () => {
         executeExtraMutations: asFunction(createExecuteMutationsHandler).singleton(),
         uploadBinaries: asFunction(createUploadBinariesHandler).singleton(),
         enrollTenantWithBoilerplatePackage: asFunction(createEnrollTenantWithBoilerplatePackageHandler).singleton(),
+        generatePluginKeypair: asFunction(createGeneratePluginKeypairHandler).singleton(),
 
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
@@ -192,6 +199,8 @@ export const buildServices = () => {
         addSkillsCommand: asFunction(createAddSkillsCommand).singleton(),
         updateSkillsCommand: asFunction(createUpdateSkillsCommand).singleton(),
         updateCommand: asFunction(createUpdateCommand).singleton(),
+        pluginKeygenCommand: asFunction(createPluginKeygenCommand).singleton(),
+        pluginDecryptPayloadCommand: asFunction(createPluginDecryptPayloadCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -211,6 +220,7 @@ export const buildServices = () => {
         'EnrollTenantWithBoilerplatePackage',
         container.cradle.enrollTenantWithBoilerplatePackage,
     );
+    container.cradle.commandBus.register('GeneratePluginKeypair', container.cradle.generatePluginKeypair);
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -278,6 +288,10 @@ export const buildServices = () => {
             file: {
                 description: 'All the commands related to Files.',
                 commands: [container.cradle.fileUploadCommand],
+            },
+            plugin: {
+                description: 'All the commands related to Plugins.',
+                commands: [container.cradle.pluginKeygenCommand, container.cradle.pluginDecryptPayloadCommand],
             },
         },
     };

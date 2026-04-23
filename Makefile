@@ -20,6 +20,10 @@ codeclean: ## Code Clean
 	@$(BUN) oxfmt .
 	@$(BUN) oxfmt --check .
 
+.PHONY: test
+test: ## Run tests
+	@$(BUN) test
+
 .PHONY: run
 run: ## Run ARGS=""
 	@LOG_LEVELS=info,debug $(BUN) src/index.ts $$ARGS

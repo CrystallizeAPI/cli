@@ -4,7 +4,7 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file serve add-mcp add-skills update-skills update"
+  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file plugin serve add-mcp add-skills update-skills update"
   local program_options="--version"
   local default_options="--help"
   local i_login_options="--no-interactive --token_id= --token_secret="
@@ -148,7 +148,26 @@ _crystallize_completions() {
                 local options="${i_login_options} --force ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
-                ;;         
+                ;;
+        esac
+    ;;
+    plugin)
+        if [[ "${COMP_CWORD}" -eq 2 ]]; then
+                local options="keygen decrypt-payload ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+        fi
+        case "${subcmd}" in
+            keygen)
+                local options="--bits= --kid= --out-dir= --public-out= --private-out= --stdout --public-only --force --yes ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            decrypt-payload)
+                local options="--private-key= --payload= --jwks-url= --jwks-file= --issuer= --audience= --clock-tolerance= --verify-backend-token --json --verbose ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
         esac
     ;;
   esac

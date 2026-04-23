@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.25.0]
+
+- added `plugin keygen` command to generate an RSA JWK keypair (RSA-OAEP-256 / A256GCM) for a Crystallize plugin revision; writes `public.jwk.json` (0644) and `private.jwk.json` (0600) or emits both to stdout with `--stdout`; refuses to clobber existing files without `--force` (exit 3) and offers to add the private file to a discovered `.gitignore`
+- added `plugin decrypt-payload` command implementing the full Crystallize plugin payload protocol: outer JWE → inner JWS (RS256) verification against a JWKS → per-field `encryptedSecrets` decryption → optional `backendToken` verification (`--verify-backend-token`); payload can be pasted interactively, piped on stdin, or passed with `--payload`; signature failures are non-fatal — the envelope + secrets are still reported with the failure reason so you can inspect untrusted payloads against mock issuers. The decrypt pipeline itself is delegated to `createPluginPayloadDecrypter` from `@crystallize/js-api-client`.
+- `plugin decrypt-payload` default output is a lean human view (`[Secrets]`, `[Configuration]`, `[Context]`, `[Token]`); pass `--json` for the full structured document (protected headers, envelope claims, signature status, backend token status) and `-v/--verbose` for the "no applicable key" diagnostic (inner JWS `kid`/`alg` vs JWKS)
+- `plugin decrypt-payload` auto-derives `--jwks-url` and `--issuer` from the `CRYSTALLIZE_ENVIRONMENT` env var (prod: `https://api.crystallize.com`, staging: `https://api-dev.crystallize.digital`); pass `--audience <plugin-id>` to enable verification. JWKS can alternatively be loaded from a local file via `--jwks-file` (offline / local-dev friendly).
+- added bash completion for the new `plugin keygen` and `plugin decrypt-payload` commands
+- bumped `@crystallize/js-api-client` to ^7.0.0 and `@crystallize/schema` to ^6.12.0
+- added `jose` as a runtime dependency (used by `plugin keygen`)
+
 ## [5.24.0]
 
 - added `mass-operation validate` command to locally validate a Mass Operation file against the schema, with per-operation grouped error display and non-zero exit on failure (no credentials or network required, CI-friendly)

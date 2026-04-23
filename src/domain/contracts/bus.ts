@@ -11,6 +11,7 @@ import type { CreateContentModelMassOperationFileHandlerDefinition } from '../us
 import type { ExecuteMutationsHandlerDefinition } from '../use-cases/execute-extra-mutations';
 import type { UploadBinariesHandlerDefinition } from '../use-cases/upload-binaries';
 import type { EnrollTenantWithBoilerplatePackageHandlerDefinition } from '../use-cases/enroll-tenant-with-boilerplate-package';
+import type { GeneratePluginKeypairHandlerDefinition } from '../use-cases/generate-plugin-keypair';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
     FetchTipsHandlerDefinition &
@@ -26,5 +27,6 @@ export type CommandDefinitions = CreateCleanTenantHandlerDefinition &
     CreateTenantInviteTokenHandlerDefinition &
     ExecuteMutationsHandlerDefinition &
     UploadBinariesHandlerDefinition &
-    EnrollTenantWithBoilerplatePackageHandlerDefinition;
+    EnrollTenantWithBoilerplatePackageHandlerDefinition &
+    GeneratePluginKeypairHandlerDefinition;
 export type CommandBus = MissiveCommandBus<CommandDefinitions>;

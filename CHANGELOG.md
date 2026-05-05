@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.26.0]
+
+- added `plugin encrypt-secret` command to encrypt a single secret value with a vendor public JWK (RSA-OAEP-256 / A256GCM), producing a compact JWE on stdout — the same shape Crystallize's UI generates for an `envelope.encryptedSecrets[fieldName]` entry; useful for local dev / testing where the UI is not in the loop. Plaintext can be passed via `--value`, piped on stdin, or pasted interactively. Output round-trips through `plugin decrypt-payload` with the matching private JWK.
+- `plugin encrypt-secret` rejects private JWKs (those carrying `d`) and non-RSA keys with exit 2, so a `private.jwk.json` cannot be passed by mistake.
+- added bash completion for the new `plugin encrypt-secret` command.
+
 ## [5.25.0]
 
 - added `plugin keygen` command to generate an RSA JWK keypair (RSA-OAEP-256 / A256GCM) for a Crystallize plugin revision; writes `public.jwk.json` (0644) and `private.jwk.json` (0600) or emits both to stdout with `--stdout`; refuses to clobber existing files without `--force` (exit 3) and offers to add the private file to a discovered `.gitignore`

@@ -59,6 +59,7 @@ import { createUpdateSkillsCommand } from '../command/update-skills';
 import { createUpdateCommand } from '../command/update';
 import { createPluginKeygenCommand } from '../command/plugin/keygen';
 import { createPluginDecryptPayloadCommand } from '../command/plugin/decrypt-payload';
+import { createPluginEncryptSecretCommand } from '../command/plugin/encrypt-secret';
 import { createGeneratePluginKeypairHandler } from '../domain/use-cases/generate-plugin-keypair';
 import { createUpdater, type Updater } from './create-updater';
 
@@ -129,6 +130,7 @@ export const buildServices = () => {
         updateCommand: Command;
         pluginKeygenCommand: Command;
         pluginDecryptPayloadCommand: Command;
+        pluginEncryptSecretCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -201,6 +203,7 @@ export const buildServices = () => {
         updateCommand: asFunction(createUpdateCommand).singleton(),
         pluginKeygenCommand: asFunction(createPluginKeygenCommand).singleton(),
         pluginDecryptPayloadCommand: asFunction(createPluginDecryptPayloadCommand).singleton(),
+        pluginEncryptSecretCommand: asFunction(createPluginEncryptSecretCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -291,7 +294,11 @@ export const buildServices = () => {
             },
             plugin: {
                 description: 'All the commands related to Plugins.',
-                commands: [container.cradle.pluginKeygenCommand, container.cradle.pluginDecryptPayloadCommand],
+                commands: [
+                    container.cradle.pluginKeygenCommand,
+                    container.cradle.pluginEncryptSecretCommand,
+                    container.cradle.pluginDecryptPayloadCommand,
+                ],
             },
         },
     };

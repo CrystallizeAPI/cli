@@ -153,13 +153,18 @@ _crystallize_completions() {
     ;;
     plugin)
         if [[ "${COMP_CWORD}" -eq 2 ]]; then
-                local options="keygen decrypt-payload ${default_options}"
+                local options="keygen encrypt-secret decrypt-payload ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
         fi
         case "${subcmd}" in
             keygen)
                 local options="--bits= --kid= --out-dir= --public-out= --private-out= --stdout --public-only --force --yes ${default_options}"
+                COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+                return 0
+                ;;
+            encrypt-secret)
+                local options="--public-key= --value= ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;

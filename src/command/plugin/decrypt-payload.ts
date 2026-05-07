@@ -67,6 +67,16 @@ const readFromStdin = async (isTty: boolean, logger: Logger): Promise<string> =>
 
 const looksLikeCompactJwe = (value: string): boolean => value.split('.').length === 5;
 
+const TIME_CLAIMS = new Set(['iat', 'nbf', 'exp']);
+
+const formatTimestamp = (value: unknown): string => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return formatValue(value);
+    // accept seconds (JWT default) or milliseconds (best-effort heuristic).
+    const ms = value > 1e12 ? value : value * 1000;
+    const iso = new Date(ms).toISOString();
+    return `${value} ${pc.dim(`(${iso})`)}`;
+};
+
 const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return pc.dim('—');
     if (typeof value === 'string') return value;
@@ -74,31 +84,54 @@ const formatValue = (value: unknown): string => {
     return JSON.stringify(value);
 };
 
+const formatClaim = (key: string, value: unknown): string =>
+    TIME_CLAIMS.has(key) ? formatTimestamp(value) : formatValue(value);
+
 const renderSection = (write: (s: string) => void, title: string, status: string | null, rows: [string, unknown][]) => {
     if (rows.length === 0) return;
     write('');
     write(pc.bold(pc.cyan(`[${title}]`)) + (status ? ' ' + status : ''));
     const width = Math.max(...rows.map(([k]) => k.length));
     for (const [k, v] of rows) {
-        write(`  ${pc.green(k.padEnd(width))}  ${formatValue(v)}`);
+        write(`  ${pc.green(k.padEnd(width))}  ${formatClaim(k, v)}`);
     }
 };
 
+const pickRows = (source: Record<string, unknown> | null | undefined, keys: readonly string[]): [string, unknown][] =>
+    source ? keys.filter((k) => source[k] !== undefined).map((k) => [k, source[k]]) : [];
+
+const ENVELOPE_IDENTITY_KEYS = [
+    'tenantId',
+    'tenantIdentifier',
+    'installationId',
+    'pluginIdentifier',
+    'revisionId',
+    'event',
+] as const;
+
+const ENVELOPE_TOKEN_KEYS = ['signatureSecret', 'staticAuthToken'] as const;
+
+const ENVELOPE_JWT_KEYS = ['iss', 'aud', 'sub', 'iat', 'nbf', 'exp', 'jti'] as const;
+
+const BACKEND_TOKEN_KEYS = ['sub', 'aud', 'iss', 'iat', 'nbf', 'exp', 'jti', 'act'] as const;
+
 const renderLean = (d: DecryptedPluginPayload): void => {
     const write = (s: string) => process.stdout.write(s + '\n');
+    const env = d.envelope as Record<string, unknown> | null;
 
-    const secrets = Object.entries(d.secrets);
-    renderSection(write, 'Secrets', null, secrets);
+    renderSection(write, 'Envelope', null, pickRows(env, ENVELOPE_IDENTITY_KEYS));
 
-    const config = d.envelope?.config;
+    const configuration = env?.configuration;
     renderSection(
         write,
         'Configuration',
         null,
-        config && typeof config === 'object' && !Array.isArray(config) ? Object.entries(config) : [],
+        configuration && typeof configuration === 'object' && !Array.isArray(configuration)
+            ? Object.entries(configuration)
+            : [],
     );
 
-    const context = d.envelope?.entityContext;
+    const context = env?.entityContext;
     renderSection(
         write,
         'Context',
@@ -106,19 +139,27 @@ const renderLean = (d: DecryptedPluginPayload): void => {
         context && typeof context === 'object' && !Array.isArray(context) ? Object.entries(context) : [],
     );
 
-    if (d.backendToken) {
-        const status = d.backendToken.verified
+    renderSection(write, 'Secrets', null, Object.entries(d.secrets));
+
+    renderSection(write, 'Plugin Tokens', null, pickRows(env, ENVELOPE_TOKEN_KEYS));
+
+    renderSection(write, 'JWT', null, pickRows(env, ENVELOPE_JWT_KEYS));
+
+    if (d.backendTokenStatus) {
+        const status = d.backendTokenStatus.verified
             ? pc.green('(verified)')
-            : d.backendToken.skipped
+            : d.backendTokenStatus.skipped
               ? pc.dim('(not verified)')
               : pc.red('(verification FAILED)');
-        const claims = (d.backendToken.claims ?? {}) as Record<string, unknown>;
-        const keys = ['sub', 'aud', 'iss', 'iat', 'nbf', 'exp', 'jti', 'act'] as const;
-        const rows: [string, unknown][] = keys.filter((k) => k in claims).map((k) => [k, claims[k]]);
-        renderSection(write, 'Token', status, rows);
+        renderSection(
+            write,
+            'Backend Token',
+            status,
+            pickRows(d.backendTokenStatus.claims as Record<string, unknown> | undefined, BACKEND_TOKEN_KEYS),
+        );
     }
 
-    if (d.envelope === null && d.plaintext !== null) {
+    if (env === null && d.plaintext !== null) {
         write('');
         write(pc.bold(pc.cyan('[Plaintext]')));
         write(`  ${d.plaintext}`);
@@ -174,7 +215,7 @@ export const createPluginDecryptPayloadCommand = ({ logger, flySystem, crystalli
     command.addOption(
         new Option(
             '--json',
-            'Emit the full structured JSON document (protectedHeader, innerProtectedHeader, envelope, secrets, signature, backendToken) instead of the lean human view.',
+            'Emit the full structured JSON document (protectedHeader, innerProtectedHeader, envelope, secrets, signatureStatus, backendTokenStatus) instead of the lean human view.',
         ).default(false),
     );
     command.addOption(
@@ -192,9 +233,12 @@ ${pc.bold('What this command does (§ reference to the plugin payload protocol):
      enforcing ${pc.cyan('issuer')}, ${pc.cyan('audience')}, ${pc.cyan('RS256')}, and a clock tolerance window.
   3. Decrypt each per-field ciphertext in ${pc.cyan('envelope.encryptedSecrets')} with the same private key.
   4. Optionally verify ${pc.cyan('envelope.backendToken')} (--verify-backend-token).
-  5. Print a lean summary (${pc.cyan('[Secrets]')} / ${pc.cyan('[Configuration]')} / ${pc.cyan('[Context]')} / ${pc.cyan('[Token]')})
-     to stdout. Use ${pc.cyan('--json')} for a full structured document (suitable for ${pc.cyan('jq')}),
-     and ${pc.cyan('-v/--verbose')} to surface protected headers and the "no applicable key" hint.
+  5. Print a lean summary to stdout. Sections appear only when the payload carries them:
+     ${pc.cyan('[Envelope]')} (tenantId/tenantIdentifier/installationId/pluginIdentifier/revisionId/event),
+     ${pc.cyan('[Configuration]')}, ${pc.cyan('[Context]')} (iframe entityContext), ${pc.cyan('[Secrets]')} (decrypted per-field),
+     ${pc.cyan('[Plugin Tokens]')} (signatureSecret/staticAuthToken), ${pc.cyan('[JWT]')} (envelope iss/aud/sub/iat/nbf/exp/jti),
+     ${pc.cyan('[Backend Token]')} (verification status + claims). Use ${pc.cyan('--json')} for a full structured document
+     (suitable for ${pc.cyan('jq')}), and ${pc.cyan('-v/--verbose')} to surface protected headers and the "no applicable key" hint.
 
 ${pc.bold('Enabling verification:')}
   Pass ${pc.cyan('--audience <your-plugin-id>')}. The JWKS URL and issuer default from the env above;
@@ -202,8 +246,8 @@ ${pc.bold('Enabling verification:')}
 
 ${pc.bold('Signature failures are NOT fatal:')}
   When --jwks-url is set and verification fails (e.g. running against a mock issuer on local dev), the
-  envelope is still decoded and secrets still decrypted, with ${pc.cyan('signature.verified = false')} and the
-  failure reason. Treat the envelope as untrusted in that case.
+  envelope is still decoded and secrets still decrypted, with ${pc.cyan('signatureStatus.verified = false')} and
+  the failure reason. Treat the envelope as untrusted in that case.
 
 ${pc.bold('Security:')}
   The emitted JSON contains decrypted secrets in cleartext. Never paste or redirect it to shared logs.
@@ -329,14 +373,14 @@ ${pc.bold('Examples:')}
 
         const errLine = (msg: string) => process.stderr.write(msg + '\n');
 
-        if (decrypted.signature.verified) {
+        if (decrypted.signatureStatus.verified) {
             errLine(pc.green('✔ ') + 'signature verified');
-        } else if (decrypted.signature.skipped) {
+        } else if (decrypted.signatureStatus.skipped) {
             if (flags.verbose) {
-                errLine(pc.yellow('⚠ ') + `signature not verified: ${decrypted.signature.reason}`);
+                errLine(pc.yellow('⚠ ') + `signature not verified: ${decrypted.signatureStatus.reason}`);
             }
         } else {
-            errLine(pc.red('✖ ') + `signature FAILED: ${decrypted.signature.reason}`);
+            errLine(pc.red('✖ ') + `signature FAILED: ${decrypted.signatureStatus.reason}`);
             if (flags.verbose && decrypted.innerProtectedHeader) {
                 const h = decrypted.innerProtectedHeader;
                 errLine(
@@ -344,7 +388,7 @@ ${pc.bold('Examples:')}
                         `  inner JWS header: kid=${JSON.stringify(h.kid)}, alg=${JSON.stringify(h.alg)} — compare with JWKS at ${flags.jwksFile ?? flags.jwksUrl}`,
                     ),
                 );
-                if (decrypted.signature.reason?.includes('no applicable key')) {
+                if (decrypted.signatureStatus.reason?.includes('no applicable key')) {
                     errLine(
                         pc.dim(
                             '  hint: "no applicable key" means the JWKS was loaded but no key matches the JWT header.',

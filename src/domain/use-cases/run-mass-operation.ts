@@ -41,9 +41,10 @@ const handler = async (
         accessTokenId: envelope.message.credentials.ACCESS_TOKEN_ID,
         accessTokenSecret: envelope.message.credentials.ACCESS_TOKEN_SECRET,
     });
-    const operations = OperationsSchema.parse(operationsContent);
+    const schema = OperationsSchema as unknown as { parse: (input: unknown) => { operations: unknown[] } };
+    const parsed = schema.parse(operationsContent);
     logger.debug(
-        `Operations file parsed successfully. ${pc.bold(pc.yellow(operations.operations.length))} operation(s) found.`,
+        `Operations file parsed successfully. ${pc.bold(pc.yellow(parsed.operations.length))} operation(s) found.`,
     );
 
     const key = await uploadMassOperationFileContent(JSON.stringify(operationsContent), {

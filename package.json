@@ -1,6 +1,6 @@
 {
     "name": "@crystallize/cli",
-    "version": "5.26.0",
+    "version": "5.27.0",
     "description": "Crystallize CLI",
     "license": "MIT",
     "contributors": [
@@ -13,7 +13,7 @@
         "test": "bun test"
     },
     "dependencies": {
-        "@crystallize/js-api-client": "^7.0.0",
+        "@crystallize/js-api-client": "^7.2.0",
         "@crystallize/schema": "^6.12.0",
         "awilix": "^13.0.3",
         "cli-spinners": "^3.4.0",
@@ -21,8 +21,8 @@
         "ink": "^6.8.0",
         "ink-link": "^5.0.0",
         "ink-text-input": "^6.0.0",
-        "jose": "^5.10.0",
-        "jotai": "^2.19.0",
+        "jose": "^6.2.3",
+        "jotai": "^2.20.0",
         "json-to-graphql-query": "^2.3.0",
         "marked": "^17.0.5",
         "marked-terminal": "^7.3.0",
@@ -32,7 +32,7 @@
         "react": "^19.2.4",
         "signale": "^1.4.0",
         "tar": "^7.5.13",
-        "zod": "^4.3.6"
+        "zod": "^4.4.3"
     },
     "devDependencies": {
         "@commitlint/cli": "^20.5.0",

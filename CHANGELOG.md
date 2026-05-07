@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.27.0]
+
+- bumped `@crystallize/js-api-client` to ^7.2.0 (renamed `signature` → `signatureStatus`, `backendToken` → `backendTokenStatus` on the decrypter result; `envelope.config` → `envelope.configuration`; new `tenantId`, `event`, `signatureSecret`, `staticAuthToken` fields on `CrystallizePluginPayload`) and bumped `jose` to ^6 (drops the `KeyLike` re-export in favor of native `CryptoKey`).
+- `plugin decrypt-payload` lean output now dumps every protocol section the payload carries: `[Envelope]` (tenantId / tenantIdentifier / installationId / pluginIdentifier / revisionId / event), `[Configuration]`, `[Context]`, `[Secrets]`, `[Plugin Tokens]` (signatureSecret / staticAuthToken), `[JWT]` (envelope iss / aud / sub / iat / nbf / exp / jti) and `[Backend Token]` — sections only render when present, so webhook vs iframe variants stay scannable.
+- `plugin decrypt-payload` lean output formats `iat` / `nbf` / `exp` claims as `<unix-seconds> (<ISO-8601>)` for at-a-glance freshness checks.
+
 ## [5.26.0]
 
 - added `plugin encrypt-secret` command to encrypt a single secret value with a vendor public JWK (RSA-OAEP-256 / A256GCM), producing a compact JWE on stdout — the same shape Crystallize's UI generates for an `envelope.encryptedSecrets[fieldName]` entry; useful for local dev / testing where the UI is not in the loop. Plaintext can be passed via `--value`, piped on stdin, or pasted interactively. Output round-trips through `plugin decrypt-payload` with the matching private JWK.

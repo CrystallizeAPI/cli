@@ -3,7 +3,7 @@ import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { CompactEncrypt, SignJWT, exportJWK, generateKeyPair, importJWK, type JWK, type KeyLike } from 'jose';
+import { CompactEncrypt, SignJWT, exportJWK, generateKeyPair, importJWK, type JWK } from 'jose';
 
 const CLI = path.resolve(import.meta.dir, '../../index.ts');
 
@@ -54,7 +54,7 @@ const encryptBytesForVendor = async (publicJwk: JWK, plaintext: Uint8Array, cty?
 type Issuer = {
     jwksFilePath: string;
     issuer: string;
-    signer: KeyLike;
+    signer: CryptoKey;
     kid: string;
 };
 
@@ -66,7 +66,7 @@ const makeJwksIssuer = async (dir: string): Promise<Issuer> => {
     return {
         jwksFilePath,
         issuer: 'https://api.crystallize.example',
-        signer: privateKey as KeyLike,
+        signer: privateKey,
         kid: 'core-sign-1',
     };
 };
@@ -112,11 +112,12 @@ const buildProtocolPayload = async (args: {
     }
 
     const envelopeClaims: Record<string, unknown> = {
-        installationId: 'inst-1',
+        tenantId: 'tenant-1',
         tenantIdentifier: 'acme',
+        installationId: 'inst-1',
         pluginIdentifier: audience,
         revisionId: 'rev-1',
-        config: { brand: 'Acme' },
+        configuration: { brand: 'Acme' },
         encryptedSecrets,
         ...envelopeExtras,
     };
@@ -238,7 +239,7 @@ describe('plugin decrypt-payload', () => {
         expect(result.status).toBe(0);
         const out = JSON.parse(result.stdout);
         expect(out.protectedHeader.cty).toBe('JWT');
-        expect(out.signature).toEqual({
+        expect(out.signatureStatus).toEqual({
             verified: true,
             issuer: issuer.issuer,
             audience,
@@ -246,14 +247,16 @@ describe('plugin decrypt-payload', () => {
         });
         expect(out.envelope.iss).toBe(issuer.issuer);
         expect(out.envelope.aud).toBe(audience);
-        expect(out.envelope.installationId).toBe('inst-1');
+        expect(out.envelope.tenantId).toBe('tenant-1');
         expect(out.envelope.tenantIdentifier).toBe('acme');
+        expect(out.envelope.installationId).toBe('inst-1');
+        expect(out.envelope.configuration).toEqual({ brand: 'Acme' });
         expect(out.envelope.entityContext).toEqual({ orderId: 'ord-42' });
         expect(out.secrets).toEqual({ StripeApiKey: 'sk_live_abc', WebhookSecret: 'whsec_def' });
         expect(out.plaintext).toBeNull();
     });
 
-    test('lean default output has [Secrets] / [Configuration] / [Context] / [Token] sections — no JSON, no headers', async () => {
+    test('lean default output dumps every protocol section — no JSON, no headers', async () => {
         const { publicJwk } = await loadVendorKeys(workDir);
         const audience = 'com.vendor.test';
         const jwe = await buildProtocolPayload({
@@ -261,7 +264,12 @@ describe('plugin decrypt-payload', () => {
             issuer,
             audience,
             secretsPlain: { StripeApiKey: 'sk_live_abc' },
-            envelopeExtras: { entityContext: { orderId: 'ord-42' } },
+            envelopeExtras: {
+                entityContext: { orderId: 'ord-42' },
+                event: 'install',
+                signatureSecret: 'whsec_lean',
+                staticAuthToken: 'static_lean_token',
+            },
             backendTokenExtras: { act: { pluginIdentifier: audience } },
         });
         const result = runDecryptLean(
@@ -281,18 +289,58 @@ describe('plugin decrypt-payload', () => {
             workDir,
         );
         expect(result.status).toBe(0);
-        expect(result.stdout).toContain('[Secrets]');
-        expect(result.stdout).toContain('StripeApiKey');
-        expect(result.stdout).toContain('sk_live_abc');
+        // Identity
+        expect(result.stdout).toContain('[Envelope]');
+        expect(result.stdout).toContain('tenantId');
+        expect(result.stdout).toContain('tenant-1');
+        expect(result.stdout).toContain('tenantIdentifier');
+        expect(result.stdout).toContain('acme');
+        expect(result.stdout).toContain('installationId');
+        expect(result.stdout).toContain('inst-1');
+        expect(result.stdout).toContain('pluginIdentifier');
+        expect(result.stdout).toContain('revisionId');
+        expect(result.stdout).toContain('event');
+        expect(result.stdout).toContain('install');
+        // Configuration / Context
         expect(result.stdout).toContain('[Configuration]');
         expect(result.stdout).toContain('brand');
         expect(result.stdout).toContain('[Context]');
         expect(result.stdout).toContain('orderId');
-        expect(result.stdout).toContain('[Token]');
+        // Secrets
+        expect(result.stdout).toContain('[Secrets]');
+        expect(result.stdout).toContain('StripeApiKey');
+        expect(result.stdout).toContain('sk_live_abc');
+        // Plugin tokens (raw envelope fields)
+        expect(result.stdout).toContain('[Plugin Tokens]');
+        expect(result.stdout).toContain('signatureSecret');
+        expect(result.stdout).toContain('whsec_lean');
+        expect(result.stdout).toContain('staticAuthToken');
+        // Envelope JWT claims
+        expect(result.stdout).toContain('[JWT]');
+        expect(result.stdout).toContain('iss');
+        expect(result.stdout).toContain(issuer.issuer);
+        expect(result.stdout).toContain('exp');
+        // Backend token
+        expect(result.stdout).toContain('[Backend Token]');
         // No JSON doc, no protected headers in lean mode.
         expect(result.stdout).not.toContain('"protectedHeader"');
         expect(result.stdout).not.toContain('"innerProtectedHeader"');
         expect(result.stderr).not.toContain('outer JWE header');
+    });
+
+    test('lean output omits sections that the payload does not carry', async () => {
+        const { publicJwk } = await loadVendorKeys(workDir);
+        const jwe = await encryptBytesForVendor(publicJwk, new TextEncoder().encode('not a jwt'));
+        const result = runDecryptLean(
+            ['--private-key', path.join(workDir, 'private.jwk.json'), '--payload', jwe],
+            workDir,
+        );
+        expect(result.status).toBe(0);
+        expect(result.stdout).toContain('[Plaintext]');
+        expect(result.stdout).not.toContain('[Envelope]');
+        expect(result.stdout).not.toContain('[JWT]');
+        expect(result.stdout).not.toContain('[Backend Token]');
+        expect(result.stdout).not.toContain('[Plugin Tokens]');
     });
 
     test('--json flag still emits the structured document', async () => {

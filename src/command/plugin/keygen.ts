@@ -1,13 +1,13 @@
 import { Command, Option } from 'commander';
 import path from 'node:path';
 import { chmod, stat } from 'node:fs/promises';
-import { spawnSync } from 'node:child_process';
 import { createInterface } from 'node:readline/promises';
 import pc from 'picocolors';
 import type { Logger } from '../../domain/contracts/logger';
 import type { FlySystem } from '../../domain/contracts/fly-system';
 import type { CommandBus } from '../../domain/contracts/bus';
 import { ALLOWED_BITS, type AllowedBits } from '../../domain/use-cases/generate-plugin-keypair';
+import { findGitRoot, gitignoreContains } from '../../core/helpers/keypair-files';
 
 type Deps = {
     logger: Logger;
@@ -48,24 +48,6 @@ const promptYesNo = async (question: string): Promise<boolean> => {
     } finally {
         rl.close();
     }
-};
-
-const findGitRoot = (cwd: string): string | null => {
-    const result = spawnSync('git', ['rev-parse', '--show-toplevel'], {
-        cwd,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-    });
-    if (result.status !== 0) return null;
-    const output = result.stdout.trim();
-    return output.length > 0 ? output : null;
-};
-
-const gitignoreContains = (content: string, name: string): boolean => {
-    return content
-        .split(/\r?\n/)
-        .map((line) => line.trim())
-        .some((line) => line === name || line === `/${name}` || line === `./${name}`);
 };
 
 export const createPluginKeygenCommand = ({ logger, flySystem, commandBus }: Deps): Command => {

@@ -12,12 +12,16 @@ import type { ExecuteMutationsHandlerDefinition } from '../use-cases/execute-ext
 import type { UploadBinariesHandlerDefinition } from '../use-cases/upload-binaries';
 import type { EnrollTenantWithBoilerplatePackageHandlerDefinition } from '../use-cases/enroll-tenant-with-boilerplate-package';
 import type { GeneratePluginKeypairHandlerDefinition } from '../use-cases/generate-plugin-keypair';
+import type { DownloadPluginSkeletonArchiveHandlerDefinition } from '../use-cases/download-plugin-skeleton-archive';
+import type { ReplacePluginTokensHandlerDefinition } from '../use-cases/replace-plugin-tokens';
+import type { InstallPluginDependenciesHandlerDefinition } from '../use-cases/install-plugin-dependencies';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
     FetchTipsHandlerDefinition &
     GetStaticAuthTokenHandlerDefinition &
     GetShopAuthTokenHandlerDefinition &
-    CreateContentModelMassOperationFileHandlerDefinition;
+    CreateContentModelMassOperationFileHandlerDefinition &
+    DownloadPluginSkeletonArchiveHandlerDefinition;
 
 export type QueryBus = MissiveQueryBus<QueryDefinitions>;
 
@@ -28,5 +32,7 @@ export type CommandDefinitions = CreateCleanTenantHandlerDefinition &
     ExecuteMutationsHandlerDefinition &
     UploadBinariesHandlerDefinition &
     EnrollTenantWithBoilerplatePackageHandlerDefinition &
-    GeneratePluginKeypairHandlerDefinition;
+    GeneratePluginKeypairHandlerDefinition &
+    ReplacePluginTokensHandlerDefinition &
+    InstallPluginDependenciesHandlerDefinition;
 export type CommandBus = MissiveCommandBus<CommandDefinitions>;

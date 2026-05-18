@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.28.0]
+
+- added `plugin create <folder> [skeleton-identifier]` command to scaffold a new Crystallize plugin from a selectable git skeleton: downloads the skeleton tarball (re-rooting an optional monorepo subfolder), generates an RSA JWK keypair (reusing `plugin keygen`'s generator, writing `public.jwk.json` 0644 / `private.jwk.json` 0600 and ensuring `private.jwk.json` is gitignored even in a fresh non-git folder), substitutes mustache tokens, and installs dependencies. Interactive Ink journey by default; fully scriptable headless path via `--no-interactive` (`--name`, `--identifier`, `--author`, `--vendor-url`, `--bits`, `--kid`, `--no-install`).
+- `plugin create` token substitution covers file contents and file/directory names across the scaffold (skipping `node_modules`/`.git`, binary files, and symlinks): `{{plugin_name}}`, `{{plugin_identifier}}`, `{{author_name}}`, `{{vendor_url}}`, `{{public_jwk}}`, `{{private_jwk}}`, `{{kid}}`.
+- `plugin create` materializes `*.dist` templates to their final filenames before token substitution (e.g. `.env.dist` → `.env`, `dev-payload.config.jsonc.dist` → `dev-payload.config.jsonc`), without overwriting an existing target, so the generated files receive their tokens too.
+- the no-lockfile dependency-install default for `plugin create` is `npm` (lockfiles still auto-detect bun/pnpm/npm/yarn).
+- added bash completion for the new `plugin create` command.
+
 ## [5.27.0]
 
 - bumped `@crystallize/js-api-client` to ^7.2.0 (renamed `signature` → `signatureStatus`, `backendToken` → `backendTokenStatus` on the decrypter result; `envelope.config` → `envelope.configuration`; new `tenantId`, `event`, `signatureSecret`, `staticAuthToken` fields on `CrystallizePluginPayload`) and bumped `jose` to ^6 (drops the `KeyLike` re-export in favor of native `CryptoKey`).

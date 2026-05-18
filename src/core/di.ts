@@ -60,7 +60,12 @@ import { createUpdateCommand } from '../command/update';
 import { createPluginKeygenCommand } from '../command/plugin/keygen';
 import { createPluginDecryptPayloadCommand } from '../command/plugin/decrypt-payload';
 import { createPluginEncryptSecretCommand } from '../command/plugin/encrypt-secret';
+import { createPluginCreateCommand } from '../command/plugin/create';
+import { createCreatePluginCommandStore } from '../ui/journeys/create-plugin/create-store';
 import { createGeneratePluginKeypairHandler } from '../domain/use-cases/generate-plugin-keypair';
+import { createDownloadPluginSkeletonArchiveHandler } from '../domain/use-cases/download-plugin-skeleton-archive';
+import { createReplacePluginTokensHandler } from '../domain/use-cases/replace-plugin-tokens';
+import { createInstallPluginDependenciesHandler } from '../domain/use-cases/install-plugin-dependencies';
 import { createUpdater, type Updater } from './create-updater';
 
 export const buildServices = () => {
@@ -100,9 +105,13 @@ export const buildServices = () => {
         uploadBinaries: ReturnType<typeof createUploadBinariesHandler>;
         enrollTenantWithBoilerplatePackage: ReturnType<typeof createEnrollTenantWithBoilerplatePackageHandler>;
         generatePluginKeypair: ReturnType<typeof createGeneratePluginKeypairHandler>;
+        downloadPluginSkeletonArchive: ReturnType<typeof createDownloadPluginSkeletonArchiveHandler>;
+        replacePluginTokens: ReturnType<typeof createReplacePluginTokensHandler>;
+        installPluginDependencies: ReturnType<typeof createInstallPluginDependenciesHandler>;
 
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
+        createPluginCommandStore: ReturnType<typeof createCreatePluginCommandStore>;
 
         // commands
         installBoilerplateCommand: Command;
@@ -131,6 +140,7 @@ export const buildServices = () => {
         pluginKeygenCommand: Command;
         pluginDecryptPayloadCommand: Command;
         pluginEncryptSecretCommand: Command;
+        pluginCreateCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -173,9 +183,13 @@ export const buildServices = () => {
         uploadBinaries: asFunction(createUploadBinariesHandler).singleton(),
         enrollTenantWithBoilerplatePackage: asFunction(createEnrollTenantWithBoilerplatePackageHandler).singleton(),
         generatePluginKeypair: asFunction(createGeneratePluginKeypairHandler).singleton(),
+        downloadPluginSkeletonArchive: asFunction(createDownloadPluginSkeletonArchiveHandler).singleton(),
+        replacePluginTokens: asFunction(createReplacePluginTokensHandler).singleton(),
+        installPluginDependencies: asFunction(createInstallPluginDependenciesHandler).singleton(),
 
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
+        createPluginCommandStore: asFunction(createCreatePluginCommandStore).singleton(),
 
         // Commands
         installBoilerplateCommand: asFunction(createInstallBoilerplateCommand).singleton(),
@@ -204,6 +218,7 @@ export const buildServices = () => {
         pluginKeygenCommand: asFunction(createPluginKeygenCommand).singleton(),
         pluginDecryptPayloadCommand: asFunction(createPluginDecryptPayloadCommand).singleton(),
         pluginEncryptSecretCommand: asFunction(createPluginEncryptSecretCommand).singleton(),
+        pluginCreateCommand: asFunction(createPluginCreateCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -224,6 +239,9 @@ export const buildServices = () => {
         container.cradle.enrollTenantWithBoilerplatePackage,
     );
     container.cradle.commandBus.register('GeneratePluginKeypair', container.cradle.generatePluginKeypair);
+    container.cradle.commandBus.register('ReplacePluginTokens', container.cradle.replacePluginTokens);
+    container.cradle.commandBus.register('InstallPluginDependencies', container.cradle.installPluginDependencies);
+    container.cradle.queryBus.register('DownloadPluginSkeletonArchive', container.cradle.downloadPluginSkeletonArchive);
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -295,6 +313,7 @@ export const buildServices = () => {
             plugin: {
                 description: 'All the commands related to Plugins.',
                 commands: [
+                    container.cradle.pluginCreateCommand,
                     container.cradle.pluginKeygenCommand,
                     container.cradle.pluginEncryptSecretCommand,
                     container.cradle.pluginDecryptPayloadCommand,

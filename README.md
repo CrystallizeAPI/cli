@@ -39,6 +39,8 @@ The CLI enhances Developer Experience while also being CI/CD-friendly for automa
 
 - **Mass Operations:** Experimental but functional. You can `dump` your content model as JSON, `run` mass operations, and `execute` sets of mutations.
 
+- **Plugin Development:** Scaffold a new Crystallize plugin from a skeleton, generate its keypair, and wire up its config in one command.
+
 ## Interactivity
 
 Most commands are interactive. If credentials are missing, or input is required, the CLI will prompt you. To disable interactivity (e.g., in a CI environment), use `--no-interactive` where applicable.
@@ -61,6 +63,30 @@ An interactive command designed to simplify setting up boilerplates.
 
 - `folder` (required): The installation directory.
 - `tenant-identifier` and `boilerplate-identifier` (optional): If omitted, a wizard will guide you.
+
+## Plugin Development
+
+Scaffold a new Crystallize plugin from a selectable git skeleton.
+
+```bash
+~/crystallize plugin create <folder> [skeleton-identifier]
+```
+
+- `folder` (required): Target directory (must be empty or not exist).
+- `skeleton-identifier` (optional): If omitted, an interactive wizard lets you pick one.
+
+The command downloads the skeleton (a git repo, optionally a subfolder of a monorepo), generates an RSA JWK keypair (`public.jwk.json` / `private.jwk.json`, the private key auto-added to `.gitignore`), substitutes mustache tokens, and installs dependencies.
+
+Tokens replaced across file contents and file/directory names: `{{plugin_name}}`, `{{plugin_identifier}}`, `{{author_name}}`, `{{vendor_url}}`, `{{public_jwk}}`, `{{private_jwk}}`, `{{kid}}`. Any `*.dist` template is also materialized to its final filename (e.g. `.env.dist` → `.env`) before substitution, without overwriting an existing target.
+
+For CI / scripting, run non-interactively:
+
+```bash
+~/crystallize plugin create ./my-plugin hono-plugin-skeleton --no-interactive \
+  --name "My Plugin" --author "Acme" --vendor-url https://acme.example --no-install
+```
+
+Other plugin subcommands (`keygen`, `encrypt-secret`, `decrypt-payload`) help generate keys and test the plugin payload protocol locally.
 
 ## Tenant Management
 

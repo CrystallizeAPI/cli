@@ -55,7 +55,7 @@ export const CreatePluginJourney = ({ store, queryBus, commandBus, flySystem, lo
             {state.isTokensReplaced && <InstallDependencies store={store} commandBus={commandBus} />}
             <Messages messages={state.messages} />
             {state.isFullfilled && (
-                <Success>{`## Plugin "${state.info?.name}" is ready!\n\nYour plugin has been scaffolded in \`${state.folder}\`.\n\n> **Keep \`private.jwk.json\` secret** — it is gitignored and must never be committed or shared.\n\n### Next steps\n\n- Register the plugin revision in Crystallize using the generated \`public.jwk.json\`.\n- Test payload decryption locally with \`crystallize plugin decrypt-payload\`.\n- See the Crystallize plugins docs at https://crystallize.com/learn/concepts/plugins\n`}</Success>
+                <Success>{`## Plugin "${state.info?.name}" is ready!\n\nYour plugin has been scaffolded in \`${state.folder}\`.\n\n> **Keep \`private.jwk.json\` secret** — it is gitignored and must never be committed or shared.\n\n### Next steps\n\n- Register the plugin revision in Crystallize using the generated \`public.jwk.json\`.\n- Test payload decryption locally with \`crystallize plugin decrypt-payload\`.\n- See the Crystallize plugins docs at https://crystallize.com/docs/developer/plugins\n`}</Success>
             )}
         </>
     );

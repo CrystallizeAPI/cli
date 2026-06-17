@@ -159,7 +159,7 @@ _crystallize_completions() {
         fi
         case "${subcmd}" in
             create)
-                local options="--name= --identifier= --author= --vendor-url= --bits= --kid= --no-install --no-interactive ${default_options}"
+                local options="--name= --identifier= --author= --plugin-url= --bits= --kid= --no-install --no-interactive ${default_options}"
                 COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
                 return 0
                 ;;

@@ -29,7 +29,7 @@ export const ReplaceTokens = ({ store, commandBus }: ReplaceTokensProps) => {
                 '{{plugin_name}}': state.info.name,
                 '{{plugin_identifier}}': state.info.identifier,
                 '{{author_name}}': state.info.author,
-                '{{vendor_url}}': state.info.vendorUrl,
+                '{{vendor_url}}': state.info.pluginUrl,
                 '{{public_jwk}}': state.publicJwkCompact,
                 '{{private_jwk}}': state.privateJwkCompact,
                 '{{kid}}': state.keypair.kid,

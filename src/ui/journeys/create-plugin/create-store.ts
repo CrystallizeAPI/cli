@@ -1,11 +1,15 @@
 import { atom, createStore } from 'jotai';
 import type { PluginSkeleton } from '../../../domain/contracts/models/plugin-skeleton';
 
+// Default plugin URL used when the deployment URL is not yet known. Matches the
+// skeleton's dev server `PORT=5173`.
+export const DEFAULT_PLUGIN_URL = 'http://localhost:5173/';
+
 export type PluginInfo = {
     name: string;
     identifier: string;
     author: string;
-    vendorUrl: string;
+    pluginUrl: string;
 };
 
 export type KeypairSettings = {

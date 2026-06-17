@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.30.0]
+
+- reverse-DNS identifier
+- optional plugin URL renamed from vendor url
+- fix docs link
+
 ## [5.28.0]
 
 - added `plugin create <folder> [skeleton-identifier]` command to scaffold a new Crystallize plugin from a selectable git skeleton: downloads the skeleton tarball (re-rooting an optional monorepo subfolder), generates an RSA JWK keypair (reusing `plugin keygen`'s generator, writing `public.jwk.json` 0644 / `private.jwk.json` 0600 and ensuring `private.jwk.json` is gitignored even in a fresh non-git folder), substitutes mustache tokens, and installs dependencies. Interactive Ink journey by default; fully scriptable headless path via `--no-interactive` (`--name`, `--identifier`, `--author`, `--vendor-url`, `--bits`, `--kid`, `--no-install`).

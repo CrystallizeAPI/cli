@@ -9,8 +9,9 @@ import type { Logger } from '../../domain/contracts/logger';
 import type { CommandBus, QueryBus } from '../../domain/contracts/bus';
 import { ALLOWED_BITS, type AllowedBits } from '../../domain/use-cases/generate-plugin-keypair';
 import { writeKeypairFiles } from '../../core/helpers/keypair-files';
+import { isValidReverseDns, resolveIdentifier, REVERSE_DNS_HINT } from '../../core/helpers/plugin-identifier';
 import { CreatePluginJourney } from '../../ui/journeys/create-plugin/create-plugin.journey';
-import type { CreatePluginStore } from '../../ui/journeys/create-plugin/create-store';
+import { DEFAULT_PLUGIN_URL, type CreatePluginStore } from '../../ui/journeys/create-plugin/create-store';
 
 type Deps = {
     logger: Logger;
@@ -24,7 +25,7 @@ type Flags = {
     name?: string;
     identifier?: string;
     author?: string;
-    vendorUrl?: string;
+    pluginUrl?: string;
     bits: string;
     kid: string;
     install: boolean; // commander: --no-install => false
@@ -32,13 +33,6 @@ type Flags = {
 };
 
 const EXIT_INVALID_FLAGS = 2;
-
-const kebab = (value: string) =>
-    value
-        .toLowerCase()
-        .trim()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '');
 
 const fail = (logger: Logger, code: number, message: string): never => {
     logger.error(message);
@@ -58,9 +52,9 @@ export const createPluginCreateCommand = ({
     command.addArgument(new Argument('<folder>', 'Target folder (must be empty or not exist).'));
     command.addArgument(new Argument('[skeleton-identifier]', 'Skeleton identifier to use.'));
     command.addOption(new Option('--name <name>', 'Plugin display name.'));
-    command.addOption(new Option('--identifier <id>', 'Plugin identifier (kebab-case).'));
+    command.addOption(new Option('--identifier <id>', `Plugin identifier (${REVERSE_DNS_HINT}).`));
     command.addOption(new Option('--author <author>', 'Author name.'));
-    command.addOption(new Option('--vendor-url <url>', 'Vendor URL.'));
+    command.addOption(new Option('--plugin-url <url>', `Plugin URL (defaults to ${DEFAULT_PLUGIN_URL}).`));
     command.addOption(new Option('--bits <n>', 'RSA modulus length.').default('2048'));
     command.addOption(new Option('--kid <kid>', 'Key id.').default('public'));
     command.addOption(new Option('--no-install', 'Skip dependency installation.'));
@@ -83,21 +77,26 @@ export const createPluginCreateCommand = ({
                 ? fail(logger, EXIT_INVALID_FLAGS, `unknown skeleton "${skeletonIdentifier}"`)
                 : undefined);
 
+        // A provided --identifier must be valid reverse-DNS; otherwise derive a default from the name.
+        const resolveIdentifierOrFail = (rawId: string | undefined, name: string): string =>
+            rawId && !isValidReverseDns(rawId.trim())
+                ? fail(logger, EXIT_INVALID_FLAGS, `invalid --identifier "${rawId}". must be ${REVERSE_DNS_HINT}`)
+                : resolveIdentifier(rawId, name);
+
         const headless = flags.interactive === false || !process.stdin.isTTY;
 
         if (headless) {
             if (!skeleton) fail(logger, EXIT_INVALID_FLAGS, 'non-interactive mode requires a [skeleton-identifier]');
             if (!flags.name) fail(logger, EXIT_INVALID_FLAGS, 'non-interactive mode requires --name');
             if (!flags.author) fail(logger, EXIT_INVALID_FLAGS, 'non-interactive mode requires --author');
-            if (!flags.vendorUrl) fail(logger, EXIT_INVALID_FLAGS, 'non-interactive mode requires --vendor-url');
             // Assign to typed locals so the try block retains non-optional types.
             // tsc does not propagate narrowing from `if (!x) fail(...)` into subsequent const assignments
             // (known limitation), so one `!` per local is required here.
             const resolvedSkeleton = skeleton!;
             const resolvedName = flags.name!;
             const resolvedAuthor = flags.author!;
-            const resolvedVendorUrl = flags.vendorUrl!;
-            const identifier = kebab(flags.identifier || resolvedName);
+            const resolvedPluginUrl = flags.pluginUrl ?? DEFAULT_PLUGIN_URL;
+            const identifier = resolveIdentifierOrFail(flags.identifier, resolvedName);
 
             try {
                 const dlQuery = queryBus.createQuery('DownloadPluginSkeletonArchive', {
@@ -131,7 +130,7 @@ export const createPluginCreateCommand = ({
                         '{{plugin_name}}': resolvedName,
                         '{{plugin_identifier}}': identifier,
                         '{{author_name}}': resolvedAuthor,
-                        '{{vendor_url}}': resolvedVendorUrl,
+                        '{{vendor_url}}': resolvedPluginUrl,
                         '{{public_jwk}}': JSON.stringify(resolvedPair.publicJwk),
                         '{{private_jwk}}': JSON.stringify(resolvedPair.privateJwk),
                         '{{kid}}': flags.kid,
@@ -162,12 +161,12 @@ export const createPluginCreateCommand = ({
         if (cmd.getOptionValueSource('bits') === 'cli' || cmd.getOptionValueSource('kid') === 'cli') {
             storage.set(atoms.setKeypairAtom, { bits: bits as AllowedBits, kid: flags.kid });
         }
-        if (flags.name && flags.author && flags.vendorUrl) {
+        if (flags.name && flags.author) {
             storage.set(atoms.setInfoAtom, {
                 name: flags.name,
-                identifier: kebab(flags.identifier || flags.name),
+                identifier: resolveIdentifierOrFail(flags.identifier, flags.name),
                 author: flags.author,
-                vendorUrl: flags.vendorUrl,
+                pluginUrl: flags.pluginUrl ?? DEFAULT_PLUGIN_URL,
             });
         }
 

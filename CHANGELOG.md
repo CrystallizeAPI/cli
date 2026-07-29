@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.31.0]
+
+- bumped `@crystallize/js-api-client` to ^7.3.0 and `@crystallize/schema` to ^6.13.0
+
 ## [5.30.0]
 
 - reverse-DNS identifier

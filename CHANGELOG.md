@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [5.32.0]
+
+- Bun runtime bumped to `>=1.4` (`engines.bun`)
+- bumped `@types/bun` to ^1.4.0
+
 ## [5.31.0]
 
 - bumped `@crystallize/js-api-client` to ^7.3.0 and `@crystallize/schema` to ^6.13.0

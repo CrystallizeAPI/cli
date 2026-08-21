@@ -12,7 +12,7 @@ make build-all                     # Build all platform binaries
 make codeclean                     # Format with oxfmt
 ```
 
-The runtime is **Bun** (>=1.3). No test framework is configured.
+The runtime is **Bun** (>=1.4). No test framework is configured.
 
 ## Architecture
 

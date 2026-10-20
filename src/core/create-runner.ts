@@ -28,7 +28,7 @@ export const createRunner =
 
         await proc.exited;
         await Promise.all([stdOutPromise, stdErrPromise]);
-        return proc.exitCode || 1;
+        return proc.exitCode ?? 1;
     };
 
 export type Runner = ReturnType<typeof createRunner>;

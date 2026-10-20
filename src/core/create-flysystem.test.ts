@@ -114,3 +114,26 @@ describe('flySystem.extractArchive', () => {
         expect(await tree(destination)).toEqual([]);
     });
 });
+
+describe('createDirectoryOrFail', () => {
+    let root: string;
+
+    beforeEach(async () => {
+        root = await mkdtemp(path.join(tmpdir(), 'crystallize-flysystem-dir-'));
+    });
+
+    afterEach(async () => {
+        await rm(root, { recursive: true, force: true });
+    });
+
+    test('the directory exists as soon as the call resolves', async () => {
+        const folder = path.join(root, 'nested/shop');
+        await flySystem.createDirectoryOrFail(folder, 'no folder');
+        expect((await stat(folder)).isDirectory()).toBe(true);
+    });
+
+    test('rejects a folder that is not empty', async () => {
+        await writeFile(path.join(root, 'file.txt'), 'content');
+        await expect(flySystem.createDirectoryOrFail(root, 'no folder')).rejects.toThrow('is not empty');
+    });
+});

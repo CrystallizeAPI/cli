@@ -31,7 +31,7 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
 
     const makeDirectory = async (path: string): Promise<boolean> => {
         logger.debug(`Creating directory: ${path}`);
-        mkdir(path, { recursive: true });
+        await mkdir(path, { recursive: true });
         return true;
     };
 

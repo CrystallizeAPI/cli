@@ -15,13 +15,18 @@ import type { GeneratePluginKeypairHandlerDefinition } from '../use-cases/genera
 import type { DownloadPluginSkeletonArchiveHandlerDefinition } from '../use-cases/download-plugin-skeleton-archive';
 import type { ReplacePluginTokensHandlerDefinition } from '../use-cases/replace-plugin-tokens';
 import type { InstallPluginDependenciesHandlerDefinition } from '../use-cases/install-plugin-dependencies';
+import type { FetchSuperfastShopsHandlerDefinition } from '../use-cases/fetch-superfast-shops';
+import type { DetectCodingAgentsHandlerDefinition } from '../use-cases/detect-coding-agents';
+import type { LaunchCodingAgentHandlerDefinition } from '../use-cases/launch-coding-agent';
 
 export type QueryDefinitions = DownloadBoilerplateArchiveHandlerDefinition &
     FetchTipsHandlerDefinition &
     GetStaticAuthTokenHandlerDefinition &
     GetShopAuthTokenHandlerDefinition &
     CreateContentModelMassOperationFileHandlerDefinition &
-    DownloadPluginSkeletonArchiveHandlerDefinition;
+    DownloadPluginSkeletonArchiveHandlerDefinition &
+    FetchSuperfastShopsHandlerDefinition &
+    DetectCodingAgentsHandlerDefinition;
 
 export type QueryBus = MissiveQueryBus<QueryDefinitions>;
 
@@ -34,5 +39,6 @@ export type CommandDefinitions = CreateCleanTenantHandlerDefinition &
     EnrollTenantWithBoilerplatePackageHandlerDefinition &
     GeneratePluginKeypairHandlerDefinition &
     ReplacePluginTokensHandlerDefinition &
-    InstallPluginDependenciesHandlerDefinition;
+    InstallPluginDependenciesHandlerDefinition &
+    LaunchCodingAgentHandlerDefinition;
 export type CommandBus = MissiveCommandBus<CommandDefinitions>;

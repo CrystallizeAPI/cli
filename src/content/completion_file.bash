@@ -4,7 +4,7 @@ _crystallize_completions() {
   local subcmd="${COMP_WORDS[2]}"    
   local subsubcmd="${COMP_WORDS[3]}"
   
-  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file plugin serve add-mcp add-skills update-skills update"
+  local commands="help changelog doc boilerplate tenant login whoami mass-operation token image file plugin serve add-mcp add-skills update-skills update superfast-shop sfs"
   local program_options="--version"
   local default_options="--help"
   local i_login_options="--no-interactive --token_id= --token_secret="
@@ -24,6 +24,11 @@ _crystallize_completions() {
         ;;
     add-mcp)
         local options="${i_login_options} ${default_options}"
+        COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
+        return 0
+        ;;
+    superfast-shop|sfs)
+        local options="--agent= ${default_options}"
         COMPREPLY=($(compgen -W "${options}" -- "${cur}"))
         return 0
         ;;

@@ -67,6 +67,10 @@ import { createDownloadPluginSkeletonArchiveHandler } from '../domain/use-cases/
 import { createReplacePluginTokensHandler } from '../domain/use-cases/replace-plugin-tokens';
 import { createInstallPluginDependenciesHandler } from '../domain/use-cases/install-plugin-dependencies';
 import { createUpdater, type Updater } from './create-updater';
+import { createSuperfastShopCommand } from '../command/superfast-shop';
+import { createFetchSuperfastShopsHandler } from '../domain/use-cases/fetch-superfast-shops';
+import { createDetectCodingAgentsHandler } from '../domain/use-cases/detect-coding-agents';
+import { createLaunchCodingAgentHandler } from '../domain/use-cases/launch-coding-agent';
 
 export const buildServices = () => {
     const logLevels = (
@@ -108,6 +112,9 @@ export const buildServices = () => {
         downloadPluginSkeletonArchive: ReturnType<typeof createDownloadPluginSkeletonArchiveHandler>;
         replacePluginTokens: ReturnType<typeof createReplacePluginTokensHandler>;
         installPluginDependencies: ReturnType<typeof createInstallPluginDependenciesHandler>;
+        fetchSuperfastShops: ReturnType<typeof createFetchSuperfastShopsHandler>;
+        detectCodingAgents: ReturnType<typeof createDetectCodingAgentsHandler>;
+        launchCodingAgent: ReturnType<typeof createLaunchCodingAgentHandler>;
 
         // stores
         installBoilerplateCommandStore: ReturnType<typeof createInstallBoilerplateCommandStore>;
@@ -141,6 +148,7 @@ export const buildServices = () => {
         pluginDecryptPayloadCommand: Command;
         pluginEncryptSecretCommand: Command;
         pluginCreateCommand: Command;
+        superfastShopCommand: Command;
     }>({
         injectionMode: InjectionMode.PROXY,
         strict: true,
@@ -186,6 +194,9 @@ export const buildServices = () => {
         downloadPluginSkeletonArchive: asFunction(createDownloadPluginSkeletonArchiveHandler).singleton(),
         replacePluginTokens: asFunction(createReplacePluginTokensHandler).singleton(),
         installPluginDependencies: asFunction(createInstallPluginDependenciesHandler).singleton(),
+        fetchSuperfastShops: asFunction(createFetchSuperfastShopsHandler).singleton(),
+        detectCodingAgents: asFunction(createDetectCodingAgentsHandler).singleton(),
+        launchCodingAgent: asFunction(createLaunchCodingAgentHandler).singleton(),
 
         // Stores
         installBoilerplateCommandStore: asFunction(createInstallBoilerplateCommandStore).singleton(),
@@ -219,6 +230,7 @@ export const buildServices = () => {
         pluginDecryptPayloadCommand: asFunction(createPluginDecryptPayloadCommand).singleton(),
         pluginEncryptSecretCommand: asFunction(createPluginEncryptSecretCommand).singleton(),
         pluginCreateCommand: asFunction(createPluginCreateCommand).singleton(),
+        superfastShopCommand: asFunction(createSuperfastShopCommand).singleton(),
     });
     container.cradle.commandBus.register('CreateCleanTenant', container.cradle.createCleanTenant);
     container.cradle.queryBus.register('DownloadBoilerplateArchive', container.cradle.downloadBoilerplateArchive);
@@ -242,6 +254,9 @@ export const buildServices = () => {
     container.cradle.commandBus.register('ReplacePluginTokens', container.cradle.replacePluginTokens);
     container.cradle.commandBus.register('InstallPluginDependencies', container.cradle.installPluginDependencies);
     container.cradle.queryBus.register('DownloadPluginSkeletonArchive', container.cradle.downloadPluginSkeletonArchive);
+    container.cradle.queryBus.register('FetchSuperfastShops', container.cradle.fetchSuperfastShops);
+    container.cradle.queryBus.register('DetectCodingAgents', container.cradle.detectCodingAgents);
+    container.cradle.commandBus.register('LaunchCodingAgent', container.cradle.launchCodingAgent);
 
     const proxyLogger: LoggerInterface = {
         log: (...args) => logger.debug(...args),
@@ -270,6 +285,7 @@ export const buildServices = () => {
                     container.cradle.addSkillsCommand,
                     container.cradle.updateSkillsCommand,
                     container.cradle.updateCommand,
+                    container.cradle.superfastShopCommand,
                 ],
             },
             boilerplate: {

@@ -1,95 +1,84 @@
-import Signale from 'signale';
-import type { Logger } from '../domain/contracts/logger';
 import pc from 'picocolors';
+import type { Logger } from '../domain/contracts/logger';
 
-export const createLogger = (scope: string, levels: Array<'info' | 'debug'>): Logger => {
+type Level = 'info' | 'debug';
+type LogType = Exclude<keyof Logger, 'setBuffered' | 'flush'>;
+type Style = {
+    badge: string;
+    color: (text: string) => string;
+    // the level that must be enabled to display this type, `null` means always displayed
+    level: Level | null;
+    // optional color applied to the message itself
+    tint?: (text: string) => string;
+};
+
+const fatalColor = (text: string) => pc.bold(pc.red(text));
+
+const styles: Record<LogType, Style> = {
+    success: { badge: '✔', color: pc.green, level: 'info' },
+    error: { badge: '✖', color: pc.red, level: null, tint: pc.red },
+    warn: { badge: '⚠', color: pc.yellow, level: null, tint: pc.yellow },
+    fatal: { badge: '✖', color: fatalColor, level: null, tint: fatalColor },
+    start: { badge: '▶', color: pc.green, level: 'info' },
+    pause: { badge: '■', color: pc.yellow, level: 'info' },
+    info: { badge: 'ℹ', color: pc.blue, level: 'info' },
+    debug: { badge: '●', color: pc.gray, level: 'debug', tint: pc.dim },
+    note: { badge: '●', color: pc.blue, level: 'info' },
+    complete: { badge: '☒', color: pc.cyan, level: 'info' },
+    await: { badge: '…', color: pc.blue, level: 'info' },
+    pending: { badge: '☐', color: pc.magenta, level: 'info' },
+    watch: { badge: '…', color: pc.yellow, level: 'info' },
+    log: { badge: ' ', color: (text) => text, level: 'debug' },
+};
+
+const formatError = (error: Error): string => {
+    const [headline = '', ...frames] = (error.stack ?? `${error.name}: ${error.message}`).split('\n');
+    const lines = [pc.bold(headline), ...frames.map((frame) => pc.dim(frame))];
+    if (error.cause !== undefined) {
+        lines.push(`${pc.dim('Caused by:')} ${formatArg(error.cause)}`);
+    }
+    return lines.join('\n');
+};
+
+const formatArg = (arg: unknown): string => {
+    if (typeof arg === 'string') {
+        return arg;
+    }
+    if (arg instanceof Error) {
+        return formatError(arg);
+    }
+    return Bun.inspect(arg, { colors: pc.isColorSupported, depth: 4 });
+};
+
+const format = (type: LogType, args: unknown[]): string => {
+    const { badge, color, tint } = styles[type];
+    const prefix = `${pc.dim(new Date().toTimeString().slice(0, 8))} ${color(badge)} `;
+    // continuation lines are aligned with the first line's message
+    const indent = ' '.repeat(Bun.stringWidth(prefix));
+    // errors following a message start on their own line
+    return args
+        .map((arg, index) => `${index === 0 ? '' : arg instanceof Error ? '\n' : ' '}${formatArg(arg)}`)
+        .join('')
+        .trimEnd()
+        .split('\n')
+        .map((line, index) => `${index === 0 ? prefix : indent}${tint ? tint(line) : line}`)
+        .join('\n');
+};
+
+export const createLogger = (levels: Array<Level>): Logger => {
     let isBuffered = false;
-    const buffer: Array<{ type: string; args: unknown[] }> = [];
-    const signale = new Signale.Signale({
-        logLevel: 'info', // we always display the maximum level of Signal and filter later
-        interactive: false,
-        scope,
-        config: {
-            displayTimestamp: true,
-            displayDate: true,
-            displayScope: false,
-            displayLabel: false,
-        },
-    });
+    const buffer: Array<{ type: LogType; args: unknown[] }> = [];
 
-    const log = (type: string, ...args: any[]) => {
+    const log = (type: LogType, ...args: unknown[]) => {
         if (isBuffered) {
             buffer.push({ type, args });
             return;
         }
-        switch (type) {
-            case 'info':
-                if (levels.includes('info')) {
-                    signale.info(...args);
-                }
-                break;
-            case 'debug':
-                if (levels.includes('debug')) {
-                    signale.debug(...args);
-                }
-                break;
-            case 'log':
-                if (levels.includes('debug')) {
-                    signale.log(...args);
-                }
-                break;
-            case 'warn':
-                signale.warn(...args);
-                break;
-            case 'error':
-                signale.error(...args);
-                break;
-            case 'fatal':
-                signale.fatal(...args);
-                break;
-            case 'success':
-                if (levels.includes('info')) {
-                    signale.success(...args);
-                }
-                break;
-            case 'start':
-                if (levels.includes('info')) {
-                    signale.start(...args);
-                }
-                break;
-            case 'note':
-                if (levels.includes('info')) {
-                    signale.note(...args);
-                }
-                break;
-            case 'await':
-                if (levels.includes('info')) {
-                    signale.await(...args);
-                }
-                break;
-            case 'complete':
-                if (levels.includes('info')) {
-                    signale.complete(...args);
-                }
-                break;
-            case 'pause':
-                if (levels.includes('info')) {
-                    signale.pause(...args);
-                }
-                break;
-            case 'pending':
-                if (levels.includes('info')) {
-                    signale.pending(...args);
-                }
-                break;
-            case 'watch':
-                if (levels.includes('info')) {
-                    signale.watch(...args);
-                }
-                break;
-            default:
-                throw new Error(`Invalid log type: ${type}`);
+        const { level } = styles[type];
+        if (level !== null && !levels.includes(level)) {
+            return;
         }
+        process.stdout.write(`${format(type, args)}\n`);
     };
 
     return {
@@ -100,7 +89,7 @@ export const createLogger = (scope: string, levels: Array<'info' | 'debug'>): Lo
             isBuffered = false;
             if (buffer.length > 0) {
                 log('debug', pc.bold(`Some logs were collected while in Buffered Mode.`));
-                buffer.forEach(({ type, args }) => log(type, ...args));
+                buffer.splice(0).forEach(({ type, args }) => log(type, ...args));
             }
         },
         success: (...args: unknown[]) => log('success', ...args),

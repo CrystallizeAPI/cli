@@ -73,7 +73,7 @@ export const buildServices = () => {
         `${Bun.env.LOG_LEVELS}` === 'no-output' ? [] : ['info', ...`${Bun.env.LOG_LEVELS}`.split(',')]
     ) as ('info' | 'debug')[];
     const crystallizeEnvironment = `${Bun.env.CRYSTALLIZE_ENVIRONMENT}` === 'staging' ? 'staging' : 'production';
-    const logger = createLogger('cli', logLevels);
+    const logger = createLogger(logLevels);
     const container = createContainer<{
         logLevels: ('info' | 'debug')[];
         crystallizeEnvironment: 'staging' | 'production';

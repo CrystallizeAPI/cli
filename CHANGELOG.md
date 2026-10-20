@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.0.0]
+
+- added `superfast-shop <folder> [shop-identifier]` command (alias `sfs`) to build your own shop from a [Superfast Shop](https://superfast.shop) demo with your coding agent: lists the demos (name, industry, description, features and demo link), detects the installed coding agent (Claude Code `claude`, Codex `codex`, Antigravity `agy`, Cursor `cursor-agent`, opencode `opencode`), asks which one when several are found or takes `--agent <agent>`, then hands the terminal over to it in the folder with the demo prompt and exits with the agent exit code. No login or tenant needed. Without any agent installed, it points to the demo prompt URL instead. On Windows the prompt goes through a temporary file, as long multi-line arguments cannot reach the agent there.
+- added bash completion for the new `superfast-shop` / `sfs` command.
+- **breaking:** warn, error and fatal logs now go to stderr, so a piped stdout only carries the command output.
+- replaced `signale` with a built-in logger (timestamps, colored badges, pretty-printed errors with their cause chain); buffered logs are no longer printed twice.
+- boilerplate and plugin skeleton archives are downloaded in memory and extracted with `Bun.Archive`: the `tar` dependency is gone, and the HTTP status of a boilerplate download is checked.
+- markdown is rendered with the built-in `Bun.markdown` instead of `marked` / `marked-terminal`.
+- bumped `commander` to ^15, `ink` to ^8, `jotai` to ^3, `missive.js` to ^1, `@crystallize/js-api-client` to ^7.5.0 and `@crystallize/schema` to ^6.16.0.
+- removed the `typescript` peer dependency: type checking uses `bun check` (`make check`).
+- fix the internal process runner reporting a successful command as failed (exit code 1).
+- fix folder creation not being awaited, so a new folder could be used before it existed.
+
 ## [5.33.0]
 
 - bumped `@crystallize/js-api-client` to ^7.4.0 and `@crystallize/schema` to ^6.14.0

@@ -10,15 +10,17 @@ type Style = {
     level: Level | null;
     // optional color applied to the message itself
     tint?: (text: string) => string;
+    // problems go to stderr so they never pollute a piped stdout
+    stderr?: true;
 };
 
 const fatalColor = (text: string) => pc.bold(pc.red(text));
 
 const styles: Record<LogType, Style> = {
     success: { badge: '✔', color: pc.green, level: 'info' },
-    error: { badge: '✖', color: pc.red, level: null, tint: pc.red },
-    warn: { badge: '⚠', color: pc.yellow, level: null, tint: pc.yellow },
-    fatal: { badge: '✖', color: fatalColor, level: null, tint: fatalColor },
+    error: { badge: '✖', color: pc.red, level: null, tint: pc.red, stderr: true },
+    warn: { badge: '⚠', color: pc.yellow, level: null, tint: pc.yellow, stderr: true },
+    fatal: { badge: '✖', color: fatalColor, level: null, tint: fatalColor, stderr: true },
     start: { badge: '▶', color: pc.green, level: 'info' },
     pause: { badge: '■', color: pc.yellow, level: 'info' },
     info: { badge: 'ℹ', color: pc.blue, level: 'info' },
@@ -74,11 +76,11 @@ export const createLogger = (levels: Array<Level>): Logger => {
             buffer.push({ type, args });
             return;
         }
-        const { level } = styles[type];
+        const { level, stderr } = styles[type];
         if (level !== null && !levels.includes(level)) {
             return;
         }
-        process.stdout.write(`${format(type, args)}\n`);
+        (stderr ? process.stderr : process.stdout).write(`${format(type, args)}\n`);
     };
 
     return {

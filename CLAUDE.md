@@ -10,6 +10,7 @@ make staging-run ARGS="<command>"  # Run against staging environment
 make build                         # Build single-platform binary
 make build-all                     # Build all platform binaries
 make codeclean                     # Format with oxfmt
+make check                         # Type check with bun check (no typescript dependency needed)
 ```
 
 The runtime is **Bun** (>=1.4). No test framework is configured.

@@ -24,6 +24,10 @@ codeclean: ## Code Clean
 test: ## Run tests
 	@$(BUN) test
 
+.PHONY: check
+check: ## Type check
+	@$(BUN) check
+
 .PHONY: run
 run: ## Run ARGS=""
 	@LOG_LEVELS=info,debug $(BUN) src/index.ts $$ARGS

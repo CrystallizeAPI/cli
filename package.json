@@ -9,9 +9,6 @@
     "repository": "https://github.com/CrystallizeAPI/crystallize-cli",
     "type": "module",
     "module": "src/index.ts",
-    "scripts": {
-        "test": "bun test"
-    },
     "dependencies": {
         "@crystallize/js-api-client": "^7.5.0",
         "@crystallize/schema": "^6.16.0",

@@ -1,5 +1,6 @@
-import { readdir, mkdir, unlink, writeFile } from 'node:fs/promises';
-import type { FlySystem } from '../domain/contracts/fly-system';
+import { readdir, mkdir, rename, rm, unlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import type { ExtractArchiveOptions, FlySystem } from '../domain/contracts/fly-system';
 import type { Logger } from '../domain/contracts/logger';
 
 type Deps = {
@@ -92,9 +93,40 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
         await saveFile(path, newContent);
     };
 
-    const saveResponse = async (path: string, response: Response): Promise<void> => {
-        logger.debug(`Writing Response in file: ${path}`);
-        await Bun.write(path, response);
+    const extractArchive = async (
+        archive: Blob,
+        destination: string,
+        { strip = 0, glob }: ExtractArchiveOptions = {},
+    ): Promise<void> => {
+        logger.debug(`Extracting archive in: ${destination}`);
+        // reading the bytes first makes any Blob work, Bun.Archive cannot read a file-backed one like Bun.file()
+        const tarball = new Bun.Archive(await archive.bytes());
+        const extractOptions = glob ? { glob } : undefined;
+        if (strip === 0) {
+            await tarball.extract(destination, extractOptions);
+            return;
+        }
+        // Bun.Archive cannot strip path segments: we extract in a work directory inside the destination
+        // (same filesystem, so `rename` works) and move up the entries found `strip` levels deep.
+        const workDirectory = join(destination, `.crystallize-archive-${Math.random().toString(36).substring(7)}`);
+        const moveEntries = async (from: string, depth: number): Promise<void> => {
+            for (const entry of await readdir(from, { withFileTypes: true })) {
+                const path = join(from, entry.name);
+                if (depth > 0) {
+                    if (entry.isDirectory()) {
+                        await moveEntries(path, depth - 1);
+                    }
+                    continue;
+                }
+                await rename(path, join(destination, entry.name));
+            }
+        };
+        try {
+            await tarball.extract(workDirectory, extractOptions);
+            await moveEntries(workDirectory, strip);
+        } finally {
+            await rm(workDirectory, { recursive: true, force: true });
+        }
     };
 
     return {
@@ -108,7 +140,7 @@ export const createFlySystem = ({ logger }: Deps): FlySystem => {
         loadJsonFile,
         removeFile,
         saveFile,
-        saveResponse,
+        extractArchive,
         replaceInFile,
     };
 };

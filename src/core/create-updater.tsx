@@ -1,6 +1,5 @@
 import pc from 'picocolors';
 import { chmod, unlink, rename, writeFile } from 'node:fs/promises';
-import { marked } from 'marked';
 import cliSpinners from 'cli-spinners';
 import { Box, Text, render } from 'ink';
 import type { Logger } from '../domain/contracts/logger';
@@ -208,7 +207,7 @@ export const createUpdater = ({ logger }: Deps) => {
         const notes = await getChangelogNotes(currentVersion, latestVersion);
         logger.info(pc.bold('Changes (from CHANGELOG.md):'));
         if (notes) {
-            console.log(marked.parse(notes));
+            console.log(Bun.markdown.ansi(notes));
         } else {
             logger.info(`- No entry found for version ${latestVersion}.`);
         }
@@ -229,7 +228,7 @@ export const createUpdater = ({ logger }: Deps) => {
             logger.note(headline);
             if (notes) {
                 logger.info(pc.bold('Changes (from CHANGELOG.md):'));
-                console.log(marked.parse(notes));
+                console.log(Bun.markdown.ansi(notes));
             } else {
                 logger.info(pc.bold('Changes (from CHANGELOG.md):'));
                 logger.info(`- No entry found for version ${latestVersion}.`);

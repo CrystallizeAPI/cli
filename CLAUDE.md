@@ -10,10 +10,11 @@ make staging-run ARGS="<command>"  # Run against staging environment
 make build                         # Build single-platform binary
 make build-all                     # Build all platform binaries
 make codeclean                     # Format with oxfmt
+make test                          # Run tests with bun test
 make check                         # Type check with bun check (no typescript dependency needed)
 ```
 
-The runtime is **Bun** (>=1.4). No test framework is configured.
+The runtime is **Bun** (>=1.4). Tests use Bun's built-in runner (`bun test`, `*.test.ts` files next to the code).
 
 ## Architecture
 

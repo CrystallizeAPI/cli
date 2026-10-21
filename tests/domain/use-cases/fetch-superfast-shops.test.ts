@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { parseSuperfastShops } from './fetch-superfast-shops';
+import { parseSuperfastShops } from '../../../src/domain/use-cases/fetch-superfast-shops';
 
 const store = {
     id: 'photo-store',

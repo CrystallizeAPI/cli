@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { tarOptionsFor } from './download-plugin-skeleton-archive';
+import { tarOptionsFor } from '../../../src/domain/use-cases/download-plugin-skeleton-archive';
 
 describe('tarOptionsFor', () => {
     test('strips only the GitHub root directory when there is no subfolder', () => {

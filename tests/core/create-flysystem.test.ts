@@ -15,8 +15,8 @@ import {
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { createFlySystem } from './create-flysystem';
-import { createLogger } from './create-logger';
+import { createFlySystem } from '../../src/core/create-flysystem';
+import { createLogger } from '../../src/core/create-logger';
 
 const flySystem = createFlySystem({ logger: createLogger([]) });
 

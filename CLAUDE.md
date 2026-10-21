@@ -14,7 +14,7 @@ make test                          # Run tests with bun test
 make check                         # Type check with bun check (no typescript dependency needed)
 ```
 
-The runtime is **Bun** (>=1.4). Tests use Bun's built-in runner (`bun test`, `*.test.ts` files next to the code).
+The runtime is **Bun** (>=1.4). Tests use Bun's built-in runner (`bun test`, `*.test.ts` files in `tests/`, mirroring the `src/` layout).
 
 ## Architecture
 

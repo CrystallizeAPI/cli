@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import path from 'node:path';
-import { resolveAgentPrompt } from './launch-coding-agent';
+import { resolveAgentPrompt } from '../../../src/domain/use-cases/launch-coding-agent';
 
 const prompt = '# Build "my" shop\n\n- 50% off & <b>bold</b> | pipes ^ and !bang';
 

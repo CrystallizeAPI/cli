@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { codingAgents } from '../../content/coding-agents';
-import { detectCodingAgents } from './detect-coding-agents';
+import { codingAgents } from '../../../src/content/coding-agents';
+import { detectCodingAgents } from '../../../src/domain/use-cases/detect-coding-agents';
 
 const whichFrom = (installed: Record<string, string>) => (binary: string) => installed[binary] ?? null;
 const noHelp = async () => '';

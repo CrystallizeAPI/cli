@@ -5,9 +5,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { CompactEncrypt, compactDecrypt, importJWK } from 'jose';
 import type { Envelope } from 'missive.js';
-import { createGeneratePluginKeypairHandler } from '../../domain/use-cases/generate-plugin-keypair';
+import { createGeneratePluginKeypairHandler } from '../../../src/domain/use-cases/generate-plugin-keypair';
 
-const CLI = path.resolve(import.meta.dir, '../../index.ts');
+const CLI = path.resolve(import.meta.dir, '../../../src/index.ts');
 
 const runCli = (args: string[], cwd: string) => {
     return spawnSync('bun', [CLI, 'plugin', 'keygen', ...args], {

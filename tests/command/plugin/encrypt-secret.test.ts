@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import type { JWK } from 'jose';
 
-const CLI = path.resolve(import.meta.dir, '../../index.ts');
+const CLI = path.resolve(import.meta.dir, '../../../src/index.ts');
 
 const runEncrypt = (args: string[], cwd: string, input?: string) => {
     return spawnSync('bun', [CLI, 'plugin', 'encrypt-secret', ...args], {

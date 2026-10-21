@@ -5,7 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { CompactEncrypt, SignJWT, exportJWK, generateKeyPair, importJWK, type JWK } from 'jose';
 
-const CLI = path.resolve(import.meta.dir, '../../index.ts');
+const CLI = path.resolve(import.meta.dir, '../../../src/index.ts');
 
 const runDecrypt = (args: string[], cwd: string, input?: string) => {
     return spawnSync('bun', [CLI, 'plugin', 'decrypt-payload', ...args, '--json'], {

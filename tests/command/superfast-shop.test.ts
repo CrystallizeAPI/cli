@@ -4,10 +4,10 @@ import { chmod, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:f
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import type { SuperfastShop } from '../domain/contracts/models/superfast-shop';
-import { parseSuperfastShops, SUPERFAST_SHOPS_URL } from '../domain/use-cases/fetch-superfast-shops';
+import type { SuperfastShop } from '../../src/domain/contracts/models/superfast-shop';
+import { parseSuperfastShops, SUPERFAST_SHOPS_URL } from '../../src/domain/use-cases/fetch-superfast-shops';
 
-const CLI = path.resolve(import.meta.dir, '../index.ts');
+const CLI = path.resolve(import.meta.dir, '../../src/index.ts');
 const TIMEOUT = 60_000;
 
 // records how it was started, then waits for one line on its stdin

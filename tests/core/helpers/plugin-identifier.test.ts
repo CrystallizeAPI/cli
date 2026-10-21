@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import { deriveReverseDns, isValidReverseDns, kebab, resolveIdentifier } from './plugin-identifier';
+import {
+    deriveReverseDns,
+    isValidReverseDns,
+    kebab,
+    resolveIdentifier,
+} from '../../../src/core/helpers/plugin-identifier';
 
 describe('plugin-identifier', () => {
     test('kebab normalizes arbitrary input', () => {

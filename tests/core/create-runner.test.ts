@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { createRunner } from './create-runner';
+import { createRunner } from '../../src/core/create-runner';
 
 const runner = createRunner();
 

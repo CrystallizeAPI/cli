@@ -1,0 +1,289 @@
+/* Base layer that ships with tokens.css: the app's font faces and the keyframes the motion.keyframes.* tokens name.
+ * Load it before tokens.css:  <link rel="stylesheet" href="tokens/base.css"> <link rel="stylesheet" href="tokens/tokens.css">
+ * Fonts: the same files the app self-hosts (apps/web/public/fonts, global.css:199-229). Only 400, 500 and 700 exist;
+ * 600 renders as 700. Keyframes: copied from the compiled app CSS, unchanged. Page base: the app's global html, body and
+ * box-sizing rules (global.css:248-303), so components inherit exactly what they inherit in the app. Hand-maintained. */
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/Roboto-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/Roboto-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/Roboto-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('fonts/RobotoSlab-Bold.ttf') format('truetype');
+}
+
+@keyframes animate-processing-rotate {
+  
+  0% {
+  transform: rotate(-15deg);
+}
+  25%, 75% {
+  transform: rotate(0deg);
+}
+  100% {
+  transform: rotate(25deg);
+}
+}
+
+@keyframes animate-processing-slide {
+  
+  0%, 100% {
+  transform: translateY(35px);
+}
+  25%, 75% {
+  transform: translateY(2px);
+}
+  20%, 80% {
+  transform: translateY(2px);
+}
+}
+
+@keyframes collapsible-close {
+  
+  0% {
+  height: var(--radix-collapsible-content-height);
+}
+  100% {
+  height: 0px;
+}
+}
+
+@keyframes collapsible-open {
+  
+  0% {
+  height: 0px;
+}
+  100% {
+  height: auto;
+}
+  99% {
+  height: var(--radix-collapsible-content-height);
+}
+}
+
+@keyframes ping {
+  
+  75%, 100% {
+  transform: scale(2); opacity: 0;
+}
+}
+
+@keyframes pop {
+  
+  50% {
+  transform: scale(1.5);
+}
+}
+
+@keyframes pulse {
+  
+  50% {
+  opacity: 0.5;
+}
+}
+
+@keyframes reveal-time-value-animation {
+  
+  0% {
+  opacity: 0; transform: scale(0.5);
+}
+  100% {
+  opacity: 1; transform: none;
+}
+}
+
+@keyframes select-bar-in {
+  
+  0% {
+  opacity: 0; transform: translateX(1.5rem);
+}
+  100% {
+  opacity: 1; transform: none;
+}
+}
+
+@keyframes shake {
+  
+  0% {
+  transform: translateX(0px);
+}
+  10% {
+  transform: translateX(5px);
+}
+  20% {
+  transform: translateX(-5px);
+}
+  30% {
+  transform: translateX(3px);
+}
+  40% {
+  transform: translateX(0px);
+}
+}
+
+@keyframes slideDown {
+  
+  0% {
+  opacity: 0; transform: translateY(-10px);
+}
+  100% {
+  opacity: 1; transform: translateY(0px);
+}
+}
+
+@keyframes slideUp {
+  
+  0% {
+  opacity: 0; transform: translateY(10px);
+}
+  100% {
+  opacity: 1; transform: translateY(0px);
+}
+}
+
+@keyframes spin {
+  
+  0% {
+  transform: rotate(0deg); stroke-dashoffset: 26.4;
+}
+  50% {
+  transform: rotate(720deg); stroke-dashoffset: 125.6;
+}
+  100% {
+  transform: rotate(1080deg); stroke-dashoffset: 26.4;
+}
+}
+
+/* PageLoader (molecules/page-loader.md; app: modules/loading/styles.css:1-35, renamed with the ds- prefix). */
+@keyframes ds-page-loader-rotate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(180deg); }
+  50% { transform: rotate(180deg); }
+  75% { transform: rotate(360deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes ds-page-loader-fill {
+  0% { height: 0; }
+  25% { height: 0; }
+  50% { height: 100%; }
+  75% { height: 100%; }
+  100% { height: 0; }
+}
+
+/* Page base, as in the app (global.css:248-303). Body sets NO font size: unsized text is 16px (browser default).
+   No preflight: the app deliberately omits Tailwind's reset (global.css:3-4), so h1-h6, p, ul keep browser-default
+   margins, weights and list indents, and svg stays inline. Specs state every override they need; do not add a reset. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-kerning: normal;
+  font-feature-settings: 'kern', 'liga', 'clig', 'calt';
+}
+
+body {
+  margin: 0;
+  font-family: var(--ds-font-family-sans);
+  font-weight: var(--ds-font-weight-regular);
+  line-height: var(--ds-font-line-height-none);
+  color: var(--ds-color-text-default);
+}
+
+input,
+textarea,
+button {
+  font-family: var(--ds-font-family-sans);
+  color: var(--ds-color-text-default);
+}
+
+a {
+  color: inherit;
+}
+
+/* The browser focus ring, made solid (global.css:231-233). Specs that say "browser default ring" mean this: a 1px
+   solid outline in the UA focus colour, not the dotted/auto ring. */
+*:focus-visible {
+  outline-style: solid;
+}
+
+/* Number inputs never show spin arrows (global.css:235-245). */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+/* Every scroll container (global.css:264-283): 8px thumb in gray-200, transparent track, round ends. */
+* {
+  scrollbar-color: var(--ds-color-gray-200) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar:horizontal {
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--ds-color-gray-200);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/* Visually hidden, still announced (the app's sr-only). */
+.ds-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Illustrations (library in illustrations/, spec atoms/illustration.md §4.5). Every outline is currentColor; fills are fixed
+   and never recoloured. --illo-stroke colours the outlines. On the dark purple surface the outline gets DARKER, never
+   white. This is a surface treatment, not app dark mode: never tie it to .c-dark. */
+.illo {
+  --illo-stroke: var(--ds-color-illustration-stroke);
+  color: var(--illo-stroke);
+}
+.illo[data-surface='dark'] {
+  --illo-stroke: var(--ds-color-illustration-stroke-on-dark);
+}

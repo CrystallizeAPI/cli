@@ -1,122 +1,2369 @@
-<html>
+<!doctype html>
+<html lang="en">
     <head>
-        <title>Crystallize CLI</title>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto Slab" />
+        <title>Crystallize CLI</title>
+        <meta
+            name="description"
+            content="The Crystallize CLI manages your Crystallize tenants from the terminal: boilerplates, tenants, tokens, images, mass operations and plugins."
+        />
+        <link rel="icon" type="image/svg+xml" href="brand/crystallize_symbol.svg" />
+        <!-- Crystallize design system: base.css first, then tokens.css (vendored from the design system's tokens/ folder). -->
+        <link rel="stylesheet" href="tokens/base.css" />
+        <link rel="stylesheet" href="tokens/tokens.css" />
         <style>
-            html,
-            body {
-                height: 100%;
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            body {
-                font-family: 'Roboto Slab', sans-serif;
-                text-align: center;
-                padding: 40px;
-                font-size: medium;
-                background-color: rgba(44, 36, 74);
-            }
+            /* =====================================================================================
+               Design system components, copied from each component page's "HTML and CSS" section.
+               Only the parts this page uses. Do not edit: update them from the design system.
+               ===================================================================================== */
 
-            main {
-                height: auto;
-                text-align: center;
-                background-color: rgb(44, 36, 74);
-                color: #fff;
-                padding: 100px;
-                border-radius: 8px;
-                box-shadow:
-                    0 0 10px rgba(255, 191, 74, 0.6),
-                    0 0 20px rgba(255, 191, 74, 0.4),
-                    0 0 30px rgba(255, 191, 74, 0.3);
-                animation: glow 1.5s infinite;
-            }
-
-            @keyframes glow {
-                0%,
-                100% {
-                    box-shadow:
-                        0 0 10px rgba(255, 191, 74, 0.6),
-                        0 0 20px rgba(255, 191, 74, 0.4),
-                        0 0 30px rgba(255, 191, 74, 0.3);
-                }
-                50% {
-                    box-shadow:
-                        0 0 20px rgba(255, 191, 74, 0.8),
-                        0 0 30px rgba(255, 191, 74, 0.6),
-                        0 0 40px rgba(255, 191, 74, 0.5);
-                }
-            }
-
-            .code-block {
-                position: relative;
-                background-color: #f5f5f5;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 20px 80px;
-                margin-top: 40px;
-                color: rgb(31, 25, 52);
-            }
-
-            pre {
-                margin: 0;
-                font-size: 14px;
-                white-space: pre-wrap;
-                word-wrap: break-word;
-            }
-
-            .copy-btn {
-                position: absolute;
-                top: 8px;
-                right: 8px;
-                background-color: rgb(255, 191, 74, 0.5);
-                color: rgb(31, 25, 52);
-                border: none;
-                border-radius: 4px;
-                padding: 8px 12px;
-                font-size: 12px;
-                font-weight: bold;
+            /* ---------- Link (atoms/link) ---------- */
+            .ds-link {
+                color: var(--ds-color-text-link);
+                text-decoration-line: underline;
+                text-decoration-color: currentColor;
                 cursor: pointer;
             }
+            .ds-link:focus-visible {
+                outline: var(--ds-border-width-hairline) solid var(--ds-color-focus-native);
+                outline-offset: var(--ds-component-link-focus-outline-offset);
+            }
+            .ds-link--quiet {
+                text-decoration-line: none;
+            }
+            .ds-link--quiet:hover {
+                text-decoration-line: underline;
+            }
 
-            .copy-btn:hover {
-                background-color: rgba(255, 191, 74);
+            /* ---------- Toolbar (organisms/toolbar) ---------- */
+            .ds-toolbar {
+                position: sticky;
+                top: 0;
+                z-index: var(--ds-z-chrome);
+                display: grid;
+                flex-shrink: 0;
+                grid-template-columns: var(--ds-layout-toolbar-gutter) minmax(auto, 1fr) var(
+                        --ds-layout-toolbar-gutter
+                    );
+                container: toolbar / inline-size;
+            }
+            .ds-toolbar__bar {
+                grid-column: 2;
+                position: relative;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                column-gap: var(--ds-space-inline-sm);
+                padding-right: var(--ds-space-inset-toolbar-end);
+                border-bottom-left-radius: var(--ds-component-toolbar-radius-bottom);
+                border-bottom-right-radius: var(--ds-component-toolbar-radius-bottom);
+                background-color: var(--ds-color-surface-raised);
+                color: var(--ds-color-text-default);
+                box-shadow: var(--ds-elevation-raised);
+                font-family: var(--ds-font-family-sans);
+            }
+
+            /* ---------- NavListItem (molecules/nav-list-item) ---------- */
+            .ds-nav-list,
+            .ds-nav-list *,
+            .ds-nav-list *::before,
+            .ds-nav-list *::after {
+                box-sizing: border-box;
+            }
+            .ds-nav-list {
+                margin: 0;
+                padding: var(--ds-space-2_5) 0 0;
+                list-style: none;
+                font-family: var(--ds-font-family-sans);
+                color: var(--ds-color-text-default);
+            }
+            .ds-nav-item {
+                position: relative;
+                list-style: none;
+            }
+            .ds-nav-item__row {
+                display: flex;
+                align-items: center;
+                padding: var(--ds-space-2_5) var(--ds-space-10) var(--ds-space-2_5) var(--ds-space-6);
+                color: inherit;
+                font-size: var(--ds-typography-body-default-font-size);
+                font-weight: var(--ds-font-weight-regular);
+                line-height: var(--ds-font-line-height-none);
+                text-decoration: none;
+                white-space: nowrap;
+            }
+            .ds-nav-item__row[aria-current='page'] {
+                background-color: var(--ds-color-selection-list-bg);
+            }
+            .ds-nav-item__row:hover {
+                background-color: var(--ds-color-selection-list-hover-bg);
+            }
+            .ds-nav-item__row:focus-visible {
+                outline: var(--ds-border-width-hairline) solid var(--ds-color-focus-native);
+                outline-offset: var(--ds-component-link-focus-outline-offset);
+            }
+
+            /* ---------- Card (atoms/card) ---------- */
+            .ds-card {
+                box-sizing: border-box;
+                display: block;
+                margin: 0;
+                border-radius: var(--ds-radius-card);
+                color: inherit;
+            }
+            .ds-card--default,
+            .ds-card--elevate {
+                padding: var(--ds-space-8);
+                background-color: var(--ds-color-surface-canvas);
+            }
+            .ds-card--default[data-viewport='narrow'],
+            .ds-card--elevate[data-viewport='narrow'] {
+                padding: var(--ds-space-inset-card);
+            }
+            .ds-card--elevate {
+                background-color: var(--ds-color-surface-raised);
+                box-shadow: var(--ds-elevation-raised);
+            }
+
+            /* ---------- Divider and SectionHeading (molecules/section-heading) ---------- */
+            .ds-divider {
+                display: block;
+                box-sizing: border-box;
+                overflow: hidden;
+                margin: var(--ds-space-0);
+                border: none;
+                width: 100%;
+                height: var(--ds-border-width-hairline);
+                background-color: var(--ds-component-divider-color);
+            }
+            .ds-section-heading {
+                margin-block: var(--ds-space-4) var(--ds-space-0);
+                margin-inline: 0;
+                font-family: var(--ds-typography-heading-subsection-font-family);
+                font-size: var(--ds-typography-heading-subsection-font-size);
+                font-weight: var(--ds-typography-heading-subsection-font-weight);
+                line-height: var(--ds-typography-heading-subsection-line-height);
+                letter-spacing: var(--ds-typography-heading-subsection-letter-spacing);
+                font-style: normal;
+                color: var(--ds-color-text-default);
+            }
+            .ds-section-heading--group-medium {
+                margin: var(--ds-space-4) var(--ds-space-6) var(--ds-space-0);
+                font-size: var(--ds-typography-label-default-font-size);
+                font-weight: var(--ds-typography-label-default-font-weight);
+                line-height: var(--ds-typography-label-default-line-height);
+                color: var(--ds-color-text-muted);
+            }
+            .ds-section-heading--menu {
+                margin: var(--ds-space-7) 0 0 var(--ds-space-6);
+                font-style: var(--ds-font-style-italic);
+            }
+            .ds-section-heading--compact {
+                margin: var(--ds-space-0);
+                font-size: var(--ds-font-size-sm);
+                font-weight: var(--ds-font-weight-bold);
+                line-height: var(--ds-font-line-height-5);
+            }
+
+            /* ---------- Tag (atoms/tag) ---------- */
+            .ds-tag {
+                box-sizing: border-box;
+                display: inline-grid;
+                grid-auto-flow: column;
+                align-items: center;
+                gap: var(--ds-space-inline-sm);
+                height: var(--ds-size-control-xs);
+                padding-inline: var(--ds-space-inset-chip-x);
+                border: var(--ds-border-width-hairline) solid var(--ds-color-border-neutral-strong);
+                border-radius: var(--ds-radius-control);
+                background-color: var(--ds-color-surface-subtle);
+                color: var(--ds-color-text-default);
+                font-family: var(--ds-font-family-sans);
+                font-size: var(--ds-component-tag-font-size-xs);
+                font-weight: var(--ds-font-weight-medium);
+                line-height: var(--ds-font-line-height-4);
+                white-space: nowrap;
+            }
+            .ds-tag--status-xs {
+                display: inline-flex;
+                align-items: center;
+                gap: var(--ds-space-1_5);
+                height: auto;
+                padding: var(--ds-space-0_5) var(--ds-space-2);
+                border-style: none;
+            }
+            .ds-tag--status-caution {
+                background-color: var(--ds-color-status-caution-bg);
+                color: var(--ds-color-status-caution-fg);
+            }
+
+            /* ---------- Callout (molecules/callout) ---------- */
+            .ds-callout {
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                border-radius: var(--ds-radius-container);
+                font-family: var(--ds-font-family-sans);
+                font-size: var(--ds-font-size-sm);
+                line-height: var(--ds-font-line-height-5);
+            }
+            .ds-callout p {
+                margin: 0;
+            }
+            .ds-callout--md {
+                padding: var(--ds-space-4);
+            }
+            .ds-callout--info {
+                gap: var(--ds-space-1_5);
+                border: var(--ds-border-width-hairline) var(--ds-border-style-solid) var(--ds-color-s-blue-200-700);
+                background-color: var(--ds-color-status-info-bg);
+                color: var(--ds-color-text-info);
+            }
+            .ds-callout__title {
+                font-weight: var(--ds-font-weight-bold);
+            }
+
+            /* ---------- DescriptionList (molecules/description-list) ---------- */
+            .ds-description-list {
+                font-family: var(--ds-font-family-sans);
+                color: var(--ds-color-text-default);
+            }
+            .ds-description-list__heading {
+                margin: 0 0 var(--ds-space-3);
+                font-family: var(--ds-font-family-sans);
+                font-size: var(--ds-typography-meta-font-size);
+                line-height: var(--ds-typography-meta-line-height);
+                font-weight: var(--ds-typography-meta-font-weight);
+                color: var(--ds-color-text-accent-muted);
+            }
+            .ds-description-list__list {
+                display: grid;
+                grid-template-columns:
+                    minmax(
+                        var(--ds-component-description-list-term-min-width),
+                        var(--ds-component-description-list-term-max-width)
+                    )
+                    1fr;
+                align-items: baseline;
+                column-gap: var(--ds-space-inline-md);
+                row-gap: var(--ds-space-3);
+                margin: 0;
+            }
+            .ds-description-list__term {
+                overflow-wrap: break-word;
+                font-size: var(--ds-typography-label-default-font-size);
+                line-height: var(--ds-typography-label-default-line-height);
+                font-weight: var(--ds-typography-label-default-font-weight);
+                color: var(--ds-color-text-accent);
+            }
+            .ds-description-list__value {
+                min-width: 0;
+                margin: 0;
+                overflow-wrap: break-word;
+                font-size: var(--ds-typography-body-default-font-size);
+                line-height: var(--ds-typography-body-default-line-height);
+            }
+
+            /* ---------- Table (organisms/table) ---------- */
+            .ds-table {
+                box-sizing: border-box;
+                margin: 0 0 var(--ds-space-12);
+                border: var(--ds-border-width-hairline) solid var(--ds-color-border-default);
+                border-radius: var(--ds-radius-table);
+                background-color: var(--ds-color-white);
+                color: var(--ds-color-text-default);
+                font-family: var(--ds-font-family-sans);
+                line-height: var(--ds-font-line-height-none);
+            }
+            .ds-table > * {
+                border: 0;
+            }
+            .ds-table > :not([hidden]) ~ :not([hidden]) {
+                border-top: var(--ds-border-width-hairline) solid var(--ds-color-border-default);
+            }
+            .ds-table__row {
+                box-sizing: border-box;
+                display: grid;
+                grid-template-columns: repeat(12, minmax(0, 1fr));
+                align-items: center;
+                column-gap: var(--ds-space-4);
+                row-gap: var(--ds-space-4);
+                padding: var(--ds-space-2) var(--ds-space-2) var(--ds-space-2) var(--ds-space-6);
+            }
+            .ds-table__th {
+                font-size: var(--ds-typography-table-header-font-size);
+                line-height: var(--ds-typography-table-header-line-height);
+                font-weight: var(--ds-typography-table-header-font-weight);
+            }
+            .ds-table__row--body {
+                font-size: var(--ds-typography-body-default-font-size);
+                line-height: var(--ds-typography-body-default-line-height);
+                font-weight: var(--ds-typography-body-default-font-weight);
+            }
+            .ds-table__row--body:nth-child(even) {
+                background-color: var(--ds-component-table-row-stripe-bg);
+            }
+            .ds-table__row--body:hover {
+                background-color: var(--ds-component-table-row-hover-bg);
+            }
+            .ds-span-6 {
+                grid-column: span 6 / span 6;
+            }
+            .ds-table__cell--name {
+                font-weight: var(--ds-font-weight-medium);
+            }
+
+            /* ---------- CopyButton (atoms/copy-button) ---------- */
+            .ds-copy-button {
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: var(--ds-size-control-xs);
+                height: var(--ds-size-control-xs);
+                margin: 0;
+                padding: 0;
+                border: none;
+                border-radius: var(--ds-radius-control);
+                background-color: var(--ds-color-transparent);
+                color: var(--ds-color-text-default);
+                cursor: pointer;
+            }
+            .ds-copy-button:enabled:active {
+                transform: scale(var(--ds-motion-scale-pressed));
+            }
+            .ds-copy-button:enabled:focus,
+            .ds-copy-button:enabled:hover {
+                background-color: var(--ds-color-surface-raised);
+                box-shadow: var(--ds-elevation-raised);
+            }
+            .ds-copy-button:enabled:hover {
+                outline: var(--ds-border-hover-outline);
+                outline-offset: 0;
+            }
+            .ds-copy-button:enabled:focus-visible {
+                outline: var(--ds-border-width-hairline) solid var(--ds-color-focus-outline);
+                outline-offset: var(--ds-component-icon-button-focus-outline-offset);
+            }
+            .ds-copy-button svg {
+                display: block;
+                width: var(--ds-icon-size-lg);
+                height: var(--ds-icon-size-lg);
+            }
+            .ds-copy-button--glyph-22 svg {
+                width: var(--ds-icon-size-native);
+                height: var(--ds-icon-size-native);
+            }
+
+            /* ---------- CopyField, boxed command (molecules/copy-field) ---------- */
+            .ds-copy-caption {
+                display: inline;
+                color: var(--ds-color-text-muted);
+                font-size: var(--ds-typography-label-default-font-size);
+                font-weight: var(--ds-typography-label-default-font-weight);
+                line-height: var(--ds-typography-label-default-line-height);
+            }
+            .ds-copy-command {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: var(--ds-space-2);
+                padding: var(--ds-space-2) var(--ds-space-3) var(--ds-space-2) var(--ds-space-2);
+                border: var(--ds-border-width-hairline) solid var(--ds-color-border-neutral);
+                border-radius: var(--ds-radius-card);
+                background-color: var(--ds-color-white);
+                color: var(--ds-color-purple-800-100);
+            }
+            .ds-copy-command__code {
+                overflow-x: auto;
+                padding-right: var(--ds-space-4);
+                font-family: var(--ds-component-copy-field-command-font-family);
+                font-size: var(--ds-font-size-xs);
+                line-height: var(--ds-font-line-height-4);
+                font-weight: var(--ds-font-weight-bold);
+                white-space: nowrap;
+            }
+
+            /* ---------- CodeBlock, default variant in a frame (atoms/code-block) ---------- */
+            .ds-code-block {
+                box-sizing: border-box;
+                display: block;
+                margin: var(--ds-component-code-block-margin-block) 0;
+                padding: var(--ds-component-code-block-padding-default);
+                background: var(--ds-component-code-block-bg);
+                color: var(--ds-component-code-block-fg);
+                font-family: var(--ds-component-code-block-font-family);
+                font-size: inherit;
+                line-height: inherit;
+                text-align: left;
+                font-feature-settings: 'kern', 'liga', 'clig', 'calt';
+                font-kerning: normal;
+                text-rendering: optimizeLegibility;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+            .ds-code-block code {
+                font-family: inherit;
+                white-space: pre;
+            }
+            .ds-code-block__line-number {
+                box-sizing: border-box;
+                display: inline-block;
+                min-width: calc(
+                    var(--digits, 1) * var(--ds-component-code-block-line-number-digit-width) +
+                        var(--ds-component-code-block-line-number-min-width-extra)
+                );
+                padding-right: var(--ds-component-code-block-line-number-gap);
+                text-align: right;
+                user-select: none;
+            }
+            .hl-keyword {
+                color: var(--ds-component-code-block-syntax-keyword);
+            }
+            .hl-string {
+                color: var(--ds-component-code-block-syntax-string);
+            }
+            .ds-code-block-frame {
+                box-sizing: border-box;
+                max-height: var(--ds-component-code-block-framed-max-height);
+                overflow-y: scroll;
+                padding: var(--ds-space-4) var(--ds-space-4) var(--ds-space-4) 0;
+                border: var(--ds-border-width-hairline) var(--ds-border-style-solid) var(--ds-color-border-neutral);
+                border-radius: var(--ds-radius-xl);
+                background-color: var(--ds-color-white);
+            }
+            .ds-code-block-frame .ds-code-block {
+                padding: 0;
+            }
+            .ds-code-block-frame .ds-code-block__line-number {
+                opacity: var(--ds-opacity-30);
+            }
+            .ds-code-block-frame__label {
+                padding-inline: var(--ds-space-6);
+                font-size: var(--ds-font-size-xs);
+                font-weight: var(--ds-font-weight-medium);
+            }
+
+            /* ---------- Toast (molecules/toast) and IconButton xs (atoms/icon-button) ---------- */
+            .ds-toast-viewport {
+                position: fixed;
+                right: var(--ds-component-toast-viewport-offset);
+                bottom: var(--ds-component-toast-viewport-offset);
+                z-index: var(--ds-z-toast);
+                box-sizing: border-box;
+                width: var(--ds-component-toast-width);
+                margin: 0;
+                padding: 0;
+                list-style: none;
+                outline: none;
+                font-family: var(--ds-component-toast-font-family);
+                font-size: var(--ds-font-size-base);
+                line-height: var(--ds-font-line-height-none);
+            }
+            @media (max-width: 600px) {
+                /* = --ds-component-toast-mobile-breakpoint; media queries cannot read variables */
+                .ds-toast-viewport {
+                    right: var(--ds-component-toast-mobile-offset);
+                    left: var(--ds-component-toast-mobile-offset);
+                    bottom: var(--ds-component-toast-mobile-bottom);
+                    width: auto;
+                }
+            }
+            .ds-toast-slot {
+                box-sizing: border-box;
+                width: 100%;
+                outline: none;
+                transition:
+                    transform var(--ds-duration-emphasis) var(--ds-component-toast-easing, ease),
+                    opacity var(--ds-duration-emphasis) var(--ds-component-toast-easing, ease),
+                    height var(--ds-duration-emphasis) var(--ds-component-toast-easing, ease),
+                    box-shadow var(--ds-duration-moderate) var(--ds-component-toast-easing, ease);
+            }
+            .ds-toast-slot:focus-visible {
+                box-shadow: var(--ds-component-toast-focus-ring);
+            }
+            .ds-toast-slot[data-state='entering'] {
+                transform: translateY(100%);
+                opacity: var(--ds-opacity-hidden);
+            }
+            .ds-toast-slot[data-visible='false'] {
+                opacity: var(--ds-opacity-hidden);
+                pointer-events: none;
+            }
+            @media (prefers-reduced-motion) {
+                .ds-toast-slot,
+                .ds-toast-slot > * {
+                    transition: none;
+                    animation: none;
+                }
+            }
+            .ds-toast {
+                position: relative;
+                box-sizing: border-box;
+                display: flex;
+                gap: var(--ds-space-inline-sm);
+                padding-left: var(--ds-space-3);
+                padding-right: var(--ds-space-6);
+                border: var(--ds-border-width-hairline) var(--ds-border-style-solid) var(--ds-color-transparent);
+                border-radius: var(--ds-radius-card);
+                background-color: var(--ds-color-white);
+                box-shadow: var(--ds-elevation-toast);
+            }
+            .ds-toast--title-only {
+                align-items: center;
+                padding-block: var(--ds-space-2);
+            }
+            .ds-toast--success {
+                border-color: var(--ds-color-feedback-success-border);
+                background-color: var(--ds-color-feedback-success-bg);
+                color: var(--ds-color-feedback-success-fg);
+            }
+            .ds-toast--error {
+                border-color: var(--ds-color-feedback-error-border);
+                background-color: var(--ds-color-feedback-error-bg);
+                color: var(--ds-color-feedback-error-fg);
+            }
+            .ds-toast__icon svg {
+                width: var(--ds-component-toast-icon-size);
+                height: var(--ds-component-toast-icon-size);
+            }
+            .ds-toast__title {
+                font-size: var(--ds-component-toast-title-typography-font-size);
+                line-height: var(--ds-component-toast-title-typography-line-height);
+                letter-spacing: var(--ds-component-toast-title-typography-letter-spacing);
+            }
+            .ds-toast--title-only .ds-toast__title {
+                font-weight: var(--ds-component-toast-title-only-typography-font-weight);
+            }
+            .ds-toast__close {
+                position: absolute;
+                top: var(--ds-space-1);
+                right: var(--ds-space-1);
+                display: none;
+            }
+            .ds-toast:hover .ds-toast__close {
+                display: block;
+            }
+            .ds-icon-button {
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: var(--ds-size-control-sm);
+                height: var(--ds-size-control-sm);
+                margin: 0;
+                padding: var(--ds-space-0);
+                border: none;
+                border-radius: var(--ds-radius-control);
+                background-color: var(--ds-color-transparent);
+                color: var(--ds-color-text-default);
+                font-family: var(--ds-font-family-sans);
+                appearance: none;
+                cursor: pointer;
+            }
+            .ds-icon-button--xs {
+                width: var(--ds-size-control-xs);
+                height: var(--ds-size-control-xs);
+            }
+            .ds-icon-button:enabled:active {
+                transform: scale(var(--ds-motion-scale-pressed));
+            }
+            .ds-icon-button:enabled:focus,
+            .ds-icon-button:enabled:hover {
+                background-color: var(--ds-color-surface-raised);
+                box-shadow: var(--ds-elevation-raised);
+            }
+            .ds-icon-button:enabled:hover {
+                outline: var(--ds-border-hover-outline);
+                outline-offset: 0;
+            }
+            .ds-icon-button:enabled:focus-visible {
+                outline: var(--ds-border-width-hairline) solid var(--ds-color-focus-outline);
+                outline-offset: var(--ds-component-icon-button-focus-outline-offset);
+            }
+            .ds-icon-button svg {
+                display: block;
+                width: var(--ds-icon-size-xs);
+                height: var(--ds-icon-size-xs);
+            }
+
+            /* =====================================================================================
+               Page arrangement. Tokens only: these classes place the components, they don't restyle them.
+               ===================================================================================== */
+            html {
+                color-scheme: light;
+                scroll-padding-top: calc(var(--ds-layout-toolbar-height) + var(--ds-space-stack-lg));
+            }
+            body {
+                background-color: var(--ds-color-surface-canvas);
+            }
+
+            /* Shell: the aside with the page list on the left, the content column on the right. */
+            .cli-shell {
+                display: grid;
+                grid-template-columns: var(--ds-layout-aside-width) minmax(0, 1fr);
+                min-height: var(--ds-size-screen-height);
+            }
+            .cli-aside {
+                position: sticky;
+                top: 0;
+                height: var(--ds-size-screen-height);
+                overflow-y: auto;
+                border-right: var(--ds-border-width-hairline) solid var(--ds-color-border-default);
+            }
+            .cli-brand {
+                display: flex;
+                align-items: center;
+                height: var(--ds-layout-toolbar-height);
+                padding-inline: var(--ds-space-6);
+            }
+            .cli-brand img {
+                display: block;
+                height: var(--ds-size-control-sm);
+                width: auto;
+            }
+            .cli-toc .ds-nav-item__row[aria-current='location'] {
+                background-color: var(--ds-color-selection-list-bg);
+            }
+            .cli-main {
+                min-width: 0;
+            }
+            .cli-toolbar__bar {
+                justify-content: space-between;
+                min-height: var(--ds-layout-toolbar-height);
+                padding-left: var(--ds-space-6);
+            }
+            .cli-toolbar__title {
+                display: flex;
+                align-items: center;
+                gap: var(--ds-space-inline-md);
+                margin: 0;
+                font-family: var(--ds-typography-title-item-font-family);
+                font-size: var(--ds-typography-title-item-font-size);
+                font-weight: var(--ds-typography-title-item-font-weight);
+                line-height: var(--ds-typography-title-item-line-height);
+            }
+            .cli-toolbar__title .cli-brand {
+                display: none;
+                padding: 0;
+            }
+            .cli-toolbar__links {
+                display: flex;
+                gap: var(--ds-space-inline-lg);
+                font-size: var(--ds-typography-body-strong-font-size);
+                font-weight: var(--ds-typography-body-strong-font-weight);
+                line-height: var(--ds-typography-body-strong-line-height);
+            }
+
+            /* The centred column, at the settings width so text keeps a readable measure. */
+            .cli-page {
+                display: grid;
+                grid-template-columns:
+                    minmax(var(--ds-layout-content-gutter), 1fr)
+                    minmax(auto, var(--ds-layout-settings-max-width))
+                    minmax(var(--ds-layout-content-gutter), 1fr);
+                row-gap: var(--ds-space-stack-lg);
+                padding-block: var(--ds-space-stack-page-top) var(--ds-space-24);
+            }
+            .cli-page > * {
+                grid-column: 2;
+                min-width: 0;
+            }
+
+            /* Splash: the whole first screen, laid out like mcp.crystallize.com, on the deep brand purple with the
+               colour-on-dark logo. The slingshot canvas sits behind the content; empty space lets the pointer through. */
+            .cli-splash {
+                position: relative;
+                display: grid;
+                place-items: center;
+                min-height: var(--ds-size-screen-height);
+                padding: var(--ds-space-24) var(--ds-layout-content-gutter) var(--ds-space-12);
+                overflow: hidden;
+                background-color: var(--ds-color-illustration-surface-dark-deep);
+                color: var(--ds-color-text-inverse);
+                text-align: center;
+            }
+            .cli-splash__game {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                touch-action: none;
+            }
+            .cli-splash__logo {
+                position: absolute;
+                top: var(--ds-space-5);
+                left: var(--ds-space-6);
+                z-index: var(--ds-z-raised);
+            }
+            .cli-splash__logo img {
+                display: block;
+                width: auto;
+                height: var(--ds-space-14);
+            }
+            .cli-splash__inner {
+                position: relative;
+                z-index: var(--ds-z-raised);
+                display: grid;
+                justify-items: center;
+                width: 100%;
+                max-width: var(--ds-layout-content-max-width);
+                pointer-events: none;
+            }
+            .cli-splash__inner > * {
+                pointer-events: auto;
+            }
+            .cli-splash h1 {
+                margin: 0 0 var(--ds-space-stack-md);
+                font-family: var(--ds-typography-display-font-family);
+                font-size: var(--ds-font-size-5xl);
+                font-weight: var(--ds-typography-display-font-weight);
+                line-height: var(--ds-font-line-height-tight);
+                letter-spacing: var(--ds-typography-display-letter-spacing);
+            }
+            .cli-splash__lead {
+                max-width: var(--ds-size-container-2xl);
+                margin: 0 0 var(--ds-space-stack-xl);
+                font-size: var(--ds-font-size-xl);
+                line-height: var(--ds-font-line-height-7);
+                color: var(--ds-color-purple-200);
+            }
+            .cli-splash .cli-command {
+                width: 100%;
+                max-width: var(--ds-size-container-2xl);
+                text-align: left;
+            }
+            /* The caption sits on the dark surface, not on white: it takes a light purple. */
+            .cli-splash .ds-copy-caption {
+                color: var(--ds-color-purple-200);
+            }
+            .cli-splash__hint,
+            .cli-splash__footer {
+                max-width: var(--ds-size-container-2xl);
+                margin: var(--ds-space-stack-sm) 0 0;
+                font-size: var(--ds-typography-meta-font-size);
+                line-height: var(--ds-typography-meta-line-height);
+                color: var(--ds-color-purple-300);
+            }
+            .cli-splash .cli-command + .cli-splash__hint {
+                margin-top: var(--ds-space-stack-md);
+            }
+            .cli-splash .ds-link,
+            .cli-splash__hint code {
+                color: var(--ds-color-orange-300);
+            }
+            .cli-splash__hint code {
+                font-family: var(--ds-typography-code-font-family);
+            }
+            .cli-splash__footer {
+                margin-top: var(--ds-space-10);
+            }
+            .cli-splash__sling {
+                margin: var(--ds-space-stack-sm) 0 0;
+                font-size: var(--ds-typography-caption-font-size);
+                font-style: var(--ds-typography-caption-font-style);
+                line-height: var(--ds-typography-caption-line-height);
+                color: var(--ds-color-purple-400);
+                pointer-events: none;
+            }
+
+            /* Feature cards: each opens its part of the documentation, and bounces the slingshot products. */
+            .cli-features {
+                display: grid;
+                grid-template-columns: repeat(7, minmax(0, 1fr));
+                gap: var(--ds-space-2);
+                width: 100%;
+                margin: var(--ds-space-16) 0 0;
+                padding: 0;
+                list-style: none;
+            }
+            .cli-feature {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: var(--ds-space-1);
+                height: 100%;
+                padding: var(--ds-space-4) var(--ds-space-3) var(--ds-space-3);
+                border: var(--ds-border-width-hairline) solid color-mix(in srgb, var(--ds-color-white) 8%, transparent);
+                border-radius: var(--ds-radius-container);
+                background-color: color-mix(in srgb, var(--ds-color-white) 3%, transparent);
+                color: inherit;
+                text-align: left;
+                text-decoration: none;
+                transition-property: border-color, background-color;
+                transition-duration: var(--ds-motion-transition-interactive-duration);
+                transition-timing-function: var(--ds-motion-transition-interactive-timing-function);
+            }
+            .cli-feature:hover {
+                border-color: color-mix(in srgb, var(--ds-color-white) 20%, transparent);
+                background-color: color-mix(in srgb, var(--ds-color-white) 6%, transparent);
+            }
+            .cli-feature:focus-visible {
+                outline: var(--ds-border-width-emphasis) solid var(--ds-color-orange-300);
+                outline-offset: var(--ds-border-width-emphasis);
+            }
+            .cli-feature[data-hit] {
+                border-color: color-mix(in srgb, var(--ds-color-cyan-400) 60%, transparent);
+                background-color: color-mix(in srgb, var(--ds-color-cyan-400) 8%, transparent);
+            }
+            .cli-feature__icon {
+                display: grid;
+                place-items: center;
+                width: var(--ds-size-control-sm);
+                height: var(--ds-size-control-sm);
+                margin-bottom: var(--ds-space-1_5);
+                border-radius: var(--ds-radius-container);
+                background-color: color-mix(in srgb, var(--tone) 18%, transparent);
+                color: var(--tone);
+            }
+            .cli-feature__icon svg {
+                width: var(--ds-icon-size-lg);
+                height: var(--ds-icon-size-lg);
+            }
+            .cli-feature__title {
+                font-size: var(--ds-typography-body-strong-font-size);
+                font-weight: var(--ds-typography-body-strong-font-weight);
+                line-height: var(--ds-typography-body-strong-line-height);
+            }
+            .cli-feature__command {
+                font-family: var(--ds-typography-code-font-family);
+                font-size: var(--ds-typography-code-font-size);
+                line-height: var(--ds-typography-code-line-height);
+                color: var(--ds-color-purple-300);
+            }
+
+            /* Below --ds-breakpoint-xl (80rem): the feature cards wrap. Superfast Shop, the first of seven, takes two
+               columns so every row fills up. */
+            @media (max-width: 79.99rem) {
+                .cli-features {
+                    grid-template-columns: repeat(4, minmax(0, 1fr));
+                }
+                .cli-features > li:first-child {
+                    grid-column: span 2;
+                }
+            }
+
+            /* A caption above a boxed command. */
+            .cli-command {
+                display: grid;
+                grid-template-columns: minmax(0, 1fr);
+                gap: var(--ds-space-stack-xs);
+            }
+            /* Let a long command shrink and scroll inside its box instead of widening the page. */
+            .cli-command .ds-copy-command__code {
+                min-width: 0;
+            }
+
+            /* Sections: one elevated card each, children stacked on the page rhythm. */
+            .cli-section > * {
+                margin-block: 0;
+            }
+            .cli-section > * + * {
+                margin-top: var(--ds-space-stack-md);
+            }
+            .cli-section > .ds-divider {
+                margin-top: var(--ds-space-stack-lg);
+            }
+            .cli-section > .ds-divider + .ds-section-heading {
+                margin-top: var(--ds-space-stack-md);
+            }
+            .cli-section > .ds-section-heading + *,
+            .cli-section > .ds-section-heading--compact + * {
+                margin-top: var(--ds-space-stack-sm);
+            }
+            .cli-section > * + .ds-section-heading--compact {
+                margin-top: var(--ds-space-stack-lg);
+            }
+            .cli-section h2 {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: var(--ds-space-inline-md);
+                font-family: var(--ds-typography-heading-section-font-family);
+                font-size: var(--ds-typography-heading-section-font-size);
+                font-weight: var(--ds-typography-heading-section-font-weight);
+                line-height: var(--ds-typography-heading-section-line-height);
+                letter-spacing: var(--ds-typography-heading-section-letter-spacing);
+                color: var(--ds-color-text-strong);
+            }
+            .cli-section > p,
+            .cli-section > ul,
+            .cli-section > ol {
+                max-width: var(--ds-layout-prose-max-width);
+                font-size: var(--ds-typography-body-prose-font-size);
+                font-weight: var(--ds-typography-body-prose-font-weight);
+                line-height: var(--ds-typography-body-prose-line-height);
+                color: var(--ds-color-text-secondary);
+            }
+            .cli-section > ul,
+            .cli-section > ol {
+                padding-left: var(--ds-space-6);
+            }
+            .cli-section > ul > li + li,
+            .cli-section > ol > li + li {
+                margin-top: var(--ds-space-stack-xs);
+            }
+            .cli-section > ul strong,
+            .cli-section > ol strong {
+                font-weight: var(--ds-font-weight-medium);
+                color: var(--ds-color-text-default);
+            }
+            .cli-section > .ds-table {
+                margin-bottom: 0;
+            }
+            .cli-section .ds-table code {
+                overflow-wrap: anywhere;
+            }
+            /* Argument names are longer than the default terms: let the term column fit them. */
+            .cli-args {
+                --ds-component-description-list-term-max-width: max-content;
+            }
+
+            /* Inline code in running text: the code role on a subtle chip. */
+            .cli-section :not(pre) > code:not([class]) {
+                padding: var(--ds-space-px) var(--ds-space-1);
+                border-radius: var(--ds-radius-control);
+                background-color: var(--ds-color-surface-subtle);
+                color: var(--ds-color-text-default);
+                font-family: var(--ds-typography-code-font-family);
+                font-size: var(--ds-typography-code-font-size);
+                font-weight: var(--ds-typography-code-font-weight);
+            }
+
+            /* Code blocks read at the dialog size: 13px on 24px lines. */
+            .cli-code {
+                font-size: var(--ds-component-code-block-font-size-ua-default);
+                line-height: var(--ds-font-line-height-6);
+            }
+
+            /* Below --ds-breakpoint-md (48rem): the aside goes, the brand moves into the toolbar. */
+            @media (max-width: 47.99rem) {
+                .cli-shell {
+                    grid-template-columns: minmax(0, 1fr);
+                }
+                .cli-aside {
+                    display: none;
+                }
+                .cli-toolbar__title .cli-brand {
+                    display: flex;
+                }
+                .cli-toolbar__title .cli-name {
+                    display: none;
+                }
+                /* The splash stacks from the top, with the logo centred above it and no slingshot. */
+                .cli-splash {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: var(--ds-space-10);
+                    padding-top: var(--ds-space-6);
+                }
+                .cli-splash__logo {
+                    position: static;
+                }
+                .cli-splash__logo img {
+                    height: var(--ds-space-9);
+                }
+                .cli-splash__game,
+                .cli-splash__sling {
+                    display: none;
+                }
+                .cli-features {
+                    margin-top: var(--ds-space-10);
+                }
+            }
+            /* Below --ds-breakpoint-sm (40rem): narrow card padding, a smaller splash title, two cards a row. */
+            @media (max-width: 39.99rem) {
+                .cli-section.ds-card--elevate {
+                    padding: var(--ds-space-inset-card);
+                }
+                .cli-splash h1 {
+                    font-size: var(--ds-font-size-4xl);
+                }
+                .cli-splash__lead {
+                    font-size: var(--ds-font-size-base);
+                    line-height: var(--ds-font-line-height-6);
+                }
+                .cli-features {
+                    grid-template-columns: repeat(2, minmax(0, 1fr));
+                }
             }
         </style>
     </head>
     <body>
-        <main>
-            <img src="https://crystallize.com/static/logo/crystallize-logo-api-cyan.svg" alt="Crystallize" />
-            <h1>Crystallize CLI</h1>
-            <p>Crystallize CLI is a command line tool that helps you to manage your Crystallize projects.</p>
+        <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+            <defs>
+                <symbol id="ds-copy" viewBox="0 0 22 22">
+                    <path
+                        style="fill: var(--ds-color-icon-stroke)"
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M5.60925 19.5266L5.88208 18.9923C6.25379 19.182 6.67497 19.2893 7.12296 19.2893H8.45636V19.8893H7.12296C6.57795 19.8893 6.06349 19.7586 5.60925 19.5266ZM10.2342 19.8893V19.2893H11.5676C12.0156 19.2893 12.4368 19.182 12.8085 18.9923L13.0813 19.5266C12.6271 19.7586 12.1126 19.8893 11.5676 19.8893H10.2342ZM14.9011 11.1111H14.3011V8.77766C14.3011 8.32967 14.1938 7.9085 14.0041 7.53678L14.5384 7.26395C14.7703 7.71819 14.9011 8.23265 14.9011 8.77766V11.1111ZM8.45636 5.44415H7.12296C6.57795 5.44415 6.06349 5.57495 5.60925 5.80686L5.88208 6.34124C6.25379 6.15146 6.67497 6.04415 7.12296 6.04415H8.45636V5.44415ZM3.78945 14.2224H4.38945V16.5558C4.38945 17.0038 4.49676 17.425 4.68654 17.7967L4.15215 18.0696C3.92024 17.6153 3.78945 17.1009 3.78945 16.5558V14.2224ZM3.78945 11.1111H4.38945V8.77766C4.38945 8.32968 4.49676 7.9085 4.68654 7.53678L4.15215 7.26395C3.92024 7.71819 3.78945 8.23265 3.78945 8.77766V11.1111ZM10.2342 5.44415V6.04415H11.5676C12.0156 6.04415 12.4368 6.15146 12.8085 6.34124L13.0813 5.80686C12.6271 5.57495 12.1126 5.44415 11.5676 5.44415H10.2342ZM14.9011 14.2224H14.3011V16.5558C14.3011 17.0038 14.1938 17.425 14.0041 17.7967L14.5384 18.0696C14.7703 17.6153 14.9011 17.1009 14.9011 16.5558V14.2224Z"
+                    />
+                    <path
+                        style="fill: var(--ds-color-icon-fill)"
+                        d="M8.23413 5.44417C8.23413 3.60312 9.72659 2.11066 11.5676 2.11066H16.0123C17.8534 2.11066 19.3458 3.60312 19.3458 5.44416V13.2223C19.3458 15.0634 17.8534 16.5559 16.0123 16.5559H11.5676C9.72659 16.5559 8.23413 15.0634 8.23413 13.2223V5.44417Z"
+                    />
+                    <path
+                        style="fill: var(--ds-color-icon-stroke)"
+                        fill-rule="evenodd"
+                        clip-rule="evenodd"
+                        d="M16.0123 2.71066H11.5676C10.058 2.71066 8.83413 3.93449 8.83413 5.44417V13.2223C8.83413 14.732 10.058 15.9559 11.5676 15.9559H16.0123C17.522 15.9559 18.7458 14.732 18.7458 13.2223V5.44416C18.7458 3.93449 17.522 2.71066 16.0123 2.71066ZM11.5676 2.11066C9.72659 2.11066 8.23413 3.60312 8.23413 5.44417V13.2223C8.23413 15.0634 9.72659 16.5559 11.5676 16.5559H16.0123C17.8534 16.5559 19.3458 15.0634 19.3458 13.2223V5.44416C19.3458 3.60312 17.8534 2.11066 16.0123 2.11066H11.5676Z"
+                    />
+                </symbol>
+                <symbol id="i-check" viewBox="0 0 22 22">
+                    <circle style="fill: var(--ds-color-icon-fill)" cx="11" cy="11" r="8.15" />
+                    <path
+                        style="fill: var(--ds-color-icon-stroke)"
+                        fill-rule="evenodd"
+                        d="M11 18.64a7.64 7.64 0 1 0 0-15.28 7.64 7.64 0 0 0 0 15.28Zm0 .51a8.15 8.15 0 1 0 0-16.3 8.15 8.15 0 0 0 0 16.3Z"
+                    />
+                    <path
+                        style="fill: var(--ds-color-icon-stroke)"
+                        d="m6.54 12.86 2.7 2.34c.4.5 1.2.5 1.63-.06l4.64-5.93c.4-.5.4-1.4-.05-2.03-.5-.5-1.3-.4-1.75.15l-3.77 4.8-1.73-1.27c-.4-.5-1.2-.5-1.6 0-.5.5-.6 1.45-.07 2Z"
+                    />
+                </symbol>
+                <symbol id="i-error" viewBox="0 0 22 22">
+                    <path
+                        style="fill: var(--ds-color-pink-600)"
+                        d="M9.64 18.27c.6 1.05 2.12 1.05 2.72 0L19.85 5.3c.6-1.05-.15-2.36-1.36-2.36H3.51c-1.21 0-1.96 1.31-1.36 2.36Z"
+                    />
+                    <path
+                        style="fill: var(--ds-color-icon-stroke)"
+                        fill-rule="evenodd"
+                        d="M10.16 17.97c.37.65 1.31.65 1.68 0L19.33 5c.37-.65-.1-1.46-.84-1.46H3.51c-.75 0-1.21.81-.84 1.46Zm1.4-5c-.25.43-.87.43-1.12 0L7.33 7.6c-.25-.43.06-.98.56-.98h6.21c.5 0 .82.55.57.98Z"
+                    />
+                </symbol>
+                <symbol id="i-cancel" viewBox="0 0 34 34">
+                    <path
+                        fill="currentColor"
+                        d="m27.43 24.43-3.05 2.75-6.36-6.36a1 1 0 0 0-1.5-.1l-6.42 6.45-2.95-2.97 6.9-6.85L7.6 10.8l2.97-2.82 6.6 6.8a.7.7 0 0 0 1 0l6.32-6.38 2.7 2.8-6.3 6.25a1 1 0 0 0 0 1.57Z"
+                    />
+                </symbol>
+            </defs>
+        </svg>
 
-            <div class="code-block">
-                <button class="copy-btn">Copy</button>
-                <pre id="code-snippet">curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash</pre>
+        <header id="install" class="cli-splash" aria-labelledby="install-title">
+            <canvas class="cli-splash__game" aria-hidden="true"></canvas>
+            <a class="cli-splash__logo" href="https://crystallize.com">
+                <img src="brand/crystallize-logo.svg" width="250" height="85" alt="Crystallize" />
+            </a>
+            <div class="cli-splash__inner">
+                <h1 id="install-title">Your tenant.<br />Terminal-ready.</h1>
+                <p class="cli-splash__lead">
+                    The Crystallize CLI builds a Superfast Shop with your coding agent, sets up boilerplates, creates
+                    tenants and runs mass operations.
+                </p>
+                <div class="cli-command">
+                    <span id="install-caption" class="ds-copy-caption">Install the CLI</span>
+                    <div class="ds-copy-command">
+                        <code class="ds-copy-command__code" aria-labelledby="install-caption"
+                            >curl -LSs https://crystallizeapi.github.io/cli/install.bash | bash</code
+                        ><button
+                            type="button"
+                            class="ds-copy-button ds-copy-button--glyph-22"
+                            aria-label="Copy install command"
+                            data-copy="Install command"
+                        >
+                            <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                        </button>
+                    </div>
+                </div>
+                <p class="cli-splash__hint">
+                    Pre-compiled with everything included, so you need neither Node nor Bun. The
+                    <a class="ds-link" href="https://github.com/CrystallizeAPI/cli/blob/main/docs/install.bash"
+                        >install script</a
+                    >
+                    is open source.
+                </p>
+                <p class="cli-splash__hint">Then run <code>~/crystallize</code> to see every command.</p>
+
+                <ul class="cli-features">
+                    <li>
+                        <a class="cli-feature" href="#superfast-shop" style="--tone: var(--ds-color-s-pink-400)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                                    <path d="M3 6h18" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Superfast Shop</span>
+                            <span class="cli-feature__command">superfast-shop</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="cli-feature" href="#boilerplates" style="--tone: var(--ds-color-cyan-400)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"
+                                    />
+                                    <path d="M12 22V12" />
+                                    <path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7" />
+                                    <path d="m7.5 4.27 9 5.15" />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Boilerplates</span>
+                            <span class="cli-feature__command">boilerplate install</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="cli-feature" href="#tenants" style="--tone: var(--ds-color-s-purple-400)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <ellipse cx="12" cy="5" rx="9" ry="3" />
+                                    <path d="M3 5V19A9 3 0 0 0 21 19V5" />
+                                    <path d="M3 12A9 3 0 0 0 21 12" />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Tenants</span>
+                            <span class="cli-feature__command">tenant create</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="cli-feature" href="#images" style="--tone: var(--ds-color-s-green-400)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+                                    <circle cx="9" cy="9" r="2" />
+                                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Images</span>
+                            <span class="cli-feature__command">image upload</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="cli-feature" href="#mass-operations" style="--tone: var(--ds-color-pink-400)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path
+                                        d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
+                                    />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Mass operations</span>
+                            <span class="cli-feature__command">mass-operation run</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="cli-feature" href="#plugins" style="--tone: var(--ds-color-s-blue-400)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M12 22v-5" />
+                                    <path d="M9 8V2" />
+                                    <path d="M15 8V2" />
+                                    <path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z" />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Plugins</span>
+                            <span class="cli-feature__command">plugin create</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a class="cli-feature" href="#commands" style="--tone: var(--ds-color-orange-300)">
+                            <span class="cli-feature__icon" aria-hidden="true">
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                >
+                                    <path d="M12 8V4H8" />
+                                    <rect width="16" height="12" x="4" y="8" rx="2" />
+                                    <path d="M2 14h2" />
+                                    <path d="M20 14h2" />
+                                    <path d="M15 13v2" />
+                                    <path d="M9 13v2" />
+                                </svg>
+                            </span>
+                            <span class="cli-feature__title">Coding agents</span>
+                            <span class="cli-feature__command">add-mcp</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <p class="cli-splash__footer">
+                    Open source on
+                    <a class="ds-link" href="https://github.com/CrystallizeAPI/tools">GitHub</a>
+                    · Every command in the
+                    <a class="ds-link" href="#overview">documentation</a>
+                    ·
+                    <a id="cli-version" class="ds-link" href="https://github.com/CrystallizeAPI/cli/releases"
+                        >Releases</a
+                    >
+                </p>
+                <p class="cli-splash__sling" hidden>Drag anywhere to slingshot products ✨</p>
             </div>
-        </main>
+        </header>
+
+        <div class="cli-shell">
+            <aside class="cli-aside" aria-label="Page sections">
+                <a class="cli-brand" href="#install">
+                    <img src="brand/crystallize-logo-main.svg" width="118" height="40" alt="Crystallize" />
+                </a>
+                <nav class="cli-toc" aria-labelledby="toc-title">
+                    <h2
+                        id="toc-title"
+                        class="ds-section-heading ds-section-heading--group-medium ds-section-heading--menu"
+                    >
+                        On this page
+                    </h2>
+                    <ul class="ds-nav-list">
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#install">Install</a></li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#overview">Overview</a></li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#credentials">Credentials</a></li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#commands">Commands</a></li>
+                        <li class="ds-nav-item">
+                            <a class="ds-nav-item__row" href="#superfast-shop">Superfast Shop</a>
+                        </li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#boilerplates">Boilerplates</a></li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#plugins">Plugins</a></li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#tenants">Tenants</a></li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#images">Images</a></li>
+                        <li class="ds-nav-item">
+                            <a class="ds-nav-item__row" href="#mass-operations">Mass operations</a>
+                        </li>
+                        <li class="ds-nav-item"><a class="ds-nav-item__row" href="#contributing">Contributing</a></li>
+                    </ul>
+                </nav>
+            </aside>
+
+            <div class="cli-main">
+                <header class="ds-toolbar">
+                    <div class="ds-toolbar__bar cli-toolbar__bar">
+                        <p class="cli-toolbar__title">
+                            <a class="cli-brand" href="#install">
+                                <img src="brand/crystallize-logo-main.svg" width="118" height="40" alt="Crystallize" />
+                            </a>
+                            <span class="cli-name">Crystallize CLI</span>
+                        </p>
+                        <nav class="cli-toolbar__links" aria-label="Project">
+                            <a class="ds-link ds-link--quiet" href="https://github.com/CrystallizeAPI/cli/releases"
+                                >Releases</a
+                            >
+                            <a class="ds-link ds-link--quiet" href="https://github.com/CrystallizeAPI/tools">GitHub</a>
+                        </nav>
+                    </div>
+                </header>
+
+                <main id="main" class="cli-page">
+                    <section
+                        id="overview"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="overview-title"
+                    >
+                        <h2 id="overview-title">Overview</h2>
+                        <p>
+                            Manage your Crystallize tenants from the terminal: install boilerplates, create tenants,
+                            upload images and run mass operations. Use it locally, or in your CI/CD pipelines to
+                            automate the work.
+                        </p>
+                        <p>
+                            The CLI is written in Bun and compiled into a single binary with everything included, so you
+                            need neither Node nor Bun. The
+                            <a class="ds-link" href="https://github.com/CrystallizeAPI/cli/blob/main/docs/install.bash"
+                                >install script</a
+                            >
+                            is open source: it detects your OS and architecture, and downloads the
+                            <a class="ds-link" href="https://github.com/CrystallizeAPI/cli/releases">latest release</a>
+                            from GitHub.
+                        </p>
+                        <div class="ds-callout ds-callout--info ds-callout--md">
+                            <p class="ds-callout__title">The legacy CLIs are deprecated</p>
+                            <p>
+                                <code>@crystallize/cli</code> and <code>@crystallize/cli-next</code> on npm still work,
+                                but they are now mainly used to install legacy templates. Use this CLI for everything
+                                else.
+                            </p>
+                        </div>
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">What it does</h3>
+                        <ul>
+                            <li>
+                                <strong>Boilerplates.</strong> Clones the repository, creates the tenant, imports its
+                                data, writes the <code>.env</code> file and installs the dependencies.
+                            </li>
+                            <li>
+                                <strong>Tenants.</strong> Creates empty tenants and generates invitations for existing
+                                ones.
+                            </li>
+                            <li><strong>Tokens.</strong> Fetches and generates access tokens.</li>
+                            <li>
+                                <strong>Images and files.</strong> Uploads and registers a single file or a whole
+                                folder.
+                            </li>
+                            <li>
+                                <strong>Mass operations.</strong> Dumps your content model as JSON, validates and runs
+                                mass operations, and executes sets of mutations.
+                            </li>
+                            <li>
+                                <strong>Plugins.</strong> Scaffolds a plugin from a skeleton, generates its keypair and
+                                wires up its configuration in one command.
+                            </li>
+                            <li>
+                                <strong>Superfast Shop.</strong> Builds your own shop from a Superfast Shop demo, with
+                                your coding agent.
+                            </li>
+                            <li>
+                                <strong>Coding agents.</strong> Adds the Crystallize MCP server and AI skills to your
+                                environment.
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section
+                        id="credentials"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="credentials-title"
+                    >
+                        <h2 id="credentials-title">Credentials</h2>
+                        <p>
+                            Most commands are interactive: when credentials are missing or input is needed, the CLI
+                            asks. In CI, pass <code>--no-interactive</code> where a command supports it.
+                        </p>
+                        <p>
+                            When you save credentials interactively, the CLI stores them in
+                            <code>~/.crystallize/credentials.json</code>. It looks for credentials in this order:
+                        </p>
+                        <ol>
+                            <li>
+                                <strong>Environment variables:</strong> <code>CRYSTALLIZE_ACCESS_TOKEN_ID</code> and
+                                <code>CRYSTALLIZE_ACCESS_TOKEN_SECRET</code>
+                            </li>
+                            <li><strong>Options:</strong> <code>--token_id</code> and <code>--token_secret</code></li>
+                            <li><strong>Stored file:</strong> <code>~/.crystallize/credentials.json</code></li>
+                        </ol>
+                        <p>
+                            Run <code>login</code> to set up your credentials, and <code>whoami</code> to check they are
+                            valid.
+                        </p>
+                    </section>
+
+                    <section
+                        id="commands"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="commands-title"
+                    >
+                        <h2 id="commands-title">Commands</h2>
+                        <p>
+                            Run <code>~/crystallize</code> on its own to see the help and install shell completion. Add
+                            <code>--help</code> to any command to see its arguments and options.
+                        </p>
+                        <div class="ds-table" role="table" aria-labelledby="commands-title">
+                            <div class="ds-table__row ds-table__row--header" role="row">
+                                <span class="ds-table__th ds-span-6" role="columnheader">Command</span>
+                                <span class="ds-table__th ds-span-6" role="columnheader">What it does</span>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>login</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Checks your credentials and offers to set them up.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>whoami</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Checks that your credentials are valid.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>update</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Updates the CLI to the latest version.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>changelog</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Shows the changelog.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>doc</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Shows this documentation in the terminal.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>serve</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Serves a subset of the commands over HTTP.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>add-mcp</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Adds the Crystallize MCP server to your environment.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>add-skills</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Adds the Crystallize AI skills to your environment.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>update-skills</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Updates the Crystallize AI skills in your environment.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>superfast-shop</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Builds your own shop from a Superfast Shop demo, with your coding agent. Alias:
+                                    <code>sfs</code>.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>boilerplate install</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Installs a boilerplate into a folder.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>tenant create</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Creates a tenant.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>tenant enroll</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Brings the shapes, items and images of a boilerplate into a tenant.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>tenant invite</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Generates invites for new users.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>token pim</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Gets the PIM auth token.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>token static</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Gets the static auth token.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>token shop</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Gets the Shop API auth token.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>image upload</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Uploads images to a tenant.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>file upload</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">Uploads files to a tenant.</div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>mass-operation run</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Uploads a mass operation and starts it in your tenant.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>mass-operation dump-content-model</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Creates a mass operation file from your content model.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>mass-operation execute-mutations</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Executes sets of mutations, client-side.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>mass-operation add-operation</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Adds operation skeletons to a mass operation file.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>mass-operation validate</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Validates a mass operation file locally.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>plugin create</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Scaffolds a new plugin from a skeleton.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>plugin keygen</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Generates an RSA JWK keypair for a plugin revision.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>plugin encrypt-secret</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Encrypts a secret with a vendor public JWK.
+                                </div>
+                            </div>
+                            <div class="ds-table__row ds-table__row--body" role="row">
+                                <div class="ds-table__cell ds-table__cell--name ds-span-6" role="cell">
+                                    <code>plugin decrypt-payload</code>
+                                </div>
+                                <div class="ds-table__cell ds-span-6" role="cell">
+                                    Decrypts and verifies a plugin JWE payload.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section
+                        id="superfast-shop"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="superfast-shop-title"
+                    >
+                        <h2 id="superfast-shop-title">Superfast Shop</h2>
+                        <p>
+                            Builds your own shop from a
+                            <a class="ds-link" href="https://superfast.shop">Superfast Shop</a> demo, with your coding
+                            agent. The CLI asks which demo to start from, finds the coding agents installed on your
+                            machine, and hands your terminal over to the one you pick, with the demo's prompt.
+                        </p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize superfast-shop &lt;folder&gt; [shop-identifier]</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ds-description-list cli-args">
+                            <h3 class="ds-description-list__heading">Arguments and options</h3>
+                            <dl class="ds-description-list__list">
+                                <dt class="ds-description-list__term"><code>folder</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Required. The folder to build the shop in, which must be empty or not exist.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>shop-identifier</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Optional. The demo to start from. If you leave it out, you pick one from a list.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>--agent</code></dt>
+                                <dd class="ds-description-list__value">
+                                    The coding agent to hand over to: <code>claude</code>, <code>codex</code>,
+                                    <code>agy</code>, <code>cursor</code> or <code>opencode</code>. If you leave it out
+                                    and several are installed, you pick one.
+                                </dd>
+                            </dl>
+                        </div>
+                        <ul>
+                            <li>Run it in an interactive terminal: your coding agent takes it over.</li>
+                            <li>
+                                If no supported agent is installed, the CLI gives you the demo's prompt to paste into
+                                the agent of your choice.
+                            </li>
+                            <li>Its alias is <code>sfs</code>.</li>
+                        </ul>
+                    </section>
+
+                    <section
+                        id="boilerplates"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="boilerplates-title"
+                    >
+                        <h2 id="boilerplates-title">Boilerplates</h2>
+                        <p>An interactive command that does the tedious setup of a boilerplate for you.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize boilerplate install &lt;folder&gt; [tenant-identifier]
+                                    [boilerplate-identifier]</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ds-description-list cli-args">
+                            <h3 class="ds-description-list__heading">Arguments</h3>
+                            <dl class="ds-description-list__list">
+                                <dt class="ds-description-list__term"><code>folder</code></dt>
+                                <dd class="ds-description-list__value">Required. The folder to install into.</dd>
+                                <dt class="ds-description-list__term"><code>tenant-identifier</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Optional. A wizard asks for it if you leave it out.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>boilerplate-identifier</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Optional. A wizard asks for it if you leave it out.
+                                </dd>
+                            </dl>
+                        </div>
+                    </section>
+
+                    <section id="plugins" class="cli-section ds-card ds-card--elevate" aria-labelledby="plugins-title">
+                        <h2 id="plugins-title">Plugins</h2>
+                        <p>Scaffolds a new Crystallize plugin from a git skeleton you pick.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize plugin create &lt;folder&gt; [skeleton-identifier]</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ds-description-list cli-args">
+                            <h3 class="ds-description-list__heading">Arguments</h3>
+                            <dl class="ds-description-list__list">
+                                <dt class="ds-description-list__term"><code>folder</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Required. The target folder, which must be empty or not exist.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>skeleton-identifier</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Optional. A wizard lets you pick one if you leave it out.
+                                </dd>
+                            </dl>
+                        </div>
+                        <p>
+                            The command downloads the skeleton (a git repository, or a subfolder of a monorepo),
+                            generates an RSA JWK keypair (<code>public.jwk.json</code> and
+                            <code>private.jwk.json</code>, with the private key added to <code>.gitignore</code>),
+                            replaces the mustache tokens and installs the dependencies.
+                        </p>
+                        <p>
+                            Tokens are replaced in file contents and in file and folder names:
+                            <code>{{plugin_name}}</code>, <code>{{plugin_identifier}}</code>,
+                            <code>{{author_name}}</code>, <code>{{vendor_url}}</code>, <code>{{public_jwk}}</code>,
+                            <code>{{private_jwk}}</code> and <code>{{kid}}</code>. Any <code>*.dist</code> template is
+                            first copied to its final name (<code>.env.dist</code> becomes <code>.env</code>), without
+                            overwriting an existing file.
+                        </p>
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">In CI and scripts</h3>
+                        <p>Pass every input as an option and run without prompts:</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Example</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize plugin create ./my-plugin hono-plugin-skeleton --no-interactive
+                                    --name "My Plugin" --author "Acme" --plugin-url https://acme.example
+                                    --no-install</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p>
+                            The other plugin commands, <code>keygen</code>, <code>encrypt-secret</code> and
+                            <code>decrypt-payload</code>, generate keys and let you test the plugin payload protocol
+                            locally.
+                        </p>
+                    </section>
+
+                    <section id="tenants" class="cli-section ds-card ds-card--elevate" aria-labelledby="tenants-title">
+                        <h2 id="tenants-title">Tenants</h2>
+                        <h3 class="ds-section-heading">Create a tenant</h3>
+                        <p>Creates a new tenant and removes the default shapes, so you start clean.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize tenant create &lt;tenant-identifier&gt;</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <ul>
+                            <li>
+                                Runs without prompts with <code>--no-interactive</code> when
+                                <a class="ds-link" href="#credentials">credentials</a> are available.
+                            </li>
+                            <li>If the identifier is taken, the CLI tells you and suggests another one.</li>
+                        </ul>
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">Invite users</h3>
+                        <p>Generates invitation links for new users.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize tenant invite &lt;tenant-identifier&gt;</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ds-description-list cli-args">
+                            <h4 class="ds-description-list__heading">Options</h4>
+                            <dl class="ds-description-list__list">
+                                <dt class="ds-description-list__term"><code>--role</code></dt>
+                                <dd class="ds-description-list__value">
+                                    The role of the new users. Defaults to <code>tenantAdmin</code>.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>--expiry</code></dt>
+                                <dd class="ds-description-list__value">
+                                    How many hours the invites stay valid. Defaults to 6.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>--number</code></dt>
+                                <dd class="ds-description-list__value">How many invites to generate. Defaults to 1.</dd>
+                            </dl>
+                        </div>
+                    </section>
+
+                    <section id="images" class="cli-section ds-card ds-card--elevate" aria-labelledby="images-title">
+                        <h2 id="images-title">Images</h2>
+                        <p>Uploads images and registers them in the Asset Organizer.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize image upload &lt;tenant-identifier&gt; &lt;file&gt;
+                                    [output-file]</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ds-description-list cli-args">
+                            <h3 class="ds-description-list__heading">Arguments and options</h3>
+                            <dl class="ds-description-list__list">
+                                <dt class="ds-description-list__term"><code>file</code></dt>
+                                <dd class="ds-description-list__value">
+                                    A single image, or a folder to upload every image in it.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>output-file</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Optional. A file that maps each upload to its key, for automation.
+                                </dd>
+                                <dt class="ds-description-list__term"><code>--force</code></dt>
+                                <dd class="ds-description-list__value">Overwrites an existing output file.</dd>
+                            </dl>
+                        </div>
+                        <div
+                            class="ds-code-block-frame cli-code"
+                            role="region"
+                            tabindex="0"
+                            aria-labelledby="images-output"
+                        >
+                            <div id="images-output" class="ds-code-block-frame__label">Output file</div>
+                            <pre
+                                class="ds-code-block"
+                            ><code class="language-json"><span class="ds-code-block__line-number" aria-hidden="true">1</span>{
+<span class="ds-code-block__line-number" aria-hidden="true">2</span>  "clean-name-png": <span class="hl-string">"crystallize-key"</span>,
+<span class="ds-code-block__line-number" aria-hidden="true">3</span>  "images-crystallize-png": <span class="hl-string">"my-tenant/25/1/12/3435d2d0/images/crystallize.png"</span>
+<span class="ds-code-block__line-number" aria-hidden="true">4</span>}</code></pre>
+                        </div>
+                    </section>
+
+                    <section
+                        id="mass-operations"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="mass-operations-title"
+                    >
+                        <h2 id="mass-operations-title">
+                            Mass operations
+                            <span class="ds-tag ds-tag--status-xs ds-tag--status-caution">Experimental</span>
+                        </h2>
+                        <p>
+                            Create, update and publish data in bulk. These commands dump, validate and run mass
+                            operation files, and execute sets of mutations from your machine.
+                        </p>
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">Dump the content model</h3>
+                        <p>Creates a mass operation file that holds your content model: shapes and pieces.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize mass-operation dump-content-model &lt;tenant-identifier&gt;
+                                    &lt;file&gt;</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p>Use <code>--force</code> to overwrite an existing file.</p>
+
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">Validate a mass operation file</h3>
+                        <p>
+                            Checks a mass operation file against the schema, locally. It needs no credentials and no
+                            network, so it fits CI and pre-commit checks.
+                        </p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize mass-operation validate &lt;file&gt;</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <ul>
+                            <li>Exits with a non-zero status code when the file is invalid.</li>
+                            <li>
+                                Groups issues by operation index, with the field path, the message and the Zod error
+                                code.
+                            </li>
+                        </ul>
+
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">Run a mass operation</h3>
+                        <p>Uploads the file, registers the operation and waits for it to finish.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize mass-operation run &lt;tenant-identifier&gt; &lt;file&gt;</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <p>Use <code>--legacy-spec</code> to convert an old spec file into a mass operation file.</p>
+
+                        <hr class="ds-divider" aria-hidden="true" />
+                        <h3 class="ds-section-heading">Execute mutations</h3>
+                        <p>A client-side tool to automate mutations.</p>
+                        <div class="cli-command">
+                            <span class="ds-copy-caption">Usage</span>
+                            <div class="ds-copy-command">
+                                <code class="ds-copy-command__code"
+                                    >~/crystallize mass-operation execute-mutations &lt;tenant-identifier&gt;
+                                    &lt;file&gt; [image-mapping-file]</code
+                                ><button
+                                    type="button"
+                                    class="ds-copy-button ds-copy-button--glyph-22"
+                                    aria-label="Copy command"
+                                    data-copy="Command"
+                                >
+                                    <svg viewBox="0 0 22 22" aria-hidden="true"><use href="#ds-copy" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="ds-description-list cli-args">
+                            <h4 class="ds-description-list__heading">Arguments</h4>
+                            <dl class="ds-description-list__list">
+                                <dt class="ds-description-list__term"><code>file</code></dt>
+                                <dd class="ds-description-list__value">The mutations, in the format below.</dd>
+                                <dt class="ds-description-list__term"><code>image-mapping-file</code></dt>
+                                <dd class="ds-description-list__value">
+                                    Optional. Injects image paths into the variables.
+                                </dd>
+                            </dl>
+                        </div>
+
+                        <h4 class="ds-section-heading ds-section-heading--compact">Mutation format</h4>
+                        <div
+                            class="ds-code-block-frame cli-code"
+                            role="region"
+                            tabindex="0"
+                            aria-labelledby="mutations-file"
+                        >
+                            <div id="mutations-file" class="ds-code-block-frame__label">Mutations file</div>
+                            <pre
+                                class="ds-code-block"
+                            ><code class="language-json" style="--digits: 2"><span class="ds-code-block__line-number" aria-hidden="true">1</span>{
+<span class="ds-code-block__line-number" aria-hidden="true">2</span>  "create-products": {
+<span class="ds-code-block__line-number" aria-hidden="true">3</span>    "target": <span class="hl-string">"pim"</span>,
+<span class="ds-code-block__line-number" aria-hidden="true">4</span>    "mutation": <span class="hl-string">"mutation CreateProduct($input: CreateProductInput!) { product { create(language: \"en\", input: $input) { id } } }"</span>,
+<span class="ds-code-block__line-number" aria-hidden="true">5</span>    "sets": []
+<span class="ds-code-block__line-number" aria-hidden="true">6</span>  },
+<span class="ds-code-block__line-number" aria-hidden="true">7</span>  "publish-items": {
+<span class="ds-code-block__line-number" aria-hidden="true">8</span>    "mutation": <span class="hl-string">"mutation PublishItems($ids: [ID!]!) { publishItems(language: \"en\", ids: $ids) { success { itemId } } }"</span>,
+<span class="ds-code-block__line-number" aria-hidden="true">9</span>    "target": <span class="hl-string">"core"</span>,
+<span class="ds-code-block__line-number" aria-hidden="true">10</span>    "sets": [
+<span class="ds-code-block__line-number" aria-hidden="true">11</span>      {
+<span class="ds-code-block__line-number" aria-hidden="true">12</span>        "ids": [
+<span class="ds-code-block__line-number" aria-hidden="true">13</span>          <span class="hl-string">"$create-products[0].product.create.id"</span>
+<span class="ds-code-block__line-number" aria-hidden="true">14</span>        ]
+<span class="ds-code-block__line-number" aria-hidden="true">15</span>      }
+<span class="ds-code-block__line-number" aria-hidden="true">16</span>    ]
+<span class="ds-code-block__line-number" aria-hidden="true">17</span>  }
+<span class="ds-code-block__line-number" aria-hidden="true">18</span>}</code></pre>
+                        </div>
+
+                        <h4 class="ds-section-heading ds-section-heading--compact">Dependencies</h4>
+                        <p>
+                            Reference the result of an earlier operation to pass its IDs along, such as
+                            <code>$create-products[0].product.create.id</code>.
+                        </p>
+
+                        <h4 class="ds-section-heading ds-section-heading--compact">Injected variables</h4>
+                        <ul>
+                            <li><code>$root.TENANT_ID</code></li>
+                            <li><code>$root.TENANT_DEFAULT_VATTYPE_ID</code></li>
+                            <li><code>$root.TENANT_ROOT_ID</code></li>
+                        </ul>
+
+                        <h4 class="ds-section-heading ds-section-heading--compact">Image mapping</h4>
+                        <div
+                            class="ds-code-block-frame cli-code"
+                            role="region"
+                            tabindex="0"
+                            aria-labelledby="image-mapping-file"
+                        >
+                            <div id="image-mapping-file" class="ds-code-block-frame__label">Image mapping file</div>
+                            <pre
+                                class="ds-code-block"
+                            ><code class="language-json" style="--digits: 2"><span class="ds-code-block__line-number" aria-hidden="true">1</span>{
+<span class="ds-code-block__line-number" aria-hidden="true">2</span>  "images": [
+<span class="ds-code-block__line-number" aria-hidden="true">3</span>    {
+<span class="ds-code-block__line-number" aria-hidden="true">4</span>      "key": <span class="hl-string">"$images.crystallize-key"</span>
+<span class="ds-code-block__line-number" aria-hidden="true">5</span>    },
+<span class="ds-code-block__line-number" aria-hidden="true">6</span>    {
+<span class="ds-code-block__line-number" aria-hidden="true">7</span>      "key": <span class="hl-string">"$images.my-tenant/25/1/12/3435d2d0/images/crystallize.png"</span>
+<span class="ds-code-block__line-number" aria-hidden="true">8</span>    }
+<span class="ds-code-block__line-number" aria-hidden="true">9</span>  ]
+<span class="ds-code-block__line-number" aria-hidden="true">10</span>}</code></pre>
+                        </div>
+                    </section>
+
+                    <section
+                        id="contributing"
+                        class="cli-section ds-card ds-card--elevate"
+                        aria-labelledby="contributing-title"
+                    >
+                        <h2 id="contributing-title">Contributing</h2>
+                        <p>
+                            The CLI lives in the
+                            <a class="ds-link" href="https://github.com/CrystallizeAPI/tools">CrystallizeAPI/tools</a>
+                            monorepo. This repository is a read-only split of it, so open issues and pull requests on
+                            <a class="ds-link" href="https://github.com/CrystallizeAPI/tools">CrystallizeAPI/tools</a>.
+                        </p>
+                    </section>
+                </main>
+            </div>
+        </div>
+
+        <ol class="ds-toast-viewport" aria-label="Notifications" aria-live="polite"></ol>
+
         <script type="text/javascript">
-            document.querySelector('.copy-btn').addEventListener('click', () => {
-                const copyButton = document.querySelector('.copy-btn');
-                const code = document.getElementById('code-snippet').textContent;
-                navigator.clipboard
-                    .writeText(code)
-                    .then(() => {
-                        const originalText = copyButton.textContent;
-                        copyButton.textContent = 'Copied!';
-                        copyButton.disabled = true;
-                        setTimeout(() => {
-                            copyButton.textContent = originalText;
-                            copyButton.disabled = false;
-                        }, 10000);
-                    })
-                    .catch((err) => {
-                        copyButton.textContent = 'Error!';
-                    });
+            const viewport = document.querySelector('.ds-toast-viewport');
+            const TOAST_TIMEOUT = 3000;
+
+            const showToast = (title, tone) => {
+                viewport.replaceChildren();
+                const slot = document.createElement('li');
+                slot.className = 'ds-toast-slot';
+                slot.dataset.state = 'entering';
+                slot.innerHTML = `
+                    <div class="ds-toast ds-toast--${tone} ds-toast--title-only">
+                        <div class="ds-toast__icon"><svg aria-hidden="true"><use href="#${tone === 'error' ? 'i-error' : 'i-check'}" /></svg></div>
+                        <div class="ds-toast__body"><div class="ds-toast__title"></div></div>
+                        <div class="ds-toast__close">
+                            <button type="button" class="ds-icon-button ds-icon-button--xs" aria-label="Dismiss notification">
+                                <svg aria-hidden="true"><use href="#i-cancel" /></svg>
+                            </button>
+                        </div>
+                    </div>`;
+                slot.querySelector('.ds-toast__title').textContent = title;
+                const dismiss = () => {
+                    slot.dataset.visible = 'false';
+                    setTimeout(() => slot.remove(), 400);
+                };
+                slot.querySelector('.ds-toast__close button').addEventListener('click', dismiss);
+                viewport.append(slot);
+                requestAnimationFrame(() => requestAnimationFrame(() => delete slot.dataset.state));
+                setTimeout(dismiss, TOAST_TIMEOUT);
+            };
+
+            document.querySelectorAll('[data-copy]').forEach((button) => {
+                button.addEventListener('click', async () => {
+                    const code = button.closest('.ds-copy-command').querySelector('.ds-copy-command__code');
+                    const text = code.textContent.replace(/\s+/g, ' ').trim();
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        showToast(`${button.dataset.copy} copied to clipboard`, 'success');
+                    } catch {
+                        showToast('Could not copy to clipboard', 'error');
+                    }
+                });
             });
+
+            // Mark the section in view in the page list.
+            const links = new Map(
+                [...document.querySelectorAll('.cli-toc .ds-nav-item__row')].map((link) => [
+                    link.getAttribute('href').slice(1),
+                    link,
+                ]),
+            );
+            const setCurrent = (id) => {
+                links.forEach((link) => link.removeAttribute('aria-current'));
+                links.get(id)?.setAttribute('aria-current', 'location');
+            };
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) setCurrent(entry.target.id);
+                    });
+                },
+                { rootMargin: '-20% 0px -70% 0px' },
+            );
+            links.forEach((_, id) => observer.observe(document.getElementById(id)));
+            // The last sections are too short to reach the observed band: mark the last one at the bottom of the page.
+            window.addEventListener(
+                'scroll',
+                () => {
+                    const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+                    if (atBottom) setCurrent([...links.keys()].at(-1));
+                },
+                { passive: true },
+            );
+
+            // Show the latest release in the splash footer. Without it, the link still says "Releases".
+            fetch('https://api.github.com/repos/CrystallizeAPI/cli/releases/latest')
+                .then((response) => (response.ok ? response.json() : null))
+                .then((release) => {
+                    if (!release?.tag_name) return;
+                    const link = document.getElementById('cli-version');
+                    link.textContent = release.tag_name.startsWith('v') ? release.tag_name : `v${release.tag_name}`;
+                    link.href = release.html_url;
+                })
+                .catch(() => {});
+
+            // Slingshot products across the splash, like mcp.crystallize.com. Wide screens only, never with reduced motion.
+            const startSlingshot = (splash) => {
+                const { Engine, Runner, Bodies, Body, Composite, Events } = Matter;
+                const canvas = splash.querySelector('.cli-splash__game');
+                const ctx = canvas.getContext('2d');
+                const engine = Engine.create({ gravity: { x: 0, y: 0.6 } });
+                const world = engine.world;
+                const WALL = 60;
+                let width = 0;
+                let height = 0;
+                let walls = [];
+                let cards = [];
+
+                // Walls on the splash edges, and a static body under each feature card.
+                const layout = () => {
+                    const ratio = window.devicePixelRatio || 1;
+                    width = splash.clientWidth;
+                    height = splash.clientHeight;
+                    canvas.width = width * ratio;
+                    canvas.height = height * ratio;
+                    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+                    Composite.remove(world, [...walls, ...cards]);
+                    walls = [
+                        Bodies.rectangle(width / 2, -WALL / 2, width + WALL * 2, WALL, { isStatic: true }),
+                        Bodies.rectangle(width / 2, height + WALL / 2, width + WALL * 2, WALL, { isStatic: true }),
+                        Bodies.rectangle(-WALL / 2, height / 2, WALL, height + WALL * 2, { isStatic: true }),
+                        Bodies.rectangle(width + WALL / 2, height / 2, WALL, height + WALL * 2, { isStatic: true }),
+                    ];
+                    const origin = splash.getBoundingClientRect();
+                    cards = [...splash.querySelectorAll('.cli-feature')].map((card) => {
+                        const box = card.getBoundingClientRect();
+                        return Bodies.rectangle(
+                            box.left - origin.left + box.width / 2,
+                            box.top - origin.top + box.height / 2,
+                            box.width,
+                            box.height,
+                            { isStatic: true, restitution: 1.3, plugin: { card } },
+                        );
+                    });
+                    Composite.add(world, [...walls, ...cards]);
+                };
+                layout();
+                document.fonts.ready.then(layout);
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(layout, 150);
+                });
+
+                const IMAGES = 'https://crystallize.com/minigames/pricing/';
+                const names = ['burger', 'cheddar', 'chili', 'donut', 'flour', 'gauda', 'hotdog', 'pizza', 'shoe'];
+                names.push('tee-blue', 'tee-pink', 'tomato', 'unicorn');
+                const images = Object.fromEntries(
+                    names.map((name) => {
+                        const image = new Image();
+                        image.src = `${IMAGES}${name}.png`;
+                        return [name, image];
+                    }),
+                );
+                const MAX_PRODUCTS = 30;
+                const products = [];
+                const spawn = (x, y, vx, vy) => {
+                    if (products.length >= MAX_PRODUCTS) Composite.remove(world, products.shift());
+                    const name = names[Math.floor(Math.random() * names.length)];
+                    const size = 20 + Math.random() * 12;
+                    const product = Bodies.circle(x, y, size, {
+                        restitution: 0.7,
+                        friction: 0.05,
+                        frictionAir: 0.005,
+                        plugin: { name, size },
+                    });
+                    Body.setVelocity(product, { x: vx, y: vy });
+                    Body.setAngularVelocity(product, (Math.random() - 0.5) * 0.1);
+                    Composite.add(world, product);
+                    products.push(product);
+                };
+
+                // Pull back from where you press, release to launch the other way.
+                const sling = { active: false, sx: 0, sy: 0, mx: 0, my: 0 };
+                const pointer = (event) => {
+                    const box = canvas.getBoundingClientRect();
+                    return [event.clientX - box.left, event.clientY - box.top];
+                };
+                canvas.addEventListener('pointerdown', (event) => {
+                    event.preventDefault();
+                    [sling.sx, sling.sy] = pointer(event);
+                    [sling.mx, sling.my] = [sling.sx, sling.sy];
+                    sling.active = true;
+                });
+                window.addEventListener('pointermove', (event) => {
+                    if (sling.active) [sling.mx, sling.my] = pointer(event);
+                });
+                window.addEventListener('pointerup', () => {
+                    if (!sling.active) return;
+                    sling.active = false;
+                    const dx = sling.sx - sling.mx;
+                    const dy = sling.sy - sling.my;
+                    const distance = Math.hypot(dx, dy);
+                    if (distance < 10) return;
+                    const power = Math.min(distance / 8, 25);
+                    spawn(sling.sx, sling.sy, (dx / distance) * power, (dy / distance) * power);
+                });
+
+                Events.on(engine, 'collisionStart', (event) => {
+                    event.pairs.forEach(({ bodyA, bodyB }) => {
+                        [bodyA, bodyB].forEach((body) => {
+                            const card = body.plugin?.card;
+                            if (!card) return;
+                            card.dataset.hit = '';
+                            clearTimeout(card.hitTimer);
+                            card.hitTimer = setTimeout(() => delete card.dataset.hit, 600);
+                        });
+                    });
+                });
+
+                const amber = getComputedStyle(splash).getPropertyValue('--ds-color-orange-300').trim();
+                const drawAim = () => {
+                    const dx = sling.sx - sling.mx;
+                    const dy = sling.sy - sling.my;
+                    const distance = Math.hypot(dx, dy);
+                    if (distance <= 10) return;
+                    const nx = dx / distance;
+                    const ny = dy / distance;
+                    const length = Math.min(distance, 200);
+                    const ax = sling.sx + nx * length;
+                    const ay = sling.sy + ny * length;
+                    const angle = Math.atan2(ny, nx);
+                    ctx.save();
+                    ctx.strokeStyle = amber;
+                    ctx.lineWidth = 2;
+                    ctx.setLineDash([6, 8]);
+                    ctx.lineDashOffset = -performance.now() / 40;
+                    ctx.beginPath();
+                    ctx.moveTo(sling.sx, sling.sy);
+                    ctx.lineTo(ax, ay);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.moveTo(ax, ay);
+                    ctx.lineTo(ax - 10 * Math.cos(angle - 0.4), ay - 10 * Math.sin(angle - 0.4));
+                    ctx.moveTo(ax, ay);
+                    ctx.lineTo(ax - 10 * Math.cos(angle + 0.4), ay - 10 * Math.sin(angle + 0.4));
+                    ctx.stroke();
+                    const preview = images[names[Math.floor(performance.now() / 2000) % names.length]];
+                    if (preview.complete && preview.naturalWidth) {
+                        ctx.globalAlpha = 0.45;
+                        ctx.drawImage(preview, sling.sx - 20, sling.sy - 20, 40, 40);
+                    }
+                    ctx.restore();
+                };
+
+                // Physics and drawing pause while the splash is off screen.
+                const runner = Runner.create();
+                Runner.run(runner, engine);
+                let visible = true;
+                new IntersectionObserver(([entry]) => {
+                    visible = entry.isIntersecting;
+                    runner.enabled = visible;
+                }).observe(splash);
+
+                const draw = () => {
+                    if (visible) {
+                        ctx.clearRect(0, 0, width, height);
+                        products.forEach((product) => {
+                            const image = images[product.plugin.name];
+                            if (!image.complete || !image.naturalWidth) return;
+                            const size = product.plugin.size * 2.2;
+                            ctx.save();
+                            ctx.translate(product.position.x, product.position.y);
+                            ctx.rotate(product.angle);
+                            ctx.drawImage(image, -size / 2, -size / 2, size, size);
+                            ctx.restore();
+                        });
+                        if (sling.active) drawAim();
+                    }
+                    requestAnimationFrame(draw);
+                };
+                draw();
+                splash.querySelector('.cli-splash__sling').hidden = false;
+            };
+
+            const splash = document.querySelector('.cli-splash');
+            // = --ds-breakpoint-md; media queries cannot read variables.
+            if (window.matchMedia('(min-width: 48rem) and (prefers-reduced-motion: no-preference)').matches) {
+                const physics = document.createElement('script');
+                physics.src = 'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js';
+                physics.onload = () => startSlingshot(splash);
+                document.head.append(physics);
+            }
         </script>
     </body>
 </html>

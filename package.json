@@ -1,6 +1,6 @@
 {
     "name": "@crystallize/cli",
-    "version": "6.0.0",
+    "version": "6.1.0",
     "description": "Crystallize CLI",
     "license": "MIT",
     "contributors": [
@@ -10,8 +10,8 @@
     "type": "module",
     "module": "src/index.ts",
     "dependencies": {
-        "@crystallize/js-api-client": "^7.5.0",
-        "@crystallize/schema": "^6.16.0",
+        "@crystallize/js-api-client": "^7.6.0",
+        "@crystallize/schema": "^6.17.0",
         "awilix": "^13.0.5",
         "cli-spinners": "^3.4.0",
         "commander": "^15.0.0",

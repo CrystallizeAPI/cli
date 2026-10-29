@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [6.1.0]
+
+- bumped `@crystallize/js-api-client` to ^7.6.0 and `@crystallize/schema` to ^6.17.0
+
 ## [6.0.0]
 
 - added `superfast-shop <folder> [shop-identifier]` command (alias `sfs`) to build your own shop from a [Superfast Shop](https://superfast.shop) demo with your coding agent: lists the demos (name, industry, description, features and demo link), detects the installed coding agent (Claude Code `claude`, Codex `codex`, Antigravity `agy`, Cursor `cursor-agent`, opencode `opencode`), asks which one when several are found or takes `--agent <agent>`, then hands the terminal over to it in the folder with the demo prompt and exits with the agent exit code. No login or tenant needed. Without any agent installed, it points to the demo prompt URL instead. On Windows the prompt goes through a temporary file, as long multi-line arguments cannot reach the agent there.
